@@ -6,7 +6,7 @@ import FormInput from '../../Components/FormInput.vue'
 import FormCheckbox from '../../Components/FormCheckbox.vue'
 import Modal from '../../Components/Modal.vue'
 import { ref } from 'vue'
-import Socialite from '@/components/Socialite.vue'
+// import Socialite from '@/components/Socialite.vue'
 
 defineOptions({
     layout: Auth
@@ -124,9 +124,9 @@ const sendMagicLink = () => {
                 </div>
             </template>
 
-            <template v-if="smLogin">
+            <!-- <template v-if="smLogin">
                 <Socialite :providers-config="providersConfig" :iconsOnly="true" />
-            </template>
+            </template> -->
 
             <template v-if="passwordlessLogin">
                 <button
