@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@source '../views';
+@import '@css/partials/base.css';
+@import '@css/partials/theme.css';
+@import '@css/partials/tables.css';
+@import '@css/partials/pagination.css';
+@import '@css/partials/forms.css';
+@import '@css/partials/buttons.css';
+@import '@css/partials/nav.css';
+@import '@css/partials/datatable.css';
+@import '~/nprogress/nprogress.css';
