@@ -3,7 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/vue3'
 import { useForm } from '@inertiajs/vue3'
 import Auth from '../../Layouts/Auth.vue'
 import FormInput from '../../Components/FormInput.vue'
-import Socialite from '@/components/Socialite.vue'
+// import Socialite from '@/components/Socialite.vue'
 
 defineOptions({
     layout: Auth
@@ -13,7 +13,7 @@ const props = defineProps({
     providersConfig: {
         type: Object,
         required: false
-    },
+    }
 })
 
 const form = useForm({
@@ -115,11 +115,11 @@ const submit = () => {
                 </div>
             </template>
 
-            <template v-if="smLogin">
+            <!-- <template v-if="smLogin">
                 <Socialite
                     :providers-config="providersConfig"
                  />
-            </template>
+            </template> -->
 
             <template v-if="passwordlessLogin">
                 <Link
