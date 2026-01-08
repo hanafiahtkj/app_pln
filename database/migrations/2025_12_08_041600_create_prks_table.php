@@ -21,9 +21,13 @@ return new class extends Migration
             $table->text('uraian')->nullable();
             $table->string('status', 50)->nullable();
 
+            $table->foreignUlid('user_id')->nullable();
+            $table->foreignId('unit_id')->nullable();
+            $table->foreignId('bidang_id')->nullable();
+
             // Kolom Keuangan
             $table->decimal('ai_rupiah', 16, 4)->nullable();
-            $table->string('user', 100)->nullable();
+
 
             // --- Kolom Dokumen dan Tanggal Penting ---
             $table->string('dokumen_kkp', 255)->nullable();

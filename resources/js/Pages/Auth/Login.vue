@@ -96,13 +96,13 @@ const sendMagicLink = () => {
                         v-model="form.remember"
                         label="Remember me"
                         name="remember" />
-                    <Link
+                    <!-- <Link
                         v-if="canResetPassword"
                         :href="route('password.request')"
                         class="text-sm link hover:underline"
                         aria-label="Reset forgotten password">
                         Forgot password?
-                    </Link>
+                    </Link> -->
                 </div>
             </section>
 
@@ -155,7 +155,7 @@ const sendMagicLink = () => {
             </template>
         </form>
 
-        <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+        <!-- <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
             Don't have an account?
             <Link
                 :href="route('register')"
@@ -163,7 +163,7 @@ const sendMagicLink = () => {
                 aria-label="Go to registration page">
                 Sign up
             </Link>
-        </p>
+        </p> -->
     </main>
 
     <Modal

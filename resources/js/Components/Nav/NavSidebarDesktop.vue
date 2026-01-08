@@ -104,18 +104,17 @@ const isParentExpanded = item => {
 
     const key = getParentKey(item)
 
-    // If we're on the parent route, use manual collapse/expand state
-    if (isCurrentRoute(item.route)) {
-        const collapsed = collapsedParents.value[key] === true
-        return !collapsed
-    }
-
-    // If a child route is active, always expand so user sees context
+    // Child aktif → selalu buka
     if (isChildCurrentRoute(item)) {
         return true
     }
 
-    // Otherwise (no parent/child active) it's closed
+    // Kalau pernah di-toggle manual → pakai state
+    if (key in collapsedParents.value) {
+        return collapsedParents.value[key] === false
+    }
+
+    // Default: tertutup
     return false
 }
 
@@ -198,57 +197,77 @@ const navigationSections = reactive([
     //         { type: 'divider' }
     //     ]
     // },
+    // {
+    //     items: [
+    //         {
+    //             name: 'PRK',
+    //             route: 'admin.prk.index',
+    //             icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" />'
+    //         },
+    //         { type: 'divider' }
+    //     ]
+    // },
+
+    // {
+    //     items: [
+    //         {
+    //             name: 'Paket',
+    //             route: 'admin.paket.index',
+    //             icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />'
+    //         },
+    //         { type: 'divider' }
+    //     ]
+    // },
 
     {
         items: [
             {
-                name: 'Perencanaan',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" />',
+                name: 'Proses',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
                 route: 'admin.prk.index',
                 children: [
                     { name: 'PRK', route: 'admin.prk.index' },
-                    { name: 'Paket', route: 'admin.paket.index' },
-                    { name: 'Enjiniring', route: 'admin.enjiniring.index' }
+                    { name: 'Paket', route: 'admin.paket.index' }
                 ]
             },
             { type: 'divider' }
         ]
     },
-    {
-        items: [
-            {
-                name: 'Pengadaan',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
-                route: 'admin.rendan.index',
-                children: [
-                    { name: 'Rendan', route: 'admin.rendan.index' },
-                    { name: 'Lakdan', route: 'admin.lakdan.index' },
-                    { name: 'Kontrak', route: 'admin.kontrak.index' }
-                ]
-            },
-            { type: 'divider' }
-        ]
-    },
-    {
-        items: [
-            {
-                name: 'Konstruksi',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.652.885a.75.75 0 0 1-.926-.264L.01 22.01l4.004-4.004a.75.75 0 0 1 .264-.926l-.885-2.652a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Z" />',
-                route: 'admin.po.index'
-            },
-            { type: 'divider' }
-        ]
-    },
-    {
-        items: [
-            {
-                name: 'Pembayaran',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h-.375a1.125 1.125 0 0 0 0 2.25h.375v.75c0 .621.504 1.125 1.125 1.125h14.25c.621 0 1.125-.504 1.125-1.125v-.75h.375a1.125 1.125 0 1 0 0-2.25h-.375V9h.375a1.125 1.125 0 1 0 0-2.25h-.375V6.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5Z" />',
-                route: 'admin.pembayaran.index'
-            },
-            { type: 'divider' }
-        ]
-    },
+    // {
+    //     items: [
+    //         {
+    //             name: 'Pengadaan',
+    //             icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
+    //             route: 'admin.rendan.index',
+    //             children: [
+    //                 { name: 'Rendan', route: 'admin.rendan.index' },
+    //                 { name: 'Lakdan', route: 'admin.lakdan.index' },
+    //                 { name: 'Kontrak', route: 'admin.kontrak.index' }
+    //             ]
+    //         },
+    //         { type: 'divider' }
+    //     ]
+    // },
+    // {
+    //     items: [
+    //         {
+    //             name: 'Konstruksi',
+    //             icon: '<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.652.885a.75.75 0 0 1-.926-.264L.01 22.01l4.004-4.004a.75.75 0 0 1 .264-.926l-.885-2.652a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Z" />',
+    //             route: 'admin.po.index'
+    //         },
+    //         { type: 'divider' }
+    //     ]
+    // },
+    // {
+    //     items: [
+    //         {
+    //             name: 'Pembayaran',
+    //             icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h-.375a1.125 1.125 0 0 0 0 2.25h.375v.75c0 .621.504 1.125 1.125 1.125h14.25c.621 0 1.125-.504 1.125-1.125v-.75h.375a1.125 1.125 0 1 0 0-2.25h-.375V9h.375a1.125 1.125 0 1 0 0-2.25h-.375V6.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5Z" />',
+    //             route: 'admin.pembayaran.index'
+    //         },
+    //         { type: 'divider' }
+    //     ]
+    // },
     {
         items: [
             {
@@ -271,6 +290,12 @@ const navigationSections = reactive([
         ]
     }
 ])
+
+const toggleParent = item => {
+    const key = getParentKey(item)
+    const collapsed = collapsedParents.value[key] === true
+    collapsedParents.value[key] = !collapsed
+}
 </script>
 
 <template>
@@ -288,10 +313,10 @@ const navigationSections = reactive([
                             </li>
 
                             <li v-else>
-                                <Link
-                                    v-if="hasPermission(item.permission) && item.route"
-                                    :href="route(item.route)"
-                                    @click="onParentClick($event, item)"
+                                <a
+                                    v-if="item.children && hasVisibleChildren(item)"
+                                    type="button"
+                                    @click="toggleParent(item)"
                                     :class="[
                                         'group flex items-center gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer',
 
@@ -300,7 +325,7 @@ const navigationSections = reactive([
                                             ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30'
                                             : // 2. Child Active: Latar Belakang Hitam Opasitas 20%
                                             isChildCurrentRoute(item)
-                                            ? 'bg-black/20 text-white opacity-90' // <-- Diganti dari bg-gray-800
+                                            ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30' // <-- Diganti dari bg-gray-800
                                             : // 3. Default/Hover
                                               'text-gray-200 hover:bg-black/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-600' // <-- Diganti dari hover:bg-gray-800
                                     ]">
@@ -312,7 +337,66 @@ const navigationSections = reactive([
                                             isCurrentRoute(item.route)
                                                 ? 'text-white' // Aktif Penuh: Putih
                                                 : isChildCurrentRoute(item)
-                                                ? 'text-amber-400' // CHILD AKTIF: Icon Amber
+                                                ? 'text-white' // CHILD AKTIF: Icon Amber
+                                                : 'text-gray-300 group-hover:text-white'
+                                        ]"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        aria-hidden="true"
+                                        v-html="item.icon"></svg>
+
+                                    <span class="text-base font-semibold flex-1">
+                                        {{ item.name }}
+                                    </span>
+
+                                    <svg
+                                        v-if="item.children && hasVisibleChildren(item)"
+                                        :class="[
+                                            'w-4 h-4 ml-2 shrink-0 transition-transform duration-200',
+                                            isParentExpanded(item)
+                                                ? 'rotate-180 text-white'
+                                                : 'text-gray-300'
+                                        ]"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        aria-hidden="true">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </a>
+                                <Link
+                                    v-else-if="hasPermission(item.permission) && item.route"
+                                    :href="route(item.route)"
+                                    @click="onParentClick($event, item)"
+                                    :class="[
+                                        'group flex items-center gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer',
+
+                                        // 1. Parent Active Penuh: MERAH
+                                        isCurrentRoute(item.route)
+                                            ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30'
+                                            : // 2. Child Active: Latar Belakang Hitam Opasitas 20%
+                                            isChildCurrentRoute(item)
+                                            ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30' // <-- Diganti dari bg-gray-800
+                                            : // 3. Default/Hover
+                                              'text-gray-200 hover:bg-black/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-600' // <-- Diganti dari hover:bg-gray-800
+                                    ]">
+                                    <svg
+                                        :class="[
+                                            'w-6 h-6 shrink-0 transition-colors duration-200',
+
+                                            // LOGIKA ICON PARENT
+                                            isCurrentRoute(item.route)
+                                                ? 'text-white' // Aktif Penuh: Putih
+                                                : isChildCurrentRoute(item)
+                                                ? 'text-white' // CHILD AKTIF: Icon Amber
                                                 : 'text-gray-300 group-hover:text-white'
                                         ]"
                                         xmlns="http://www.w3.org/2000/svg"

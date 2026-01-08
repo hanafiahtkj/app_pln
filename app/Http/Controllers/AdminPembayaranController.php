@@ -81,8 +81,9 @@ class AdminPembayaranController extends Controller
      */
     public function create()
     {
-        // Menyediakan daftar Kontrak untuk dipilih sebagai foreign key
-        $kontraks = Kontrak::select('id', 'nomor_perjanjian')->get();
+        $kontraks = Kontrak::with('lakdan.rendan.enjiniring.paket.prk')
+            ->doesntHave('pembayaran')
+            ->get();
 
         return Inertia::render('Admin/Pembayaran/CreatePage', [
             'kontraks' => $kontraks,
@@ -95,7 +96,17 @@ class AdminPembayaranController extends Controller
     public function edit($id)
     {
         $pembayaran = Pembayaran::findOrFail($id);
-        $kontraks = Kontrak::select('id', 'nomor_perjanjian')->get();
+        // Dapatkan ID Kontrak yang saat ini terkait dengan PO ini.
+        $currentKontrakId = $pembayaran->kontrak_id;
+
+        // 2. Query untuk mengambil daftar Kontrak yang tersedia:
+        $kontraks = Kontrak::with('lakdan.rendan.enjiniring.paket.prk') // Tambahkan relasi yang dibutuhkan untuk modal
+            // Gunakan where closure untuk menggabungkan kondisi OR
+            ->where(function ($query) use ($currentKontrakId) {
+                $query->doesntHave('pembayaran');
+                $query->orWhere('id', $currentKontrakId);
+            })
+            ->get();
 
         return Inertia::render('Admin/Pembayaran/EditPage', [
             'data' => $pembayaran,
@@ -112,12 +123,12 @@ class AdminPembayaranController extends Controller
             DB::beginTransaction();
 
             // 1. Simpan data Pembayaran ke database
-            Pembayaran::create($validated);
+            $req = Pembayaran::create($validated);
 
             DB::commit();
 
             return redirect()
-                ->route('admin.pembayaran.index')
+                ->route('admin.paket.show', $req->kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pembayaran berhasil ditambahkan.');
 
         } catch (Exception $e) {
@@ -142,7 +153,7 @@ class AdminPembayaranController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.pembayaran.index')
+                ->route('admin.paket.show', $pembayaran->kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pembayaran berhasil diperbarui.');
 
         } catch (Exception $e) {

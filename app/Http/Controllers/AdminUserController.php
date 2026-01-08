@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Models\Unit;
 
 class AdminUserController extends Controller
 {
@@ -42,10 +43,15 @@ class AdminUserController extends Controller
                 ];
             });
 
+        $units = Unit::select(['id', 'name'])->get();
+
         return Inertia::render('Admin/User/IndexUserPage', [
             'users' => $users,
             'roles' => [
                 'data' => Role::select(['id', 'name'])->get(),
+            ],
+            'units' => [
+                'data' => $units
             ],
             'filters' => $this->pagination->buildFilters($request),
         ]);
@@ -58,6 +64,7 @@ class AdminUserController extends Controller
             'email'                 => ['required', 'email', 'unique:users'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
             'role'                  => ['nullable', 'exists:roles,id'],
+            'unit_id'               => ['nullable', 'exists:units,id'],
             'force_password_change' => ['boolean'],
         ]);
 
@@ -79,6 +86,7 @@ class AdminUserController extends Controller
                 'id'                    => $user->id,
                 'name'                  => $user->name,
                 'email'                 => $user->email,
+                'unit_id'               => $user->unit_id,
                 'disable_account'       => $user->disable_account,
                 'force_password_change' => $user->force_password_change,
                 'roles'                 => $user->roles,
@@ -93,6 +101,9 @@ class AdminUserController extends Controller
             ],
             'roles' => [
                 'data' => Role::select(['id', 'name'])->get(),
+            ],
+            'units' => [
+                'data' => Unit::select(['id', 'name'])->get()
             ],
         ]);
     }
@@ -116,6 +127,7 @@ class AdminUserController extends Controller
             'name'                  => ['required', 'string', 'max:255'],
             'email'                 => ['required', 'email', Rule::unique('users')->ignore($id)],
             'role'                  => ['nullable', 'exists:roles,id'],
+            'unit_id'               => ['nullable', 'exists:units,id'],
             'permissions'           => ['sometimes', 'array'],
             'permissions.*'         => ['exists:permissions,id'],
             'disable_account'       => ['boolean'],
@@ -129,6 +141,7 @@ class AdminUserController extends Controller
         $user->update([
             'name'                  => $request->name,
             'email'                 => $request->email,
+            'unit_id'               => $request->unit_id,
             'force_password_change' => $request->force_password_change,
             'disable_account'       => $request->disable_account,
         ]);

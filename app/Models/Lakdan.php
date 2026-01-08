@@ -21,4 +21,9 @@ class Lakdan extends Model
    {
         return $this->belongsTo(Rendan::class);
    }
+
+   public function kontrak()
+    {
+        return $this->hasOne(Kontrak::class, 'lakdan_id');
+    }
 }

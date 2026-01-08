@@ -19,13 +19,40 @@ class AdminPaketController extends Controller
 
     public function index(Request $request)
     {
-        // Inisialisasi query data Paket
-        $data = Paket::latest()
-            ->with('prk')
-            ->paginate($request->input('per_page', 10));
+        // 1. Inisialisasi query dasar dengan eager loading relasi prk
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // 2. Filter berdasarkan unit_id yang ada di tabel PRK
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // 3. Eksekusi pagination
+        $data = $query->paginate($request->input('per_page', 10));
 
         return Inertia::render('Admin/Paket/IndexPage', [
             'data' => $data,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Paket/ShowPage', [
+            'data' => $paket,
         ]);
     }
 
@@ -34,7 +61,7 @@ class AdminPaketController extends Controller
         // $this->authorize('create-lapangan');
 
         return Inertia::render('Admin/Paket/CreatePage', [
-            'prks' => Prk::select('id', 'prk')->get(),
+            'prks' => Prk::get(),
         ]);
     }
 
@@ -52,58 +79,25 @@ class AdminPaketController extends Controller
             'status_paket' => ['nullable', 'string'],
 
             // Dokumen SKK (File Upload dari pre-upload asinkron)
-            'dokumen_skk_path' => ['nullable', 'string'],
-            'dokumen_skk_name' => ['nullable', 'string'],
+            'dokumen_skk' => ['nullable', 'string'],
         ]);
-
-        $tempPath = $validated['dokumen_skk_path'] ?? null;
-        $finalPath = null;
-        $finalDirectory = 'paket_dokumen/skk'; // Direktori penyimpanan file SKK
 
         try {
             DB::beginTransaction();
 
             $paketData = $validated;
 
-            // 2. LOGIKA PENANGANAN FILE DOKUMEN SKK
-            if ($tempPath) {
-                if (!Storage::disk('public')->exists($tempPath)) {
-                    throw new \Exception('File dokumen SKK tidak ditemukan di lokasi sementara. Harap unggah ulang.');
-                }
-
-                // Tentukan path permanen
-                $fileName = $validated['dokumen_skk_name'] ?? basename($tempPath);
-                $finalPath = $finalDirectory . '/' . $fileName;
-
-                // Pindahkan file dari 'temp_uploads' ke lokasi permanen
-                Storage::disk('public')->move($tempPath, $finalPath);
-
-                // Update data yang akan disimpan dengan path permanen
-                $paketData['dokumen_skk'] = $finalPath;
-            } else {
-                // Jika tidak ada file diunggah
-                $paketData['dokumen_skk'] = null;
-            }
-
-            // Hapus field path dan name yang hanya digunakan untuk proses pemindahan
-            unset($paketData['dokumen_skk_path']);
-            unset($paketData['dokumen_skk_name']);
-
-            // 3. Simpan data Paket ke database
-            Paket::create($paketData);
+            $req = Paket::create($paketData);
 
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.index')
+                ->route('admin.paket.show', $req->id)
                 ->with('success', 'Data Paket dan dokumen SKK berhasil ditambahkan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Jika terjadi kegagalan, hapus file yang sudah terlanjur dipindahkan
-            if ($finalPath && Storage::disk('public')->exists($finalPath)) {
-                Storage::disk('public')->delete($finalPath);
-            }
+
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data Paket: ' . $e->getMessage());
         }
     }
@@ -117,7 +111,7 @@ class AdminPaketController extends Controller
 
         return Inertia::render('Admin/Paket/EditPage', [
             'data' => $paket, // <-- Kirim data paket yang akan diedit
-            'prks' => Prk::select('id', 'prk')->get(),
+            'prks' => Prk::get(),
         ]);
     }
 
@@ -142,63 +136,25 @@ class AdminPaketController extends Controller
             'status_paket' => ['nullable', 'string'],
 
             // Dokumen SKK (Path & Name dari pre-upload asinkron)
-            'dokumen_skk_path' => ['nullable', 'string'],
-            'dokumen_skk_name' => ['nullable', 'string'],
+            'dokumen_skk' => ['nullable', 'string'],
         ]);
-
-        $tempPath = $validated['dokumen_skk_path'] ?? null;
-        $oldFilePath = $paket->dokumen_skk;
-        $finalDirectory = 'paket_dokumen/skk';
-        $newFinalPath = null;
 
         try {
             DB::beginTransaction();
 
             $paketData = $validated;
 
-            // 2. LOGIKA PEMINDAHAN FILE DOKUMEN SKK (HANYA JIKA ADA UPLOAD BARU)
-            if ($tempPath) {
-                if (!Storage::disk('public')->exists($tempPath)) {
-                    throw new \Exception('File dokumen SKK yang baru tidak ditemukan di lokasi sementara. Harap unggah ulang.');
-                }
-
-                // Tentukan nama file permanen
-                $fileName = $validated['dokumen_skk_name'] ?? basename($tempPath);
-                $newFinalPath = $finalDirectory . '/' . $fileName;
-
-                // Hapus file lama jika ada
-                if ($oldFilePath && Storage::disk('public')->exists($oldFilePath)) {
-                    Storage::disk('public')->delete($oldFilePath);
-                }
-
-                // Pindahkan file dari lokasi sementara ke lokasi permanen
-                Storage::disk('public')->move($tempPath, $newFinalPath);
-
-                // Simpan path permanen di field dokumen_skk
-                $paketData['dokumen_skk'] = $newFinalPath;
-            }
-            // Jika tidak ada upload baru, field 'dokumen_skk' akan tetap menggunakan nilai dari payload Inertia (path lama)
-            // Kecuali jika user menghapus file dari form, yang akan mengirimkan null di dokumen_skk
-
-            // Hapus field path dan name yang hanya digunakan untuk proses pemindahan
-            unset($paketData['dokumen_skk_path']);
-            unset($paketData['dokumen_skk_name']);
-
-            // 3. Update data Paket
             $paket->update($paketData);
 
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.index')
+                ->route('admin.paket.show', $paket->id)
                 ->with('success', 'Data Paket dan dokumen SKK berhasil diperbarui.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Jika terjadi kegagalan, hapus file baru yang sudah terlanjur dipindahkan
-            if ($newFinalPath && Storage::disk('public')->exists($newFinalPath)) {
-                Storage::disk('public')->delete($newFinalPath);
-            }
+
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data Paket: ' . $e->getMessage());
         }
     }

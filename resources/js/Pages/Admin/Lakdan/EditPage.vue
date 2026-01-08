@@ -4,7 +4,10 @@ import Default from '@/Layouts/Default.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormSelect from '@/Components/FormSelect.vue'
+import RendanSearchSelect from './RendanSearchSelect.vue'
+import FormCurrency from '@/Components/FormCurrency.vue'
 import { ref } from 'vue'
+import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
 
@@ -59,6 +62,7 @@ const form = useForm({
     rendan_id: props.data.rendan_id,
 
     // Core Lakdan Fields
+    pic: props.data.pic,
     proses_pengadaan: props.data.proses_pengadaan,
     metode_pengadaan: props.data.metode_pengadaan,
 
@@ -67,8 +71,7 @@ const form = useForm({
     realisasi_tanggal_hps: formatDate(props.data.realisasi_tanggal_hps),
     nomor_hps: props.data.nomor_hps,
     nilai_hps: props.data.nilai_hps,
-    dokumen_hps_path: null,
-    dokumen_hps_name: null,
+    dokumen_hps: props.data.dokumen_hps,
 
     // Pengumuman Lelang Fields
     rencana_pengumuman_lelang: formatDate(props.data.rencana_pengumuman_lelang),
@@ -79,8 +82,77 @@ const form = useForm({
     rencana_penunjukan_pemenang: formatDate(props.data.rencana_penunjukan_pemenang),
     realisasi_penunjukan_pemenang: formatDate(props.data.realisasi_penunjukan_pemenang),
     nomor_penunjukan_pemenang: props.data.nomor_penunjukan_pemenang,
-    dokumen_penunjukan_pemenang_path: null,
-    dokumen_penunjukan_pemenang_name: null
+    dokumen_penunjukan_pemenang: props.data.dokumen_penunjukan_pemenang,
+
+    // 1. Persiapan Pengadaan
+    rencana_persiapan_pengadaan: formatDate(props.data.rencana_persiapan_pengadaan),
+    realisasi_persiapan_pengadaan: formatDate(props.data.realisasi_persiapan_pengadaan),
+    persiapan_pengadaan: props.data.persiapan_pengadaan || '',
+
+    // 2. Pengumuman Pengadaan
+    rencana_pengumuman_pengadaan: formatDate(props.data.rencana_pengumuman_pengadaan),
+    realisasi_pengumuman_pengadaan: formatDate(props.data.realisasi_pengumuman_pengadaan),
+    pengumuman_pengadaan: props.data.pengumuman_pengadaan || '',
+
+    // 3. Pendaftaran & Pengambilan Dokumen
+    rencana_pendaftaran_ambil_dokumen: formatDate(props.data.rencana_pendaftaran_ambil_dokumen),
+    realisasi_pendaftaran_ambil_dokumen: formatDate(props.data.realisasi_pendaftaran_ambil_dokumen),
+    pendaftaran_ambil_dokumen: props.data.pendaftaran_ambil_dokumen || '',
+
+    // 4. Aanwijzing
+    rencana_aanwijzing: formatDate(props.data.rencana_aanwijzing),
+    realisasi_aanwijzing: formatDate(props.data.realisasi_aanwijzing),
+    aanwijzing: props.data.aanwijzing || '',
+
+    // 5. Pemasukan Dokumen Penawaran
+    rencana_pemasukan_penawaran: formatDate(props.data.rencana_pemasukan_penawaran),
+    realisasi_pemasukan_penawaran: formatDate(props.data.realisasi_pemasukan_penawaran),
+    pemasukan_penawaran: props.data.pemasukan_penawaran || '',
+
+    // 6. Pembukaan Dokumen dan Evaluasi
+    rencana_pembukaan_evaluasi: formatDate(props.data.rencana_pembukaan_evaluasi),
+    realisasi_pembukaan_evaluasi: formatDate(props.data.realisasi_pembukaan_evaluasi),
+    pembukaan_evaluasi: props.data.pembukaan_evaluasi || '',
+
+    // 7. Klarifikasi dan Negosiasi Harga
+    rencana_klarifikasi_negosiasi: formatDate(props.data.rencana_klarifikasi_negosiasi),
+    realisasi_klarifikasi_negosiasi: formatDate(props.data.realisasi_klarifikasi_negosiasi),
+    klarifikasi_negosiasi: props.data.klarifikasi_negosiasi || '',
+
+    // 8. Usulan Penetapan Pemenang
+    rencana_usulan_penetapan_pemenang: formatDate(props.data.rencana_usulan_penetapan_pemenang),
+    realisasi_usulan_penetapan_pemenang: formatDate(props.data.realisasi_usulan_penetapan_pemenang),
+    usulan_penetapan_pemenang: props.data.usulan_penetapan_pemenang || '',
+
+    // 9. Izin Prinsip Tanda Tangan Kontrak
+    rencana_izin_prinsip_kontrak: formatDate(props.data.rencana_izin_prinsip_kontrak),
+    realisasi_izin_prinsip_kontrak: formatDate(props.data.realisasi_izin_prinsip_kontrak),
+    izin_prinsip_kontrak: props.data.izin_prinsip_kontrak || '',
+
+    // 10. Penetapan dan Pengumuman Pemenang
+    rencana_penetapan_pengumuman_pemenang: formatDate(
+        props.data.rencana_penetapan_pengumuman_pemenang
+    ),
+    realisasi_penetapan_pengumuman_pemenang: formatDate(
+        props.data.realisasi_penetapan_pengumuman_pemenang
+    ),
+    penetapan_pengumuman_pemenang: props.data.penetapan_pengumuman_pemenang || '',
+
+    // 11. Sanggah
+    rencana_sanggah: formatDate(props.data.rencana_sanggah),
+    realisasi_sanggah: formatDate(props.data.realisasi_sanggah),
+    sanggah: props.data.sanggah || '',
+
+    // 12. Penunjukan Penyedia Barang/Jasa
+    rencana_penunjukan_penyedia: formatDate(props.data.rencana_penunjukan_penyedia),
+    realisasi_penunjukan_penyedia: formatDate(props.data.realisasi_penunjukan_penyedia),
+    penunjukan_penyedia: props.data.penunjukan_penyedia || '',
+    dokumen_penunjukan_penyedia: props.data.dokumen_penunjukan_penyedia || '',
+
+    // 13. Contract Discussion Agreement (CDA)
+    rencana_cda: formatDate(props.data.rencana_cda),
+    realisasi_cda: formatDate(props.data.realisasi_cda),
+    cda: props.data.cda || ''
 })
 
 // --- Fungsi Reusable Upload File ---
@@ -172,20 +244,23 @@ const rendanOptions = props.rendans.map(rendan => ({
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            1. Informasi Utama Pengadaan
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Pilih Rendan terkait dan metode pelaksanaan.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                1. Informasi Utama Pengadaan
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Pilih Rendan terkait dan metode pelaksanaan.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormSelect
-                                label="Rendan Terkait (Nomor ND User)"
-                                v-model.number="form.rendan_id"
-                                :options="rendanOptions"
+                            <RendanSearchSelect
+                                label="Data Rendan Terkait (ND User)"
+                                v-model="form.rendan_id"
+                                :rendans="props.rendans"
                                 :error="form.errors.rendan_id"
-                                placeholder="Pilih Nomor ND User Rendan" />
+                                placeholder="Cari Nomor ND User Rendan"
+                                :disabled="true" />
 
                             <FormInput
                                 label="Proses Pengadaan"
@@ -198,18 +273,26 @@ const rendanOptions = props.rendans.map(rendan => ({
                                 v-model="form.metode_pengadaan"
                                 :error="form.errors.metode_pengadaan"
                                 placeholder="Cth: Tender Terbuka, Penunjukan Langsung" />
+
+                            <FormInput
+                                label="PIC"
+                                v-model="form.pic"
+                                :error="form.errors.pic"
+                                placeholder="Cth: ..." />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            2. Harga Perkiraan Sendiri (HPS)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail dokumen Harga Perkiraan Sendiri.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                2. Harga Perkiraan Sendiri (HPS)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail dokumen Harga Perkiraan Sendiri.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormInput
@@ -218,92 +301,6 @@ const rendanOptions = props.rendans.map(rendan => ({
                                 :error="form.errors.nomor_hps"
                                 placeholder="Cth: 001.HPS/DAN.01.03/..." />
 
-                            <FormInput
-                                label="Nilai HPS (Rupiah)"
-                                type="number"
-                                step="0.0001"
-                                v-model.number="form.nilai_hps"
-                                :error="form.errors.nilai_hps"
-                                placeholder="Cth: 1234567.89" />
-
-                            <div class="space-y-2">
-                                <FormInput
-                                    label="Dokumen HPS (File Upload)"
-                                    type="file"
-                                    @input="handleFileUpload($event, 'hps')"
-                                    :error="uploadHpsError || form.errors.dokumen_hps_path"
-                                    :disabled="isUploadingHps"
-                                    accept=".pdf, .jpg, .jpeg, .png" />
-
-                                <div
-                                    v-if="isUploadingHps"
-                                    class="mt-1 text-sm text-sky-500 flex items-center">
-                                    <svg
-                                        class="animate-spin h-4 w-4 mr-3"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                            class="opacity-25"></circle>
-                                        <path
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            class="opacity-75"></path>
-                                    </svg>
-                                    Sedang mengunggah HPS ({{ uploadedHpsName || '...' }})...
-                                </div>
-                                <div v-else-if="uploadHpsError" class="mt-1 text-sm text-red-500">
-                                    Gagal unggah: {{ uploadHpsError }}
-                                </div>
-                                <div
-                                    v-else-if="uploadedHpsPath"
-                                    class="mt-1 text-sm text-green-500 font-medium">
-                                    ✅ File HPS **{{ uploadedHpsName }}** berhasil diunggah. (Akan
-                                    menggantikan file lama).
-                                </div>
-
-                                <div
-                                    v-else-if="
-                                        existingHpsPath && !isUploadingHps && !uploadHpsError
-                                    "
-                                    class="flex items-center gap-4">
-                                    <div
-                                        class="text-sm text-gray-500 font-medium dark:text-gray-400">
-                                        File saat ini: **{{ existingHpsName }}**
-                                    </div>
-                                    <a
-                                        :href="`/storage/${existingHpsPath}`"
-                                        target="_blank"
-                                        class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500 transition duration-150 ease-in-out border border-blue-600 hover:border-blue-700 dark:border-blue-400 dark:hover:border-blue-500 px-3 py-1 rounded-md">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 mr-1"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            stroke-width="2">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Lihat Dokumen
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-200 dark:border-gray-600">
                             <FormInput
                                 label="Rencana Tanggal HPS"
                                 type="date"
@@ -315,6 +312,21 @@ const rendanOptions = props.rendans.map(rendan => ({
                                 type="date"
                                 v-model="form.realisasi_tanggal_hps"
                                 :error="form.errors.realisasi_tanggal_hps" />
+                        </div>
+
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                            <FileManagerInput
+                                label="Dokumen HPS"
+                                v-model="form.dokumen_hps"
+                                :error="form.errors.dokumen_hps"
+                                placeholder="Pilih Dokumen" />
+
+                            <FormCurrency
+                                label="Nilai HPS (Rupiah)"
+                                v-model="form.nilai_hps"
+                                :error="form.errors.nilai_hps"
+                                placeholder="HPS Rupiah" />
 
                             <div class="hidden md:block"></div>
                         </div>
@@ -323,149 +335,254 @@ const rendanOptions = props.rendans.map(rendan => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            3. Pengumuman Lelang
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail jadwal dan nomor Pengumuman Lelang/Tender.
-                        </p>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormInput
-                                label="Nomor Pengumuman Lelang"
-                                v-model="form.nomor_pengumuman_lelang"
-                                :error="form.errors.nomor_pengumuman_lelang"
-                                placeholder="Cth: EPROC-7300-..." />
-
-                            <FormInput
-                                label="Rencana Tgl. Pengumuman"
-                                type="date"
-                                v-model="form.rencana_pengumuman_lelang"
-                                :error="form.errors.rencana_pengumuman_lelang" />
-
-                            <FormInput
-                                label="Realisasi Tgl. Pengumuman"
-                                type="date"
-                                v-model="form.realisasi_pengumuman_lelang"
-                                :error="form.errors.realisasi_pengumuman_lelang" />
-                        </div>
-                    </div>
-                </section>
-
-                <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            4. Penunjukan Pemenang
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail dokumen Penunjukan Pemenang.
-                        </p>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormInput
-                                label="Nomor Penunjukan Pemenang"
-                                v-model="form.nomor_penunjukan_pemenang"
-                                :error="form.errors.nomor_penunjukan_pemenang"
-                                placeholder="Cth: 0932/DAN.01.03/..." />
-
-                            <FormInput
-                                label="Rencana Tgl. Pemenang"
-                                type="date"
-                                v-model="form.rencana_penunjukan_pemenang"
-                                :error="form.errors.rencana_penunjukan_pemenang" />
-
-                            <FormInput
-                                label="Realisasi Tgl. Pemenang"
-                                type="date"
-                                v-model="form.realisasi_penunjukan_pemenang"
-                                :error="form.errors.realisasi_penunjukan_pemenang" />
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                3. Tahapan Lelang
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail jadwal dan nomor tahapan pelaksanaan pengadaan.
+                            </p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="md:col-span-1 space-y-2">
+                        <div class="space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <FormInput
-                                    label="Dokumen Penunjukan Pemenang (File Upload)"
-                                    type="file"
-                                    @input="handleFileUpload($event, 'penunjukan_pemenang')"
-                                    :error="
-                                        uploadPemenangError ||
-                                        form.errors.dokumen_penunjukan_pemenang_path
-                                    "
-                                    :disabled="isUploadingPemenang"
-                                    accept=".pdf, .jpg, .jpeg, .png" />
-
-                                <div
-                                    v-if="isUploadingPemenang"
-                                    class="mt-1 text-sm text-sky-500 flex items-center">
-                                    <svg
-                                        class="animate-spin h-4 w-4 mr-3"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                            class="opacity-25"></circle>
-                                        <path
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            class="opacity-75"></path>
-                                    </svg>
-                                    Sedang mengunggah Dokumen Pemenang ({{
-                                        uploadedPemenangName || '...'
-                                    }})...
-                                </div>
-                                <div
-                                    v-else-if="uploadPemenangError"
-                                    class="mt-1 text-sm text-red-500">
-                                    Gagal unggah: {{ uploadPemenangError }}
-                                </div>
-                                <div
-                                    v-else-if="uploadedPemenangPath"
-                                    class="mt-1 text-sm text-green-500 font-medium">
-                                    ✅ File Pemenang **{{ uploadedPemenangName }}** berhasil
-                                    diunggah. (Akan menggantikan file lama).
-                                </div>
-
-                                <div
-                                    v-else-if="
-                                        existingPemenangPath &&
-                                        !isUploadingPemenang &&
-                                        !uploadPemenangError
-                                    "
-                                    class="flex items-center gap-4">
-                                    <div
-                                        class="text-sm text-gray-500 font-medium dark:text-gray-400">
-                                        File saat ini: **{{ existingPemenangName }}**
-                                    </div>
-                                    <a
-                                        :href="`/storage/${existingPemenangPath}`"
-                                        target="_blank"
-                                        class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500 transition duration-150 ease-in-out border border-blue-600 hover:border-blue-700 dark:border-blue-400 dark:hover:border-blue-500 px-3 py-1 rounded-md">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 mr-1"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            stroke-width="2">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Lihat Dokumen
-                                    </a>
-                                </div>
+                                    label="Persiapan Pengadaan"
+                                    v-model="form.persiapan_pengadaan"
+                                    :error="form.errors.persiapan_pengadaan" />
+                                <FormInput
+                                    label="Rencana Tgl. Persiapan"
+                                    type="date"
+                                    v-model="form.rencana_persiapan_pengadaan"
+                                    :error="form.errors.rencana_persiapan_pengadaan" />
+                                <FormInput
+                                    label="Realisasi Tgl. Persiapan"
+                                    type="date"
+                                    v-model="form.realisasi_persiapan_pengadaan"
+                                    :error="form.errors.realisasi_persiapan_pengadaan" />
                             </div>
-                            <div class="md:col-span-2"></div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Pengumuman Pengadaan "
+                                    v-model="form.pengumuman_pengadaan"
+                                    :error="form.errors.pengumuman_pengadaan" />
+                                <FormInput
+                                    label="Rencana Tgl. Pengumuman"
+                                    type="date"
+                                    v-model="form.rencana_pengumuman_pengadaan"
+                                    :error="form.errors.rencana_pengumuman_pengadaan" />
+                                <FormInput
+                                    label="Realisasi Tgl. Pengumuman"
+                                    type="date"
+                                    v-model="form.realisasi_pengumuman_pengadaan"
+                                    :error="form.errors.realisasi_pengumuman_pengadaan" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Pendaftaran Dokumen"
+                                    v-model="form.pendaftaran_ambil_dokumen"
+                                    :error="form.errors.pendaftaran_ambil_dokumen" />
+                                <FormInput
+                                    label="Rencana Tgl. Pendaftaran"
+                                    type="date"
+                                    v-model="form.rencana_pendaftaran_ambil_dokumen"
+                                    :error="form.errors.rencana_pendaftaran_ambil_dokumen" />
+                                <FormInput
+                                    label="Realisasi Tgl. Pendaftaran"
+                                    type="date"
+                                    v-model="form.realisasi_pendaftaran_ambil_dokumen"
+                                    :error="form.errors.realisasi_pendaftaran_ambil_dokumen" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Aanwijzing"
+                                    v-model="form.aanwijzing"
+                                    :error="form.errors.aanwijzing" />
+                                <FormInput
+                                    label="Rencana Tgl. Aanwijzing"
+                                    type="date"
+                                    v-model="form.rencana_aanwijzing"
+                                    :error="form.errors.rencana_aanwijzing" />
+                                <FormInput
+                                    label="Realisasi Tgl. Aanwijzing"
+                                    type="date"
+                                    v-model="form.realisasi_aanwijzing"
+                                    :error="form.errors.realisasi_aanwijzing" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Pemasukan Penawaran (No/Ref)"
+                                    v-model="form.pemasukan_penawaran"
+                                    :error="form.errors.pemasukan_penawaran" />
+                                <FormInput
+                                    label="Rencana Tgl. Pemasukan"
+                                    type="date"
+                                    v-model="form.rencana_pemasukan_penawaran"
+                                    :error="form.errors.rencana_pemasukan_penawaran" />
+                                <FormInput
+                                    label="Realisasi Tgl. Pemasukan"
+                                    type="date"
+                                    v-model="form.realisasi_pemasukan_penawaran"
+                                    :error="form.errors.realisasi_pemasukan_penawaran" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Pembukaan & Evaluasi"
+                                    v-model="form.pembukaan_evaluasi"
+                                    :error="form.errors.pembukaan_evaluasi" />
+                                <FormInput
+                                    label="Rencana Tgl. Evaluasi"
+                                    type="date"
+                                    v-model="form.rencana_pembukaan_evaluasi"
+                                    :error="form.errors.rencana_pembukaan_evaluasi" />
+                                <FormInput
+                                    label="Realisasi Tgl. Evaluasi"
+                                    type="date"
+                                    v-model="form.realisasi_pembukaan_evaluasi"
+                                    :error="form.errors.realisasi_pembukaan_evaluasi" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Klarifikasi & Negosiasi"
+                                    v-model="form.klarifikasi_negosiasi"
+                                    :error="form.errors.klarifikasi_negosiasi" />
+                                <FormInput
+                                    label="Rencana Tgl. Negosiasi"
+                                    type="date"
+                                    v-model="form.rencana_klarifikasi_negosiasi"
+                                    :error="form.errors.rencana_klarifikasi_negosiasi" />
+                                <FormInput
+                                    label="Realisasi Tgl. Negosiasi"
+                                    type="date"
+                                    v-model="form.realisasi_klarifikasi_negosiasi"
+                                    :error="form.errors.realisasi_klarifikasi_negosiasi" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Usulan Pemenang "
+                                    v-model="form.usulan_penetapan_pemenang"
+                                    :error="form.errors.usulan_penetapan_pemenang" />
+                                <FormInput
+                                    label="Rencana Tgl. Usulan"
+                                    type="date"
+                                    v-model="form.rencana_usulan_penetapan_pemenang"
+                                    :error="form.errors.rencana_usulan_penetapan_pemenang" />
+                                <FormInput
+                                    label="Realisasi Tgl. Usulan"
+                                    type="date"
+                                    v-model="form.realisasi_usulan_penetapan_pemenang"
+                                    :error="form.errors.realisasi_usulan_penetapan_pemenang" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Izin Prinsip Kontrak"
+                                    v-model="form.izin_prinsip_kontrak"
+                                    :error="form.errors.izin_prinsip_kontrak" />
+                                <FormInput
+                                    label="Rencana Tgl. Izin"
+                                    type="date"
+                                    v-model="form.rencana_izin_prinsip_kontrak"
+                                    :error="form.errors.rencana_izin_prinsip_kontrak" />
+                                <FormInput
+                                    label="Realisasi Tgl. Izin"
+                                    type="date"
+                                    v-model="form.realisasi_izin_prinsip_kontrak"
+                                    :error="form.errors.realisasi_izin_prinsip_kontrak" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Penetapan Pemenang"
+                                    v-model="form.penetapan_pengumuman_pemenang"
+                                    :error="form.errors.penetapan_pengumuman_pemenang" />
+                                <FormInput
+                                    label="Rencana Tgl. Penetapan"
+                                    type="date"
+                                    v-model="form.rencana_penetapan_pengumuman_pemenang"
+                                    :error="form.errors.rencana_penetapan_pengumuman_pemenang" />
+                                <FormInput
+                                    label="Realisasi Tgl. Penetapan"
+                                    type="date"
+                                    v-model="form.realisasi_penetapan_pengumuman_pemenang"
+                                    :error="form.errors.realisasi_penetapan_pengumuman_pemenang" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Sanggah"
+                                    v-model="form.sanggah"
+                                    :error="form.errors.sanggah" />
+                                <FormInput
+                                    label="Rencana Tgl. Sanggah"
+                                    type="date"
+                                    v-model="form.rencana_sanggah"
+                                    :error="form.errors.rencana_sanggah" />
+                                <FormInput
+                                    label="Realisasi Tgl. Sanggah"
+                                    type="date"
+                                    v-model="form.realisasi_sanggah"
+                                    :error="form.errors.realisasi_sanggah" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="Penunjukan Penyedia "
+                                    v-model="form.penunjukan_penyedia"
+                                    :error="form.errors.penunjukan_penyedia" />
+                                <FormInput
+                                    label="Rencana Tgl. Penunjukan"
+                                    type="date"
+                                    v-model="form.rencana_penunjukan_penyedia"
+                                    :error="form.errors.rencana_penunjukan_penyedia" />
+                                <FormInput
+                                    label="Realisasi Tgl. Penunjukan"
+                                    type="date"
+                                    v-model="form.realisasi_penunjukan_penyedia"
+                                    :error="form.errors.realisasi_penunjukan_penyedia" />
+
+                                <FileManagerInput
+                                    label="Dokumen Penunjukan"
+                                    v-model="form.dokumen_penunjukan_penyedia"
+                                    :error="form.errors.dokumen_penunjukan_penyedia"
+                                    placeholder="Pilih Dokumen" />
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-600">
+                                <FormInput
+                                    label="CDA"
+                                    v-model="form.cda"
+                                    :error="form.errors.cda" />
+                                <FormInput
+                                    label="Rencana Tgl. CDA"
+                                    type="date"
+                                    v-model="form.rencana_cda"
+                                    :error="form.errors.rencana_cda" />
+                                <FormInput
+                                    label="Realisasi Tgl. CDA"
+                                    type="date"
+                                    v-model="form.realisasi_cda"
+                                    :error="form.errors.realisasi_cda" />
+                            </div>
                         </div>
                     </div>
                 </section>

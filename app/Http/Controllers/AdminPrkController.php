@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterKondisiFisik;
-use App\Models\MasterMediaSimpan;
-use App\Models\MasterTingkatPerkembangan;
 use App\Models\Prk;
+use App\Models\Bidang;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class AdminPrkController extends Controller
 {
@@ -21,8 +20,20 @@ class AdminPrkController extends Controller
 
     public function index(Request $request)
     {
-        $data = Prk::latest()
-            ->paginate($request->input('per_page', 10));
+        // 1. Mulai query dasar
+        $query = Prk::latest();
+
+        // 2. Ambil user yang sedang login
+        $user = auth()->user();
+
+        // 3. Cek apakah user memiliki role 'user' (menggunakan spatie)
+        // Asumsi: kolom di tabel prks adalah 'unit_id' dan di tabel users adalah 'unit_id'
+        if ($user->hasRole('user')) {
+            $query->where('unit_id', $user->unit_id);
+        }
+
+        // 4. Eksekusi pagination
+        $data = $query->paginate($request->input('per_page', 10));
 
         return Inertia::render('Admin/Prk/IndexPage', [
             'data' => $data,
@@ -33,13 +44,19 @@ class AdminPrkController extends Controller
     {
         // $this->authorize('create-lapangan');
 
-        return Inertia::render('Admin/Prk/CreatePage', [
+        $bidangs = Bidang::select(['id', 'name'])->get();
 
+        return Inertia::render('Admin/Prk/CreatePage', [
+            'bidangs' => [
+                'data' => $bidangs,
+            ],
         ]);
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         // 1. Tentukan aturan validasi sesuai skema PRK
         $validated = $request->validate([
             'tahun' => ['required', 'integer', 'digits:4'],
@@ -48,7 +65,7 @@ class AdminPrkController extends Controller
             'uraian' => ['required', 'string'],
             'status' => ['required', 'string'],
             'ai_rupiah' => ['required', 'numeric'],
-            'user' => ['required', 'string'],
+            'bidang_id' => ['nullable', 'exists:bidangs,id'],
 
             // Dokumen Kaji Ulang
             'dokumen_kkp' => ['nullable', 'string'],
@@ -68,51 +85,22 @@ class AdminPrkController extends Controller
             'tanggal_skai' => ['nullable', 'date'],
             'nilai_skai' => ['nullable', 'numeric'],
             'jumlah_paket' => ['nullable', 'integer'],
+            'dokumen_skai' => ['nullable', 'string'],
 
-            // Dokumen SKAI (File Upload)
-            'dokumen_skai_path' => ['nullable', 'string'],
-            'dokumen_skai_name' => ['nullable', 'string'],
+            'file_kkp' => ['nullable', 'string'],
+            'file_kajian_risiko' => ['nullable', 'string'],
+            'file_grc' => ['nullable', 'string'],
+            'file_tvv' => ['nullable', 'string'],
         ]);
-
-        $tempPath = $validated['dokumen_skai_path'] ?? null;
-        $finalPath = null;
-        $finalDirectory = 'prk_dokumen/skai';
 
         try {
             DB::beginTransaction();
 
             $prkData = $validated;
 
-            // 2. LOGIKA PENANGANAN FILE DOKUMEN SKAI
-            if ($tempPath) {
-                // Pastikan file sementara ada sebelum diproses
-                if (!Storage::disk('public')->exists($tempPath)) {
-                    throw new \Exception('File dokumen SKAI tidak ditemukan di lokasi sementara. Harap unggah ulang.');
-                }
+            $prkData['user_id'] = $user->id;
+            $prkData['unit_id'] = $user->unit_id;
 
-                // Tentukan path permanen
-                // Menggunakan nama file asli (dari dokumen_skai_name) jika ada, atau menggunakan nama basename tempPath
-                $fileName = $validated['dokumen_skai_name'] ?? basename($tempPath);
-                $finalPath = $finalDirectory . '/' . $fileName;
-
-                // Pastikan nama file unik (opsional, tergantung kebutuhan Anda)
-                // $finalPath = $finalDirectory . '/' . time() . '_' . $fileName;
-
-                // Pindahkan file dari 'temp_uploads' ke 'prk_dokumen/skai'
-                Storage::disk('public')->move($tempPath, $finalPath);
-
-                // Update data yang akan disimpan dengan path permanen
-                $prkData['dokumen_skai'] = $finalPath;
-            } else {
-                // Jika tidak ada file diunggah, pastikan field dokumen_skai null
-                $prkData['dokumen_skai'] = null;
-            }
-
-            // Hapus field path dan name dari data yang akan di-create
-            unset($prkData['dokumen_skai_path']);
-            unset($prkData['dokumen_skai_name']);
-
-            // 3. Simpan data PRK ke database
             Prk::create($prkData);
 
             DB::commit();
@@ -123,10 +111,7 @@ class AdminPrkController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Jika terjadi kegagalan, hapus file yang sudah terlanjur dipindahkan
-            if ($finalPath && Storage::disk('public')->exists($finalPath)) {
-                Storage::disk('public')->delete($finalPath);
-            }
+
             return redirect()->back()->with('error', 'Gagal menyimpan data PRK: ' . $e->getMessage());
         }
     }
@@ -138,8 +123,13 @@ class AdminPrkController extends Controller
         // 1. Ambil data Prk berdasarkan ID
         $prk = Prk::findOrFail($id);
 
+        $bidangs = Bidang::select(['id', 'name'])->get();
+
         return Inertia::render('Admin/Prk/EditPage', [
             'data' => $prk, // <-- Kirim data arsip yang akan diedit
+            'bidangs' => [
+                'data' => $bidangs,
+            ],
         ]);
     }
 
@@ -150,6 +140,7 @@ class AdminPrkController extends Controller
     {
         // Cari data yang akan diupdate
         $prk = Prk::findOrFail($id);
+        $user = Auth::user();
 
         // 1. Tentukan aturan validasi
         $validated = $request->validate([
@@ -159,8 +150,8 @@ class AdminPrkController extends Controller
             'fungsi' => ['required', 'string'],
             'uraian' => ['required', 'string'],
             'status' => ['required', 'string'],
-            'ai_rupiah' => ['required', 'numeric'],
-            'user' => ['required', 'string'],
+            'ai_rupiah' => ['nullable', 'numeric'],
+            'bidang_id' => ['nullable', 'exists:bidangs,id'],
 
             // Dokumen Kaji Ulang
             'dokumen_kkp' => ['nullable', 'string'],
@@ -180,52 +171,22 @@ class AdminPrkController extends Controller
             'tanggal_skai' => ['nullable', 'date'],
             'nilai_skai' => ['nullable', 'numeric'],
             'jumlah_paket' => ['nullable', 'integer'],
+            'dokumen_skai' => ['nullable', 'string'],
 
-            // Dokumen SKAI (Path & Name dari pre-upload asinkron)
-            'dokumen_skai_path' => ['nullable', 'string'],
-            'dokumen_skai_name' => ['nullable', 'string'],
+            'file_kkp' => ['nullable', 'string'],
+            'file_kajian_risiko' => ['nullable', 'string'],
+            'file_grc' => ['nullable', 'string'],
+            'file_tvv' => ['nullable', 'string'],
         ]);
-
-        $tempPath = $validated['dokumen_skai_path'] ?? null;
-        $finalPath = $prk->dokumen_skai; // Path default adalah path yang sudah ada
-        $oldFilePath = $prk->dokumen_skai;
-        $finalDirectory = 'prk_dokumen/skai';
 
         try {
             DB::beginTransaction();
 
             $prkData = $validated;
 
-            // 2. LOGIKA PEMINDAHAN FILE DOKUMEN SKAI (HANYA JIKA ADA UPLOAD BARU)
-            if ($tempPath) {
-                if (!Storage::disk('public')->exists($tempPath)) {
-                    throw new \Exception('File dokumen SKAI yang baru tidak ditemukan di lokasi sementara. Harap unggah ulang.');
-                }
+            $prkData['user_id'] = $user->id;
+            $prkData['unit_id'] = $user->unit_id;
 
-                // Tentukan nama file permanen
-                $fileName = $validated['dokumen_skai_name'] ?? basename($tempPath);
-                $finalPath = $finalDirectory . '/' . $fileName;
-
-                // Hapus file lama jika ada
-                if ($oldFilePath && Storage::disk('public')->exists($oldFilePath)) {
-                    Storage::disk('public')->delete($oldFilePath);
-                }
-
-                // Pindahkan file dari lokasi sementara ke lokasi permanen
-                Storage::disk('public')->move($tempPath, $finalPath);
-
-                // Simpan path permanen di field dokumen_skai
-                $prkData['dokumen_skai'] = $finalPath;
-            } else {
-                // Jika tidak ada upload baru, pertahankan path lama.
-                $prkData['dokumen_skai'] = $oldFilePath;
-            }
-
-            // Hapus field path dan name yang hanya digunakan untuk proses pemindahan
-            unset($prkData['dokumen_skai_path']);
-            unset($prkData['dokumen_skai_name']);
-
-            // 3. Update data PRK
             $prk->update($prkData);
 
             DB::commit();
@@ -236,10 +197,7 @@ class AdminPrkController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Jika terjadi kegagalan, hapus file baru yang sudah terlanjur dipindahkan
-            if ($tempPath && $finalPath && Storage::disk('public')->exists($finalPath)) {
-                Storage::disk('public')->delete($finalPath);
-            }
+
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data PRK: ' . $e->getMessage());
         }
     }
@@ -260,5 +218,16 @@ class AdminPrkController extends Controller
                 ->route('admin.prk.index')
                 ->with('error', 'Gagal menghapus: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Prk::with([
+            'bidang',
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Prk/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

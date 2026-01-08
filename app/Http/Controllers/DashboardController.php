@@ -6,13 +6,39 @@ use App\Models\User;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use App\Models\Prk;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $user = auth()->user();
+
+        // Ambil tahun dari request (default null)
+        $tahunFilter = $request->query('tahun');
+
+        $query = Prk::with([
+            'bidang',
+            'pakets.enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'pakets.enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])
+        ->when($tahunFilter, function ($q) use ($tahunFilter) {
+            $q->where('tahun', $tahunFilter); // Memfilter kolom tahun di tabel PRK
+        })
+        ->latest();
+
+        if ($user->hasRole('user')) {
+            $query->where('unit_id', $user->unit_id);
+        }
+
+        // withQueryString() memastikan filter tahun tetap terbawa saat pindah halaman (paging)
+        $prks = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Dashboard', [
-            'stats' => $this->getStats(),
+            'prks'   => $prks,
+            'stats'  => $this->getStats(),
+            'filters'=> $request->only(['tahun']) // Kirim balik nilai filter ke Vue
         ]);
     }
 

@@ -16,6 +16,7 @@ use Laravel\Scout\Searchable;
 use Laravolt\Avatar\Facade as Avatar;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable implements Auditable
 {
@@ -34,6 +35,7 @@ class User extends Authenticatable implements Auditable
     protected $fillable = [
         'name',
         'email',
+        'unit_id',
         'password',
         'email_verified_at',
         'password_expiry_at',
@@ -192,5 +194,10 @@ class User extends Authenticatable implements Auditable
                 ]);
             },
         );
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

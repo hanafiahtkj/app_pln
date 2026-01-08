@@ -31,7 +31,8 @@
         "spatie/laravel-permission": "^6.10",
         "symfony/process": "^7.0|^8.0",
         "tightenco/ziggy": "^2.3",
-        "typesense/typesense-php": "^5.1"
+        "typesense/typesense-php": "^5.1",
+        "unisharp/laravel-filemanager": "^2.12"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -17,7 +17,8 @@ return new class extends Migration
 
                 // Relasi ke PRK
                 // PENTING: Tabel 'prks' harus ada.
-                $table->foreignUlid('prk_id')->index()->comment('Foreign Key ke tabel prks');
+               $table->foreignUlid('enjiniring_id')
+                  ->index();
 
                 // Kolom-kolom berdasarkan 'rendan.xlsx - Sheet1.csv' yang tersisa
 
@@ -27,7 +28,7 @@ return new class extends Migration
                 $table->date('tanggal_nd_user')->nullable(); // Tanggal ND User
 
                 // RAB
-                $table->string('rab')->nullable(); // RAB (Nilai/Status)
+                $table->decimal('rab', 16, 4)->nullable();
 
                 // Dokumen RKS
                 $table->string('dokumen_rks')->nullable(); // Dokumen RKS
@@ -37,7 +38,10 @@ return new class extends Migration
                 $table->timestamps();
 
                 // Definisi Foreign Key
-                $table->foreign('prk_id')->references('id')->on('prks')->onDelete('cascade');
+                $table->foreign('enjiniring_id')
+                  ->references('id')
+                  ->on('enjinirings') // Mengacu ke tabel enjinirings
+                  ->onDelete('cascade');
             });
 
     }

@@ -23,7 +23,7 @@ class AdminEnjiniringController extends Controller
     public function index(Request $request)
     {
         $data = Enjiniring::latest()
-            ->with('prk.pakets')
+            ->with('paket.prk')
             ->paginate($request->input('per_page', 10));
 
         return Inertia::render('Admin/Enjiniring/IndexPage', [
@@ -31,24 +31,17 @@ class AdminEnjiniringController extends Controller
         ]);
     }
 
-    private function getAvailablePrks()
-    {
-        // 1. Filter: Hanya ambil ID PRK yang sudah memiliki Paket
-        $prkIdsWithPaket = Paket::pluck('prk_id')->unique();
-
-        // 2. Query: Ambil data PRK berdasarkan ID yang sudah terfilter
-        return Prk::whereIn('id', $prkIdsWithPaket)
-            ->select('id', 'prk')
-            ->get();
-    }
-
     /**
      * Menampilkan form untuk membuat data Paket Enjiniring baru.
      */
     public function create()
     {
+        $pakets = Paket::with('prk')
+            ->doesntHave('enjiniring')
+            ->get();
+
         return Inertia::render('Admin/Enjiniring/CreatePage', [
-            'prks' => $this->getAvailablePrks(),
+            'pakets' => $pakets,
         ]);
     }
 
@@ -59,7 +52,7 @@ class AdminEnjiniringController extends Controller
     {
         // 1. Tentukan aturan validasi (hanya untuk data non-file)
         $validated = $request->validate([
-            'prk_id' => ['required', 'exists:prks,id'],
+            'paket_id' => ['required', 'exists:pakets,id'],
             'target_survey' => ['nullable', 'date'],
             'realisasi_survey' => ['nullable', 'date'],
             'target_dokumen_enjiniring' => ['nullable', 'date'],
@@ -70,18 +63,22 @@ class AdminEnjiniringController extends Controller
             'dokumen_survey' => ['nullable', 'string', 'max:255'],
             'dokumen_rab' => ['nullable', 'string', 'max:255'],
             'dokumen_tor' => ['nullable', 'string', 'max:255'],
+
+            'file_survey' => ['nullable', 'string', 'max:255'],
+            'file_rab' => ['nullable', 'string', 'max:255'],
+            'file_tor' => ['nullable', 'string', 'max:255'],
         ]);
 
         try {
             DB::beginTransaction();
 
             // 2. Simpan data Paket Enjiniring ke database
-            Enjiniring::create($validated);
+            $req = Enjiniring::create($validated);
 
             DB::commit();
 
             return redirect()
-                ->route('admin.enjiniring.index')
+                ->route('admin.paket.show', $req->paket_id)
                 ->with('success', 'Data Paket Enjiniring berhasil ditambahkan.');
 
         } catch (\Exception $e) {
@@ -95,14 +92,20 @@ class AdminEnjiniringController extends Controller
      */
     public function edit($id)
     {
-        // Eager load relasi 'prk'
-        $paketEnjiniring = Enjiniring::with('prk')->findOrFail($id);
+        $paketEnjiniring = Enjiniring::with('paket')->findOrFail($id);
+        $currentPaketId = $paketEnjiniring->paket_id;
 
-        // prk_id sudah tersedia di objek $paketEnjiniring
+        $pakets = Paket::with('prk')
+        ->where(function ($query) use ($currentPaketId) {
+            $query->doesntHave('enjiniring');
+            $query->orWhere('id', $currentPaketId);
+        })
+        ->orderBy('tahun', 'desc')
+        ->get();
 
         return Inertia::render('Admin/Enjiniring/EditPage', [
             'data' => $paketEnjiniring,
-            'prks' => $this->getAvailablePrks(),
+            'pakets' => $pakets,
         ]);
     }
 
@@ -115,7 +118,7 @@ class AdminEnjiniringController extends Controller
 
         // 1. Tentukan aturan validasi (hanya untuk data non-file)
         $validated = $request->validate([
-            'prk_id' => ['required', 'exists:prks,id'],
+            'paket_id' => ['required', 'exists:pakets,id'],
             'target_survey' => ['nullable', 'date'],
             'realisasi_survey' => ['nullable', 'date'],
             'target_dokumen_enjiniring' => ['nullable', 'date'],
@@ -126,6 +129,10 @@ class AdminEnjiniringController extends Controller
             'dokumen_survey' => ['nullable', 'string', 'max:255'],
             'dokumen_rab' => ['nullable', 'string', 'max:255'],
             'dokumen_tor' => ['nullable', 'string', 'max:255'],
+
+            'file_survey' => ['nullable', 'string', 'max:255'],
+            'file_rab' => ['nullable', 'string', 'max:255'],
+            'file_tor' => ['nullable', 'string', 'max:255'],
         ]);
 
         try {
@@ -137,7 +144,7 @@ class AdminEnjiniringController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.enjiniring.index')
+                ->route('admin.paket.show', $paketEnjiniring->paket_id)
                 ->with('success', 'Data Paket Enjiniring berhasil diperbarui.');
 
         } catch (\Exception $e) {

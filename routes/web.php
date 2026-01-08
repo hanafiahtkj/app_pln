@@ -162,8 +162,8 @@ Route::middleware(['web', 'auth', 'auth.session'])->group(function () {
                     Route::post('refresh', 'runHealthChecks')->name('refresh');
                 });
 
-                Route::resource('prk', AdminPrkController::class)->except('show')->names('prk');
-                Route::resource('paket', AdminPaketController::class)->except('show')->names('paket');
+                Route::resource('prk', AdminPrkController::class)->names('prk');
+                Route::resource('paket', AdminPaketController::class)->names('paket');
                 Route::resource('enjiniring', AdminEnjiniringController::class)->except('show')->names('enjiniring');
                 Route::resource('rendan', AdminRendanController::class)->except('show')->names('rendan');
                 Route::resource('lakdan', AdminLakdanController::class)->except('show')->names('lakdan');
@@ -203,3 +203,7 @@ Route::middleware(['guest', 'web'])->group(function () {
         });
     });
 });
+
+Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
+     \UniSharp\LaravelFilemanager\Lfm::routes();
+ });

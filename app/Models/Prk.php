@@ -11,20 +11,29 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prk extends Model
 {
-   use HasFactory;
+    use HasFactory;
 
-   use HasUlids;
+    use HasUlids;
 
-   protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
 
-   public function pakets(): HasMany
+    public function pakets(): HasMany
     {
-        // Asumsi model Paket memiliki foreign key 'prk_id'
         return $this->hasMany(Paket::class, 'prk_id');
     }
 
-   public function paketEnjinirings(): HasMany
+    public function paketEnjinirings(): HasMany
     {
         return $this->hasMany(PaketEnjiniring::class, 'prk_id');
+    }
+
+    public function bidang(): BelongsTo
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

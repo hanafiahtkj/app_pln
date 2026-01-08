@@ -16,8 +16,13 @@ class Enjiniring extends Model
 
    protected $guarded = ['id', 'created_at', 'updated_at'];
 
-   public function prk(): BelongsTo
+   public function paket(): BelongsTo
     {
-        return $this->belongsTo(Prk::class);
+        return $this->belongsTo(Paket::class);
+    }
+
+    public function rendan()
+    {
+        return $this->hasOne(Rendan::class, 'enjiniring_id');
     }
 }

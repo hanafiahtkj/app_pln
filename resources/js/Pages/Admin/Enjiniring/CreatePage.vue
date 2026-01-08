@@ -5,22 +5,25 @@ import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormTextarea from '@/Components/FormTextarea.vue'
 import FormSelect from '@/Components/FormSelect.vue'
-import { ref } from 'vue'
+import PaketSearchSelect from './PaketSearchSelect.vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
 
 const props = defineProps({
     // Prop: Daftar PRK yang tersedia untuk dipilih (Foreign Key)
-    prks: {
-        // Diubah dari 'pakets' menjadi 'prks'
+    pakets: {
         type: Array,
         default: () => []
     }
 })
 
+const isLocked = ref(false)
+
 // --- Inisialisasi Form PAKET ENJINIRING ---
 const form = useForm({
-    prk_id: null, // Diubah dari 'paket_id' menjadi 'prk_id'
+    paket_id: null, // Diubah dari 'paket_id' menjadi 'prk_id'
 
     // Target dan Realisasi Tanggal
     target_survey: null,
@@ -34,22 +37,32 @@ const form = useForm({
     dokumen_tor: '',
 
     // Keterangan
-    keterangan: ''
+    keterangan: '',
+
+    file_survey: '',
+    file_rab: '',
+    file_tor: ''
 })
 
 const submit = () => {
-    // Rute tetap, namun data yang dikirim menggunakan prk_id
-    form.post(route('admin.enjiniring.store'), {
-        preserveScroll: true
+    const routeParams = form.paket_id ? { paket_id: form.paket_id } : {}
+
+    form.post(route('admin.enjiniring.store', routeParams), {
+        preserveScroll: true,
+        onSuccess: () => {}
     })
 }
 
-// Konversi daftar PRK dari props ke format opsi select
-const prkOptions = props.prks.map(prk => ({
-    // Tampilkan Nomor PRK (asumsi kolom di tabel PRK bernama 'prk')
-    label: `PRK: ${prk.prk}`,
-    value: prk.id // Nilai yang dikirim adalah ID PRK
-}))
+onMounted(() => {
+    // Ambil parameter dari URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const paketIdFromUrl = urlParams.get('paket_id')
+
+    if (paketIdFromUrl) {
+        form.paket_id = paketIdFromUrl
+        isLocked.value = true
+    }
+})
 </script>
 
 <template>
@@ -72,21 +85,24 @@ const prkOptions = props.prks.map(prk => ({
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            1. Informasi PRK Terkait
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Pilih Nomor PRK yang akan diberi detail Enjiniring.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                1. Informasi Paket Terkait
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Pilih Nomor Paket Pekerjaan yang akan diberi detail Enjiniring.
+                            </p>
+                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormSelect
-                                label="Nomor PRK"
-                                v-model="form.prk_id"
-                                :options="prkOptions"
-                                :error="form.errors.prk_id"
-                                placeholder="Pilih Nomor PRK"
-                                class="md:col-span-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <PaketSearchSelect
+                                label="Nomor Paket"
+                                v-model="form.paket_id"
+                                :pakets="props.pakets"
+                                :error="form.errors.paket_id"
+                                placeholder="Cari Paket Pekerjaan..."
+                                class="md:col-span-2"
+                                :disabled="isLocked" />
 
                             <div class="hidden md:block"></div>
                         </div>
@@ -95,12 +111,27 @@ const prkOptions = props.prks.map(prk => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            2. Status Survey
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Target dan realisasi pelaksanaan survey.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                2. Status Survey
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Target dan realisasi pelaksanaan survey.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormInput
+                                label="Nomor/Nama Dokumen Survey"
+                                v-model="form.dokumen_survey"
+                                :error="form.errors.dokumen_survey"
+                                placeholder="Cth: Dok. Survey 2025.P3BK.4.001" />
+
+                            <FileManagerInput
+                                label="File Survey"
+                                v-model="form.file_survey"
+                                :error="form.errors.file_survey" />
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormInput
@@ -114,25 +145,20 @@ const prkOptions = props.prks.map(prk => ({
                                 type="date"
                                 v-model="form.realisasi_survey"
                                 :error="form.errors.realisasi_survey" />
-
-                            <FormInput
-                                label="Nomor/Nama Dokumen Survey"
-                                v-model="form.dokumen_survey"
-                                :error="form.errors.dokumen_survey"
-                                placeholder="Cth: Dok. Survey 2025.P3BK.4.001"
-                                class="md:col-span-2" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            3. Dokumen Enjiniring (RAB & TOR)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail status dokumen enjiniring dan referensi dokumen.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                3. Dokumen Enjiniring (RAB & TOR)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail status dokumen enjiniring dan referensi dokumen.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormInput
@@ -153,11 +179,21 @@ const prkOptions = props.prks.map(prk => ({
                                 :error="form.errors.dokumen_rab"
                                 placeholder="Cth: Dok. RAB 2025.P3BK.4.001" />
 
+                            <FileManagerInput
+                                label="File RAB"
+                                v-model="form.file_rab"
+                                :error="form.errors.file_rab" />
+
                             <FormInput
                                 label="Nomor/Nama Dokumen TOR"
                                 v-model="form.dokumen_tor"
                                 :error="form.errors.dokumen_tor"
                                 placeholder="Cth: Dok. TOR 2025.P3BK.4.001" />
+
+                            <FileManagerInput
+                                label="File TOR"
+                                v-model="form.file_tor"
+                                :error="form.errors.file_tor" />
                         </div>
 
                         <FormTextarea

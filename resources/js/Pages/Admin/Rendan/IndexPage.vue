@@ -94,10 +94,10 @@ const renderFileStatus = (path, name, openPdfHandler) => {
 
 // --- DEFINISI KOLOM SESUAI RENDAN ---
 const columns = [
-    columnHelper.accessor('prk.prk', {
-        header: 'Nomor PRK',
+    columnHelper.accessor('enjiniring.paket.prk.prk', {
+        header: 'PRK',
         cell: info => {
-            return h('span', info.row.original.prk?.prk || '-')
+            return h('span', info.row.original.enjiniring?.paket?.prk?.prk || '-')
         }
     }),
     columnHelper.accessor('nomor_nd_user', {

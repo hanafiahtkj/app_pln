@@ -61,6 +61,7 @@ class HandleInertiaRequests extends Middleware
                         'permissions' => $user->getAllPermissions()->pluck('name'),
                         'avatar'      => $avatar,
                         'gravatar'    => $gravatar,
+                        'unit'    => $user->unit,
                     ] : null,
                 ],
 

@@ -161,51 +161,89 @@ const columns = [
         header: 'Nomor PRK',
         cell: info => h('span', info.getValue() || '-')
     }),
-    columnHelper.accessor('fungsi', {
-        header: 'Fungsi',
-        cell: info => h('span', info.getValue() || '-')
-    }),
+    // columnHelper.accessor('fungsi', {
+    //     header: 'Fungsi',
+    //     cell: info => h('span', info.getValue() || '-')
+    // }),
     columnHelper.accessor('uraian', {
         header: 'Uraian',
         cell: info => h('span', info.getValue() || '-'),
         maxSize: 300
     }),
-    columnHelper.accessor('ai_rupiah', {
-        header: 'AI (Rp)',
-        cell: info => {
-            const value = info.getValue()
-            if (value === null) return h('span', '-')
-            return h(
-                'span',
-                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
-            )
-        }
-    }),
-    columnHelper.accessor('tanggal_skai', {
-        header: 'Tgl SKAI',
-        cell: info => h('span', info.getValue() || '-')
-    }),
-    columnHelper.accessor('status', {
-        header: 'Status',
-        cell: info => h('span', info.getValue() || '-')
-    }),
-    columnHelper.accessor('created_at', {
-        header: 'Dibuat Pada',
-        cell: info =>
-            h(
-                'span',
-                new Date(info.getValue()).toLocaleString('id-ID', {
-                    dateStyle: 'short',
-                    timeStyle: 'short'
-                })
-            )
-    }),
+    // columnHelper.accessor('ai_rupiah', {
+    //     header: 'AI (Rp)',
+    //     cell: info => {
+    //         const value = info.getValue()
+    //         if (value === null) return h('span', '-')
+    //         return h(
+    //             'span',
+    //             new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
+    //         )
+    //     }
+    // }),
+    // columnHelper.accessor('tanggal_skai', {
+    //     header: 'Tgl SKAI',
+    //     cell: info => h('span', info.getValue() || '-')
+    // }),
+    // columnHelper.accessor('status', {
+    //     header: 'Status',
+    //     cell: info => h('span', info.getValue() || '-')
+    // }),
+    // columnHelper.accessor('created_at', {
+    //     header: 'Dibuat Pada',
+    //     cell: info =>
+    //         h(
+    //             'span',
+    //             new Date(info.getValue()).toLocaleString('id-ID', {
+    //                 dateStyle: 'short',
+    //                 timeStyle: 'short'
+    //             })
+    //         )
+    // }),
     columnHelper.display({
         id: 'actions',
         header: 'Aksi',
         cell: info => {
             const prk = info.row.original
             if (!prk?.id) return null
+
+            const showButton = h(
+                'button',
+                {
+                    class: 'p-2 text-blue-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 cursor-pointer',
+                    onClick: () => handleShow(prk),
+                    type: 'button',
+                    title: 'Lihat Detail'
+                },
+                [
+                    h(
+                        'svg',
+                        {
+                            class: 'w-4 h-4',
+                            fill: 'none',
+                            stroke: 'currentColor',
+                            viewBox: '0 0 24 24',
+                            xmlns: 'http://www.w3.org/2000/svg'
+                        },
+                        [
+                            // Path Lingkaran Tengah (Pupil)
+                            h('path', {
+                                'stroke-linecap': 'round',
+                                'stroke-linejoin': 'round',
+                                'stroke-width': '2',
+                                d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+                            }),
+                            // Path Bentuk Mata
+                            h('path', {
+                                'stroke-linecap': 'round',
+                                'stroke-linejoin': 'round',
+                                'stroke-width': '2',
+                                d: 'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
+                            })
+                        ]
+                    )
+                ]
+            )
 
             // --- TOMBOL EDIT BARU ---
             const editButton = h(
@@ -272,11 +310,16 @@ const columns = [
                 {
                     class: 'flex items-center gap-2 justify-end'
                 },
-                [editButton, deleteButton] // Tambahkan editButton di sini
+                [showButton, editButton, deleteButton] // Tambahkan editButton di sini
             )
         }
     })
 ]
+
+const handleShow = prk => {
+    if (!prk?.id) return
+    router.visit(route('admin.prk.show', { prk: prk.id }))
+}
 
 // Hapus fungsi handleEdit yang mengarahkan ke halaman baru (route('admin.prk.edit'))
 // Jika Anda ingin menggunakan modal untuk edit, pastikan `openEditModal` dipanggil.
@@ -318,6 +361,7 @@ const handleEdit = prk => {
         <div class="container-border overflow-hidden">
             <PageHeader
                 title="Data PRK"
+                description="Daftar lengkap Program Rencana Kerja (PRK)."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
                     { label: 'Data PRK' }
@@ -326,7 +370,6 @@ const handleEdit = prk => {
                     <Link :href="route('admin.prk.create')" class="btn-primary btn-sm">Tambah</Link>
                 </template>
             </PageHeader>
-
             <div class="p-6 dark:bg-gray-900">
                 <DataTable
                     :data="data.data"

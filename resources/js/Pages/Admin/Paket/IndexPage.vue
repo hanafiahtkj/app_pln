@@ -137,10 +137,15 @@ const columns = [
         cell: info => h('span', info.getValue() || '-')
     }),
     columnHelper.accessor('prk.prk', {
-        header: 'Nomor PRK',
+        header: 'PRK',
         cell: info => {
-            // Jika relasi 'prk' di-eager-load di controller, gunakan:
             return h('span', info.row.original.prk?.prk || '-')
+        }
+    }),
+    columnHelper.accessor('prk.uraian', {
+        header: 'Uraian',
+        cell: info => {
+            return h('span', info.row.original.prk?.uraian || '-')
         }
     }),
     columnHelper.accessor('nomor_skk', {
@@ -166,6 +171,22 @@ const columns = [
         header: 'Status',
         cell: info => h('span', info.getValue() || '-')
     }),
+    columnHelper.display({
+        id: 'progress_tracker',
+        header: 'Progres',
+        cell: info => {
+            const status = getProgressStatus(info.row.original)
+            return h('div', { class: 'flex items-center' }, [
+                h(
+                    'span',
+                    {
+                        class: `px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${status.color}`
+                    },
+                    status.label
+                )
+            ])
+        }
+    }),
     columnHelper.accessor('created_at', {
         header: 'Dibuat Pada',
         cell: info =>
@@ -184,14 +205,13 @@ const columns = [
             const paket = info.row.original
             if (!paket?.id) return null
 
-            // --- TOMBOL EDIT BARU ---
-            const editButton = h(
+            const showButton = h(
                 'button',
                 {
                     class: 'p-2 text-blue-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 cursor-pointer',
-                    onClick: () => handleEdit(paket),
+                    onClick: () => handleShow(paket),
                     type: 'button',
-                    title: 'Edit'
+                    title: 'Lihat Detail'
                 },
                 [
                     h(
@@ -200,14 +220,23 @@ const columns = [
                             class: 'w-4 h-4',
                             fill: 'none',
                             stroke: 'currentColor',
-                            viewBox: '0 0 24 24'
+                            viewBox: '0 0 24 24',
+                            xmlns: 'http://www.w3.org/2000/svg'
                         },
                         [
+                            // Path Lingkaran Tengah (Pupil)
                             h('path', {
                                 'stroke-linecap': 'round',
                                 'stroke-linejoin': 'round',
                                 'stroke-width': '2',
-                                d: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'
+                                d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+                            }),
+                            // Path Bentuk Mata
+                            h('path', {
+                                'stroke-linecap': 'round',
+                                'stroke-linejoin': 'round',
+                                'stroke-width': '2',
+                                d: 'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
                             })
                         ]
                     )
@@ -249,7 +278,7 @@ const columns = [
                 {
                     class: 'flex items-center gap-2 justify-end'
                 },
-                [editButton, deleteButton]
+                [showButton, deleteButton]
             )
         }
     })
@@ -259,6 +288,11 @@ const columns = [
 const handleEdit = paket => {
     if (!paket?.id) return
     router.visit(route('admin.paket.edit', { paket: paket.id }))
+}
+
+const handleShow = paket => {
+    if (!paket?.id) return
+    router.visit(route('admin.paket.show', { paket: paket.id }))
 }
 
 watch(
@@ -280,6 +314,41 @@ watch(
     },
     { deep: true }
 )
+
+const getProgressStatus = paket => {
+    // 1. Cek Enjiniring
+    if (!paket.enjiniring)
+        return { label: 'Paket', color: 'bg-gray-100 text-gray-600 border-gray-200' }
+
+    // 2. Cek Rendan
+    if (!paket.enjiniring.rendan)
+        return { label: 'Enjiniring', color: 'bg-blue-100 text-blue-700 border-blue-200' }
+
+    // 3. Cek Lakdan
+    if (!paket.enjiniring.rendan.lakdan)
+        return { label: 'Rendan', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' }
+
+    // 4. Cek Kontrak
+    if (!paket.enjiniring.rendan.lakdan.kontrak)
+        return { label: 'Lakdan', color: 'bg-purple-100 text-purple-700 border-purple-200' }
+
+    const kontrak = paket.enjiniring.rendan.lakdan.kontrak
+
+    // 5. Cek Purchase Order (PO)
+    if (!kontrak.purchase_order)
+        return { label: 'Kontrak', color: 'bg-pink-100 text-pink-700 border-pink-200' }
+
+    // 6. Cek Pembayaran (Tahap Akhir)
+    if (kontrak.pembayaran) {
+        return {
+            label: 'Pembayaran',
+            color: 'bg-emerald-500 text-white border-emerald-600'
+        }
+    }
+
+    // Jika sudah ada PO tapi belum ada pembayaran
+    return { label: 'PO', color: 'bg-orange-100 text-orange-700 border-orange-200' }
+}
 </script>
 
 <template>
@@ -289,6 +358,7 @@ watch(
         <div class="container-border overflow-hidden">
             <PageHeader
                 title="Data Paket"
+                description="Daftar Paket Pekerjaan yang terkait dengan PRK"
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
                     { label: 'Data Paket' }

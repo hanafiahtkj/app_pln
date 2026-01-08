@@ -34,7 +34,9 @@ class AdminLakdanController extends Controller
     public function create()
     {
         // Menyediakan daftar Rendan untuk dipilih sebagai foreign key
-        $rendans = Rendan::select('id', 'nomor_nd_user')->get();
+        $rendans = Rendan::with('enjiniring.paket.prk')
+            ->doesntHave('lakdan')
+            ->get();
 
         return Inertia::render('Admin/Lakdan/CreatePage', [
             'rendans' => $rendans,
@@ -47,7 +49,16 @@ class AdminLakdanController extends Controller
     public function edit($id)
     {
         $lakdan = Lakdan::findOrFail($id);
-        $rendans = Rendan::select('id', 'nomor_nd_user')->get();
+
+        $currentRendanId = $lakdan->rendan_id;
+
+        $rendans = Rendan::with('enjiniring.paket.prk')
+            ->where(function ($query) use ($currentRendanId) {
+                $query->doesntHave('lakdan');
+                $query->orWhere('id', $currentRendanId);
+            })
+            ->get();
+
 
         return Inertia::render('Admin/Lakdan/EditPage', [
             'data' => $lakdan,
@@ -63,6 +74,7 @@ class AdminLakdanController extends Controller
             'rendan_id' => ['required', 'exists:rendans,id'], // Foreign key ke Rendan
 
             // Core Lakdan Fields
+            'pic' => ['nullable', 'string'],
             'proses_pengadaan' => ['nullable', 'string'],
             'metode_pengadaan' => ['nullable', 'string'],
 
@@ -71,8 +83,7 @@ class AdminLakdanController extends Controller
             'realisasi_tanggal_hps' => ['nullable', 'date'],
             'nomor_hps' => ['nullable', 'string'],
             'nilai_hps' => ['nullable', 'numeric'],
-            'dokumen_hps_path' => ['nullable', 'string'], // Path sementara
-            'dokumen_hps_name' => ['nullable', 'string'], // Nama file
+            'dokumen_hps' => ['nullable', 'string'],
 
             // Pengumuman Lelang Fields
             'rencana_pengumuman_lelang' => ['nullable', 'date'],
@@ -83,69 +94,91 @@ class AdminLakdanController extends Controller
             'rencana_penunjukan_pemenang' => ['nullable', 'date'],
             'realisasi_penunjukan_pemenang' => ['nullable', 'date'],
             'nomor_penunjukan_pemenang' => ['nullable', 'string'],
-            'dokumen_penunjukan_pemenang_path' => ['nullable', 'string'], // Path sementara
-            'dokumen_penunjukan_pemenang_name' => ['nullable', 'string'], // Nama file
+            'dokumen_penunjukan_pemenang' => ['nullable', 'string'],
+
+            // 1. Persiapan pengadaan
+            'rencana_persiapan_pengadaan' => ['nullable', 'date'],
+            'realisasi_persiapan_pengadaan' => ['nullable', 'date'],
+            'persiapan_pengadaan' => ['nullable', 'string'],
+
+            // 2. Pengumuman pengadaan
+            'rencana_pengumuman_pengadaan' => ['nullable', 'date'],
+            'realisasi_pengumuman_pengadaan' => ['nullable', 'date'],
+            'pengumuman_pengadaan' => ['nullable', 'string'],
+
+            // 3. Pendaftaran & Pengambilan Dokumen
+            'rencana_pendaftaran_ambil_dokumen' => ['nullable', 'date'],
+            'realisasi_pendaftaran_ambil_dokumen' => ['nullable', 'date'],
+            'pendaftaran_ambil_dokumen' => ['nullable', 'string'],
+
+            // 4. Aanwijzing
+            'rencana_aanwijzing' => ['nullable', 'date'],
+            'realisasi_aanwijzing' => ['nullable', 'date'],
+            'aanwijzing' => ['nullable', 'string'],
+
+            // 5. Pemasukan Dokumen Penawaran
+            'rencana_pemasukan_penawaran' => ['nullable', 'date'],
+            'realisasi_pemasukan_penawaran' => ['nullable', 'date'],
+            'pemasukan_penawaran' => ['nullable', 'string'],
+
+            // 6. Pembukaan Dokumen dan Evaluasi
+            'rencana_pembukaan_evaluasi' => ['nullable', 'date'],
+            'realisasi_pembukaan_evaluasi' => ['nullable', 'date'],
+            'pembukaan_evaluasi' => ['nullable', 'string'],
+
+            // 7. Klarifikasi dan Negosiasi Harga
+            'rencana_klarifikasi_negosiasi' => ['nullable', 'date'],
+            'realisasi_klarifikasi_negosiasi' => ['nullable', 'date'],
+            'klarifikasi_negosiasi' => ['nullable', 'string'],
+
+            // 8. Usulan Penetapan Pemenang
+            'rencana_usulan_penetapan_pemenang' => ['nullable', 'date'],
+            'realisasi_usulan_penetapan_pemenang' => ['nullable', 'date'],
+            'usulan_penetapan_pemenang' => ['nullable', 'string'],
+
+            // 9. Izin Prinsip Tanda Tangan Kontrak
+            'rencana_izin_prinsip_kontrak' => ['nullable', 'date'],
+            'realisasi_izin_prinsip_kontrak' => ['nullable', 'date'],
+            'izin_prinsip_kontrak' => ['nullable', 'string'],
+
+            // 10. Penetapan dan Pengumuman Pemenang
+            'rencana_penetapan_pengumuman_pemenang' => ['nullable', 'date'],
+            'realisasi_penetapan_pengumuman_pemenang' => ['nullable', 'date'],
+            'penetapan_pengumuman_pemenang' => ['nullable', 'string'],
+
+            // 11. Sanggah
+            'rencana_sanggah' => ['nullable', 'date'],
+            'realisasi_sanggah' => ['nullable', 'date'],
+            'sanggah' => ['nullable', 'string'],
+
+            // 12. Penunjukan Penyedia Barang/Jasa
+            'rencana_penunjukan_penyedia' => ['nullable', 'date'],
+            'realisasi_penunjukan_penyedia' => ['nullable', 'date'],
+            'penunjukan_penyedia' => ['nullable', 'string'],
+            'dokumen_penunjukan_penyedia' => ['nullable', 'string'],
+
+            // 13. Contract Discussion Agreement (CDA)
+            'rencana_cda' => ['nullable', 'date'],
+            'realisasi_cda' => ['nullable', 'date'],
+            'cda' => ['nullable', 'string'],
         ]);
-
-        $finalPaths = [];
-        $tempPaths = [
-            'hps' => $validated['dokumen_hps_path'] ?? null,
-            'penunjukan_pemenang' => $validated['dokumen_penunjukan_pemenang_path'] ?? null,
-        ];
-
-        $finalDirectories = [
-            'hps' => 'lakdan_dokumen/hps',
-            'penunjukan_pemenang' => 'lakdan_dokumen/pemenang',
-        ];
 
         try {
             DB::beginTransaction();
 
             $lakdanData = $validated;
 
-            // 2. LOGIKA PENANGANAN FILE
-            foreach ($tempPaths as $key => $tempPath) {
-                $dbField = "dokumen_{$key}"; // e.g., dokumen_hps
-
-                if ($tempPath) {
-                    if (!Storage::disk('public')->exists($tempPath)) {
-                        throw new Exception("File dokumen {$key} tidak ditemukan di lokasi sementara. Harap unggah ulang.");
-                    }
-
-                    $fileName = $validated["dokumen_{$key}_name"] ?? basename($tempPath);
-                    $finalPath = $finalDirectories[$key] . '/' . $fileName;
-
-                    // Pindahkan file dan simpan path final
-                    Storage::disk('public')->move($tempPath, $finalPath);
-                    $finalPaths[$key] = $finalPath; // Simpan untuk rollback jika gagal
-                    $lakdanData[$dbField] = $finalPath; // Field DB
-
-                } else {
-                    $lakdanData[$dbField] = null;
-                }
-
-                // Hapus field path dan name dari data yang akan disimpan
-                unset($lakdanData["dokumen_{$key}_path"]);
-                unset($lakdanData["dokumen_{$key}_name"]);
-            }
-
-            // 3. Simpan data Lakdan ke database
-            Lakdan::create($lakdanData);
+            $req = Lakdan::create($lakdanData);
 
             DB::commit();
 
             return redirect()
-                ->route('admin.lakdan.index')
+                ->route('admin.paket.show', $req->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pelaksanaan Pengadaan berhasil ditambahkan.');
 
         } catch (Exception $e) {
             DB::rollBack();
-            // Jika terjadi kegagalan, hapus file yang sudah terlanjur dipindahkan
-            foreach ($finalPaths as $path) {
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
-                }
-            }
+
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data Pelaksanaan Pengadaan: ' . $e->getMessage());
         }
     }
@@ -160,6 +193,7 @@ class AdminLakdanController extends Controller
             'rendan_id' => ['required', 'exists:rendans,id'],
 
             // Core Lakdan Fields
+            'pic' => ['nullable', 'string'],
             'proses_pengadaan' => ['nullable', 'string'],
             'metode_pengadaan' => ['nullable', 'string'],
 
@@ -168,8 +202,7 @@ class AdminLakdanController extends Controller
             'realisasi_tanggal_hps' => ['nullable', 'date'],
             'nomor_hps' => ['nullable', 'string'],
             'nilai_hps' => ['nullable', 'numeric'],
-            'dokumen_hps_path' => ['nullable', 'string'],
-            'dokumen_hps_name' => ['nullable', 'string'],
+            'dokumen_hps' => ['nullable', 'string'],
 
             // Pengumuman Lelang Fields
             'rencana_pengumuman_lelang' => ['nullable', 'date'],
@@ -180,80 +213,91 @@ class AdminLakdanController extends Controller
             'rencana_penunjukan_pemenang' => ['nullable', 'date'],
             'realisasi_penunjukan_pemenang' => ['nullable', 'date'],
             'nomor_penunjukan_pemenang' => ['nullable', 'string'],
-            'dokumen_penunjukan_pemenang_path' => ['nullable', 'string'],
-            'dokumen_penunjukan_pemenang_name' => ['nullable', 'string'],
-        ]);
+            'dokumen_penunjukan_pemenang' => ['nullable', 'string'],
 
-        $newFinalPaths = [];
-        $oldFilePaths = [
-            'hps' => $lakdan->dokumen_hps,
-            'penunjukan_pemenang' => $lakdan->dokumen_penunjukan_pemenang,
-        ];
-        $tempPaths = [
-            'hps' => $validated['dokumen_hps_path'] ?? null,
-            'penunjukan_pemenang' => $validated['dokumen_penunjukan_pemenang_path'] ?? null,
-        ];
-        $finalDirectories = [
-            'hps' => 'lakdan_dokumen/hps',
-            'penunjukan_pemenang' => 'lakdan_dokumen/pemenang',
-        ];
+            // 1. Persiapan pengadaan
+            'rencana_persiapan_pengadaan' => ['nullable', 'date'],
+            'realisasi_persiapan_pengadaan' => ['nullable', 'date'],
+            'persiapan_pengadaan' => ['nullable', 'string'],
+
+            // 2. Pengumuman pengadaan
+            'rencana_pengumuman_pengadaan' => ['nullable', 'date'],
+            'realisasi_pengumuman_pengadaan' => ['nullable', 'date'],
+            'pengumuman_pengadaan' => ['nullable', 'string'],
+
+            // 3. Pendaftaran & Pengambilan Dokumen
+            'rencana_pendaftaran_ambil_dokumen' => ['nullable', 'date'],
+            'realisasi_pendaftaran_ambil_dokumen' => ['nullable', 'date'],
+            'pendaftaran_ambil_dokumen' => ['nullable', 'string'],
+
+            // 4. Aanwijzing
+            'rencana_aanwijzing' => ['nullable', 'date'],
+            'realisasi_aanwijzing' => ['nullable', 'date'],
+            'aanwijzing' => ['nullable', 'string'],
+
+            // 5. Pemasukan Dokumen Penawaran
+            'rencana_pemasukan_penawaran' => ['nullable', 'date'],
+            'realisasi_pemasukan_penawaran' => ['nullable', 'date'],
+            'pemasukan_penawaran' => ['nullable', 'string'],
+
+            // 6. Pembukaan Dokumen dan Evaluasi
+            'rencana_pembukaan_evaluasi' => ['nullable', 'date'],
+            'realisasi_pembukaan_evaluasi' => ['nullable', 'date'],
+            'pembukaan_evaluasi' => ['nullable', 'string'],
+
+            // 7. Klarifikasi dan Negosiasi Harga
+            'rencana_klarifikasi_negosiasi' => ['nullable', 'date'],
+            'realisasi_klarifikasi_negosiasi' => ['nullable', 'date'],
+            'klarifikasi_negosiasi' => ['nullable', 'string'],
+
+            // 8. Usulan Penetapan Pemenang
+            'rencana_usulan_penetapan_pemenang' => ['nullable', 'date'],
+            'realisasi_usulan_penetapan_pemenang' => ['nullable', 'date'],
+            'usulan_penetapan_pemenang' => ['nullable', 'string'],
+
+            // 9. Izin Prinsip Tanda Tangan Kontrak
+            'rencana_izin_prinsip_kontrak' => ['nullable', 'date'],
+            'realisasi_izin_prinsip_kontrak' => ['nullable', 'date'],
+            'izin_prinsip_kontrak' => ['nullable', 'string'],
+
+            // 10. Penetapan dan Pengumuman Pemenang
+            'rencana_penetapan_pengumuman_pemenang' => ['nullable', 'date'],
+            'realisasi_penetapan_pengumuman_pemenang' => ['nullable', 'date'],
+            'penetapan_pengumuman_pemenang' => ['nullable', 'string'],
+
+            // 11. Sanggah
+            'rencana_sanggah' => ['nullable', 'date'],
+            'realisasi_sanggah' => ['nullable', 'date'],
+            'sanggah' => ['nullable', 'string'],
+
+            // 12. Penunjukan Penyedia Barang/Jasa
+            'rencana_penunjukan_penyedia' => ['nullable', 'date'],
+            'realisasi_penunjukan_penyedia' => ['nullable', 'date'],
+            'penunjukan_penyedia' => ['nullable', 'string'],
+            'dokumen_penunjukan_penyedia' => ['nullable', 'string'],
+
+            // 13. Contract Discussion Agreement (CDA)
+            'rencana_cda' => ['nullable', 'date'],
+            'realisasi_cda' => ['nullable', 'date'],
+            'cda' => ['nullable', 'string'],
+        ]);
 
         try {
             DB::beginTransaction();
 
             $lakdanData = $validated;
 
-            // 2. LOGIKA PEMINDAHAN FILE
-            foreach ($tempPaths as $key => $tempPath) {
-                $dbField = "dokumen_{$key}";
-
-                if ($tempPath) {
-                    // Ada upload baru
-                    if (!Storage::disk('public')->exists($tempPath)) {
-                        throw new Exception("File dokumen {$key} yang baru tidak ditemukan di lokasi sementara. Harap unggah ulang.");
-                    }
-
-                    $fileName = $validated["dokumen_{$key}_name"] ?? basename($tempPath);
-                    $newFinalPath = $finalDirectories[$key] . '/' . $fileName;
-
-                    // Hapus file lama jika ada
-                    if ($oldFilePaths[$key] && Storage::disk('public')->exists($oldFilePaths[$key])) {
-                        Storage::disk('public')->delete($oldFilePaths[$key]);
-                    }
-
-                    // Pindahkan file baru
-                    Storage::disk('public')->move($tempPath, $newFinalPath);
-
-                    $newFinalPaths[$key] = $newFinalPath; // Simpan untuk rollback
-                    $lakdanData[$dbField] = $newFinalPath; // Simpan path baru ke DB
-
-                } else {
-                    // Jika tidak ada upload baru, pertahankan nilai path dokumen yang lama dari model
-                    $lakdanData[$dbField] = $lakdan->{$dbField};
-                }
-
-                // Hapus field path dan name sementara
-                unset($lakdanData["dokumen_{$key}_path"]);
-                unset($lakdanData["dokumen_{$key}_name"]);
-            }
-
-            // 3. Update data Lakdan
             $lakdan->update($lakdanData);
 
             DB::commit();
 
             return redirect()
-                ->route('admin.lakdan.index')
+                ->route('admin.paket.show', $lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pelaksanaan Pengadaan berhasil diperbarui.');
 
         } catch (Exception $e) {
             DB::rollBack();
-            // Jika terjadi kegagalan, hapus file baru yang sudah terlanjur dipindahkan
-            foreach ($newFinalPaths as $path) {
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
-                }
-            }
+
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data Pelaksanaan Pengadaan: ' . $e->getMessage());
         }
     }
@@ -264,14 +308,6 @@ class AdminLakdanController extends Controller
         try {
             DB::beginTransaction();
             $data = Lakdan::findOrFail($id);
-
-            // Hapus file dokumen terkait sebelum menghapus record
-            if ($data->dokumen_hps && Storage::disk('public')->exists($data->dokumen_hps)) {
-                Storage::disk('public')->delete($data->dokumen_hps);
-            }
-            if ($data->dokumen_penunjukan_pemenang && Storage::disk('public')->exists($data->dokumen_penunjukan_pemenang)) {
-                Storage::disk('public')->delete($data->dokumen_penunjukan_pemenang);
-            }
 
             $data->delete();
             DB::commit();

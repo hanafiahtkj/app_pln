@@ -21,4 +21,14 @@ class Kontrak extends Model
    {
         return $this->belongsTo(Lakdan::class);
    }
+
+   public function purchase_order()
+    {
+        return $this->hasOne(PurchaseOrder::class, 'kontrak_id');
+    }
+
+    public function pembayaran()
+    {
+        return $this->hasOne(Pembayaran::class, 'kontrak_id');
+    }
 }

@@ -4,7 +4,10 @@ import Default from '@/Layouts/Default.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormSelect from '@/Components/FormSelect.vue'
+import LakdanSearchSelect from './LakdanSearchSelect.vue'
+import FormCurrency from '@/Components/FormCurrency.vue'
 import { ref } from 'vue'
+import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
 
@@ -110,10 +113,8 @@ const form = useForm({
     efisiensi_thd_hps: props.data.efisiensi_thd_hps,
 
     // Document Paths (Only sent if new file is uploaded)
-    dokumen_perjanjian_path: null,
-    dokumen_perjanjian_name: null,
-    dokumen_jaminan_pelaksanaan_path: null,
-    dokumen_jaminan_pelaksanaan_name: null
+    dokumen_perjanjian: props.data.dokumen_perjanjian,
+    dokumen_jaminan_pelaksanaan: props.data.dokumen_jaminan_pelaksanaan
 })
 
 // --- Fungsi Reusable Upload File ---
@@ -228,20 +229,23 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            1. Informasi Utama Kontrak
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Pilih Lakdan terkait dan detail dasar kontrak.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                1. Informasi Utama Kontrak
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Pilih Lakdan terkait dan detail dasar kontrak.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormSelect
-                                label="Lakdan Terkait (Nomor HPS)"
-                                v-model.number="form.lakdan_id"
-                                :options="lakdanOptions"
+                            <LakdanSearchSelect
+                                label="Lakdan Terkait (Nomor HPS / PRK)"
+                                v-model="form.lakdan_id"
+                                :lakdans="props.lakdans"
                                 :error="form.errors.lakdan_id"
-                                placeholder="Pilih Nomor HPS Lakdan" />
+                                placeholder="Cari Nomor HPS atau PRK Lakdan"
+                                :disabled="true" />
 
                             <FormInput
                                 label="Penyedia Barang/Jasa"
@@ -282,12 +286,14 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            2. Detail Perjanjian (Kontrak)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Tanggal, nomor, nilai, dan dokumen perjanjian.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                2. Detail Perjanjian (Kontrak)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Tanggal, nomor, nilai, dan dokumen perjanjian.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormInput
@@ -296,19 +302,15 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                                 :error="form.errors.nomor_perjanjian"
                                 placeholder="Cth: 001.Pj/DAN.01.03/F48000000/2025" />
 
-                            <FormInput
+                            <FormCurrency
                                 label="Nilai Perjanjian (PPN)"
-                                type="number"
-                                step="0.0001"
-                                v-model.number="form.nilai_perjanjian_ppn"
+                                v-model="form.nilai_perjanjian_ppn"
                                 :error="form.errors.nilai_perjanjian_ppn"
                                 placeholder="Nilai termasuk PPN" />
 
-                            <FormInput
+                            <FormCurrency
                                 label="Nilai Perjanjian (sebelum PPN)"
-                                type="number"
-                                step="0.0001"
-                                v-model.number="form.nilai_perjanjian_sebelum_ppn"
+                                v-model="form.nilai_perjanjian_sebelum_ppn"
                                 :error="form.errors.nilai_perjanjian_sebelum_ppn"
                                 placeholder="Nilai sebelum PPN" />
 
@@ -332,100 +334,25 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="md:col-span-1 space-y-2">
-                                <FormInput
-                                    label="Dokumen Kontrak (File Upload)"
-                                    type="file"
-                                    @input="handleFileUpload($event, 'perjanjian')"
-                                    :error="
-                                        uploadPerjanjianError || form.errors.dokumen_perjanjian_path
-                                    "
-                                    :disabled="isUploadingPerjanjian"
-                                    accept=".pdf, .jpg, .jpeg, .png" />
-
-                                <div
-                                    v-if="isUploadingPerjanjian"
-                                    class="mt-1 text-sm text-sky-500 flex items-center">
-                                    <svg
-                                        class="animate-spin h-4 w-4 mr-3"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                            class="opacity-25"></circle>
-                                        <path
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            class="opacity-75"></path>
-                                    </svg>
-                                    Sedang mengunggah Dokumen Kontrak ({{
-                                        uploadedPerjanjianName || '...'
-                                    }})
-                                </div>
-                                <div
-                                    v-else-if="uploadPerjanjianError"
-                                    class="mt-1 text-sm text-red-500">
-                                    Gagal unggah: {{ uploadPerjanjianError }}
-                                </div>
-                                <div
-                                    v-else-if="uploadedPerjanjianPath"
-                                    class="mt-1 text-sm text-green-500 font-medium">
-                                    ✅ File Kontrak **{{ uploadedPerjanjianName }}** berhasil
-                                    diunggah. (Akan menggantikan file lama).
-                                </div>
-                                <div
-                                    v-else-if="
-                                        existingPerjanjianPath &&
-                                        !isUploadingPerjanjian &&
-                                        !uploadPerjanjianError
-                                    "
-                                    class="flex items-center gap-4">
-                                    <div
-                                        class="text-sm text-gray-500 font-medium dark:text-gray-400">
-                                        File saat ini: **{{ existingPerjanjianName }}**
-                                    </div>
-                                    <a
-                                        :href="`/storage/${existingPerjanjianPath}`"
-                                        target="_blank"
-                                        class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500 transition duration-150 ease-in-out border border-blue-600 hover:border-blue-700 dark:border-blue-400 dark:hover:border-blue-500 px-3 py-1 rounded-md">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 mr-1"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            stroke-width="2">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Lihat Dokumen
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2"></div>
+                            <FileManagerInput
+                                label="Dokumen Kontrak"
+                                v-model="form.dokumen_perjanjian"
+                                :error="form.errors.dokumen_perjanjian"
+                                placeholder="Pilih Dokumen" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            3. Detail Jaminan Pelaksanaan
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Informasi mengenai jaminan pelaksanaan kontrak.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                3. Detail Jaminan Pelaksanaan
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Informasi mengenai jaminan pelaksanaan kontrak.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormInput
@@ -434,13 +361,11 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                                 :error="form.errors.nomor_jaminan_pelaksanaan"
                                 placeholder="Cth: BG5344615" />
 
-                            <FormInput
+                            <FormCurrency
                                 label="Nilai Jaminan Pelaksanaan"
-                                type="number"
-                                step="0.0001"
-                                v-model.number="form.nilai_jaminan_pelaksanaan"
+                                v-model="form.nilai_jaminan_pelaksanaan"
                                 :error="form.errors.nilai_jaminan_pelaksanaan"
-                                placeholder="Cth: 123456.78" />
+                                placeholder="Nilai Jaminan Pelaksanaan" />
 
                             <FormInput
                                 label="Bank Pemberi Jaminan"
@@ -464,102 +389,25 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="md:col-span-1 space-y-2">
-                                <FormInput
-                                    label="Dokumen Jaminan Pelaksanaan (File Upload)"
-                                    type="file"
-                                    @input="handleFileUpload($event, 'jaminan_pelaksanaan')"
-                                    :error="
-                                        uploadJaminanError ||
-                                        form.errors.dokumen_jaminan_pelaksanaan_path
-                                    "
-                                    :disabled="isUploadingJaminan"
-                                    accept=".pdf, .jpg, .jpeg, .png" />
-
-                                <div
-                                    v-if="isUploadingJaminan"
-                                    class="mt-1 text-sm text-sky-500 flex items-center">
-                                    <svg
-                                        class="animate-spin h-4 w-4 mr-3"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                            class="opacity-25"></circle>
-                                        <path
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            class="opacity-75"></path>
-                                    </svg>
-                                    Sedang mengunggah Dokumen Jaminan ({{
-                                        uploadedJaminanName || '...'
-                                    }})...
-                                </div>
-                                <div
-                                    v-else-if="uploadJaminanError"
-                                    class="mt-1 text-sm text-red-500">
-                                    Gagal unggah: {{ uploadJaminanError }}
-                                </div>
-                                <div
-                                    v-else-if="uploadedJaminanPath"
-                                    class="mt-1 text-sm text-green-500 font-medium">
-                                    ✅ File Jaminan **{{ uploadedJaminanName }}** berhasil diunggah.
-                                    (Akan menggantikan file lama).
-                                </div>
-
-                                <div
-                                    v-else-if="
-                                        existingJaminanPath &&
-                                        !isUploadingJaminan &&
-                                        !uploadJaminanError
-                                    "
-                                    class="flex items-center gap-4">
-                                    <div
-                                        class="text-sm text-gray-500 font-medium dark:text-gray-400">
-                                        File saat ini: **{{ existingJaminanName }}**
-                                    </div>
-                                    <a
-                                        :href="`/storage/${existingJaminanPath}`"
-                                        target="_blank"
-                                        class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500 transition duration-150 ease-in-out border border-blue-600 hover:border-blue-700 dark:border-blue-400 dark:hover:border-blue-500 px-3 py-1 rounded-md">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 mr-1"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            stroke-width="2">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Lihat Dokumen
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2"></div>
+                            <FileManagerInput
+                                label="Dokumen Jaminan Pelaksanaan"
+                                v-model="form.dokumen_jaminan_pelaksanaan"
+                                :error="form.errors.dokumen_jaminan_pelaksanaan"
+                                placeholder="Pilih Dokumen" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            4. Metrik dan Keterangan Tambahan
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Informasi mengenai risiko, TKDN, dan efisiensi.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                4. Metrik dan Keterangan Tambahan
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Informasi mengenai risiko, TKDN, dan efisiensi.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormSelect

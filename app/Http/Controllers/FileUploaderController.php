@@ -17,7 +17,7 @@ class FileUploaderController extends Controller
     {
         // 1. Validasi File
         $request->validate([
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // File field harus bernama 'file' di frontend
+            'file' => 'required|file|mimes:pdf|max:10240', // File field harus bernama 'file' di frontend
         ]);
 
         try {

@@ -5,7 +5,10 @@ import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormTextarea from '@/Components/FormTextarea.vue'
 import FormSelect from '@/Components/FormSelect.vue'
-import { ref } from 'vue'
+import PrkSearchSelect from './PrkSearchSelect.vue'
+import FormCurrency from '@/Components/FormCurrency.vue'
+import { ref, computed, watch } from 'vue'
+import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
 
@@ -29,10 +32,24 @@ const uploadedSkkPath = ref(null)
 const uploadedSkkName = ref(null)
 const uploadSkkError = ref(null)
 
+const currentYear = new Date().getFullYear()
+const minYear = 2024 // Tentukan tahun awal yang wajar
+const maxYear = currentYear + 1 // Tentukan tahun akhir yang wajar
+const tahunOptions = []
+
+for (let year = maxYear; year >= minYear; year--) {
+    tahunOptions.push({ label: String(year), value: year })
+}
+
+const getFileName = url => {
+    if (!url) return ''
+    return url.split('/').pop()
+}
+
 // --- Inisialisasi Form PAKET ---
 const form = useForm({
     prk_id: null, // Foreign Key ke PRK
-    tahun: null,
+    tahun: currentYear,
 
     // Informasi SKK (Surat Keputusan Kebutuhan)
     nomor_skk: '',
@@ -41,9 +58,48 @@ const form = useForm({
     status_paket: '',
 
     // FIELD BARU UNTUK FILE UPLOAD DOKUMEN SKK
-    dokumen_skk_path: null,
-    dokumen_skk_name: null
+    dokumen_skk: null
 })
+
+const openFileManager = () => {
+    // Pastikan prefix sesuai dengan config/lfm.php Anda
+    const route_prefix = '/filemanager'
+    window.open(route_prefix + '?type=Files', 'FileManager', 'width=900,height=600')
+
+    window.SetUrl = items => {
+        const file = Array.isArray(items) ? items[0] : items
+        form.dokumen_skk = file.url // Menyimpan path/URL ke form
+    }
+}
+
+const clearFile = () => {
+    form.dokumen_skk = null
+}
+
+// --- Computed Property untuk Filter PRK berdasarkan Tahun ---
+const filteredPrks = computed(() => {
+    const selectedTahun = form.tahun
+
+    // 1. Cek jika Tahun TIDAK diisi atau TIDAK valid
+    // Jika null, 0, atau bukan angka, kembalikan SEMUA PRK.
+    if (!selectedTahun || isNaN(selectedTahun) || selectedTahun <= 0) {
+        return props.prks // <<< KEMBALIKAN SEMUA PRK
+    }
+
+    // 2. Jika Tahun diisi dan valid, lakukan filter
+    return props.prks.filter(prk => prk.tahun == selectedTahun)
+})
+
+// --- Bersihkan prk_id jika tahun berubah ---
+// Ini penting agar prk_id tidak merujuk ke PRK dari tahun sebelumnya.
+watch(
+    () => form.tahun,
+    (newTahun, oldTahun) => {
+        if (newTahun !== oldTahun) {
+            form.prk_id = null
+        }
+    }
+)
 
 // --- Fungsi Khusus Upload File SKK ---
 const handleSkkUpload = async event => {
@@ -95,10 +151,10 @@ const submit = () => {
 }
 
 // Konversi daftar PRK dari props ke format opsi select
-const prkOptions = props.prks.map(prk => ({
-    label: prk.prk, // Tampilkan nomor PRK
-    value: prk.id // Nilai yang dikirim adalah ID PRK
-}))
+// const prkOptions = props.prks.map(prk => ({
+//     label: prk.prk, // Tampilkan nomor PRK
+//     value: prk.id // Nilai yang dikirim adalah ID PRK
+// }))
 </script>
 
 <template>
@@ -121,27 +177,29 @@ const prkOptions = props.prks.map(prk => ({
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            1. Informasi Utama Paket
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Pilih PRK terkait dan detail tahun.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                1. Informasi Utama Paket
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Pilih PRK terkait dan detail tahun.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormInput
-                                label="Tahun"
-                                type="number"
-                                v-model.number="form.tahun"
-                                :error="form.errors.tahun"
-                                placeholder="Cth: 2025" />
-
                             <FormSelect
+                                label="Tahun"
+                                v-model.number="form.tahun"
+                                :options="tahunOptions"
+                                :error="form.errors.tahun"
+                                placeholder="Pilih Tahun" />
+
+                            <PrkSearchSelect
                                 label="PRK Terkait"
                                 v-model="form.prk_id"
-                                :options="prkOptions"
+                                :prks="filteredPrks"
                                 :error="form.errors.prk_id"
-                                placeholder="Pilih Nomor PRK" />
+                                placeholder="Cari PRK..." />
 
                             <div class="hidden md:block"></div>
                         </div>
@@ -150,12 +208,14 @@ const prkOptions = props.prks.map(prk => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            2. Surat Keputusan Kebutuhan (SKK)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail SKK terkait paket ini.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                2. Surat Keputusan Kebutuhan (SKK)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail SKK terkait paket ini.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormInput
@@ -179,55 +239,16 @@ const prkOptions = props.prks.map(prk => ({
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormInput
+                            <FormCurrency
                                 label="Nilai SKK (Rupiah)"
-                                type="number"
-                                step="0.0001"
-                                v-model.number="form.nilai_skk"
+                                v-model="form.nilai_skk"
                                 :error="form.errors.nilai_skk"
-                                placeholder="Cth: 2813445.684" />
+                                placeholder="SKK Rupiah" />
 
-                            <div class="md:col-span-2 space-y-2">
-                                <FormInput
-                                    label="Dokumen SKK (File Upload)"
-                                    type="file"
-                                    @input="handleSkkUpload($event)"
-                                    :error="uploadSkkError || form.errors.dokumen_skk_path"
-                                    :disabled="isUploadingSkk"
-                                    accept=".pdf, .jpg, .jpeg, .png" />
-
-                                <div
-                                    v-if="isUploadingSkk"
-                                    class="mt-1 text-sm text-sky-500 flex items-center">
-                                    <svg
-                                        class="animate-spin h-4 w-4 mr-3"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                            class="opacity-25"></circle>
-                                        <path
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            class="opacity-75"></path>
-                                    </svg>
-                                    Sedang mengunggah ({{ uploadedSkkName || '...' }})...
-                                </div>
-                                <div v-else-if="uploadSkkError" class="mt-1 text-sm text-red-500">
-                                    Gagal mengunggah: {{ uploadSkkError }}
-                                </div>
-                                <div
-                                    v-else-if="uploadedSkkPath"
-                                    class="mt-1 text-sm text-green-500 font-medium">
-                                    ✅ File **{{ uploadedSkkName }}** berhasil diunggah dan siap
-                                    disimpan.
-                                </div>
-                            </div>
+                            <FileManagerInput
+                                label="Dokumen SKK"
+                                v-model="form.dokumen_skk"
+                                :error="form.errors.dokumen_skk" />
                         </div>
                     </div>
                 </section>

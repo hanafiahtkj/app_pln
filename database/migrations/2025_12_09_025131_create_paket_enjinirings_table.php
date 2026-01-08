@@ -17,8 +17,8 @@ return new class extends Migration
 
             // Foreign Key ke tabel 'pakets'
             // Asumsi: Tabel 'pakets' menggunakan ULID sebagai primary key (karena Model Paket Anda menggunakan HasUlids)
-            $table->foreignUlid('prk_id')
-                  ->constrained('prks') // Relasi ke tabel 'pakets'
+            $table->foreignUlid('paket_id')
+                  ->constrained('pakets') // Relasi ke tabel 'pakets'
                   ->onDelete('cascade');  // Jika Paket dihapus, data enjiniring ikut terhapus
 
             // --- Kolom-kolom untuk Tracking Enjiniring (sesuai data sheet 'engineering.xlsx') ---

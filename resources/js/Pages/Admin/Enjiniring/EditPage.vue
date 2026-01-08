@@ -5,6 +5,8 @@ import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormTextarea from '@/Components/FormTextarea.vue' // Tambahkan FormTextarea
 import FormSelect from '@/Components/FormSelect.vue'
+import PaketSearchSelect from './PaketSearchSelect.vue'
+import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
 
@@ -13,8 +15,7 @@ const props = defineProps({
         type: Object,
         required: true // Data Paket Enjiniring yang akan diedit (dengan relasi prk)
     },
-    // Daftar PRK yang tersedia (termasuk PRK yang sedang diedit)
-    prks: {
+    pakets: {
         type: Array,
         default: () => []
     }
@@ -31,17 +32,17 @@ const formatDate = dateString => {
 }
 
 // Konversi daftar PRK dari props ke format opsi select
-const prkOptions = props.prks.map(prk => ({
-    label: `PRK: ${prk.prk}`,
-    value: prk.id
-}))
+// const prkOptions = props.prks.map(prk => ({
+//     label: `PRK: ${prk.prk}`,
+//     value: prk.id
+// }))
 
 // --- Inisialisasi Form PAKET ENJINIRING dengan data yang ada ---
 const form = useForm({
     _method: 'put',
 
     // Foreign Key
-    prk_id: props.data.prk_id,
+    paket_id: props.data.paket_id,
 
     // Target dan Realisasi Tanggal Survey
     target_survey: formatDate(props.data.target_survey),
@@ -57,7 +58,11 @@ const form = useForm({
     dokumen_tor: props.data.dokumen_tor || '',
 
     // Keterangan
-    keterangan: props.data.keterangan || ''
+    keterangan: props.data.keterangan || '',
+
+    file_survey: props.data.file_survey || '',
+    file_rab: props.data.file_rab || '',
+    file_tor: props.data.file_tor || ''
 })
 
 const submit = () => {
@@ -74,8 +79,8 @@ const submit = () => {
         <h1 class="sr-only" id="edit-paket-enjiniring">Edit Data Enjiniring</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data Enjiniring PRK: ${props.data.prk.prk || props.data.prk_id}`"
-                description="Perbarui detail lengkap status Enjiniring untuk PRK tertentu."
+                :title="`Edit Data Enjiniring : ${props.data.id}`"
+                description="Perbarui detail lengkap status Enjiniring untuk Paket tertentu."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
                     {
@@ -88,21 +93,24 @@ const submit = () => {
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            1. Informasi PRK Terkait
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Pilih Nomor PRK yang akan diberi detail Enjiniring.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                1. Informasi Paket Terkait
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Pilih Nomor Paket Pekerjaan yang akan diberi detail Enjiniring.
+                            </p>
+                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormSelect
-                                label="Nomor PRK"
-                                v-model="form.prk_id"
-                                :options="prkOptions"
-                                :error="form.errors.prk_id"
-                                placeholder="Pilih Nomor PRK"
-                                class="md:col-span-2" />
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <PaketSearchSelect
+                                label="Nomor Paket"
+                                v-model="form.paket_id"
+                                :pakets="props.pakets"
+                                :error="form.errors.paket_id"
+                                placeholder="Cari Paket Pekerjaan..."
+                                class="md:col-span-2"
+                                :disabled="true" />
 
                             <div class="hidden md:block"></div>
                         </div>
@@ -111,12 +119,27 @@ const submit = () => {
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            2. Status Survey
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Target dan realisasi pelaksanaan survey dan referensi dokumen.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                2. Status Survey
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Target dan realisasi pelaksanaan survey.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormInput
+                                label="Nomor/Nama Dokumen Survey"
+                                v-model="form.dokumen_survey"
+                                :error="form.errors.dokumen_survey"
+                                placeholder="Cth: Dok. Survey 2025.P3BK.4.001" />
+
+                            <FileManagerInput
+                                label="File Survey"
+                                v-model="form.file_survey"
+                                :error="form.errors.file_survey" />
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormInput
@@ -130,25 +153,20 @@ const submit = () => {
                                 type="date"
                                 v-model="form.realisasi_survey"
                                 :error="form.errors.realisasi_survey" />
-
-                            <FormInput
-                                label="Nomor/Nama Dokumen Survey"
-                                v-model="form.dokumen_survey"
-                                :error="form.errors.dokumen_survey"
-                                placeholder="Cth: Dok. Survey 2025.P3BK.4.001"
-                                class="md:col-span-2" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            3. Dokumen Enjiniring (RAB & TOR)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail status dokumen enjiniring dan referensi dokumen.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                3. Dokumen Enjiniring (RAB & TOR)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail status dokumen enjiniring dan referensi dokumen.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormInput
@@ -169,11 +187,21 @@ const submit = () => {
                                 :error="form.errors.dokumen_rab"
                                 placeholder="Cth: Dok. RAB 2025.P3BK.4.001" />
 
+                            <FileManagerInput
+                                label="File RAB"
+                                v-model="form.file_rab"
+                                :error="form.errors.file_rab" />
+
                             <FormInput
                                 label="Nomor/Nama Dokumen TOR"
                                 v-model="form.dokumen_tor"
                                 :error="form.errors.dokumen_tor"
                                 placeholder="Cth: Dok. TOR 2025.P3BK.4.001" />
+
+                            <FileManagerInput
+                                label="File TOR"
+                                v-model="form.file_tor"
+                                :error="form.errors.file_tor" />
                         </div>
 
                         <FormTextarea

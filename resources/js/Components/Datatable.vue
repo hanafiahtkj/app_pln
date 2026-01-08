@@ -643,8 +643,7 @@ watch(
                                         class="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
                                         {{ getColumnHeader(cell.column.columnDef) }}
                                     </dt>
-                                    <dd
-                                        class="text-xs font-medium text-[var(--color-text)]">
+                                    <dd class="text-xs font-medium text-[var(--color-text)]">
                                         <FlexRender
                                             :render="cell.column.columnDef.cell"
                                             :props="cell.getContext()" />
@@ -657,7 +656,7 @@ watch(
             </div>
 
             <table
-                class="hidden md:table min-w-full divide-y divide-[var(--color-border)]"
+                class="hidden md:table min-w-full divide-y divide-[var(--color-border)] divide-y divide-[var(--color-border-muted)]"
                 role="grid">
                 <thead class="bg-[var(--color-surface-muted)]">
                     <tr>
@@ -700,7 +699,7 @@ watch(
                 </thead>
 
                 <tbody
-                    class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)]">
+                    class="bg-[var(--color-surface)] divide-y divide-[var(--color-border)] divide-y divide-[var(--color-border-muted)]">
                     <tr v-if="!table.getRowModel().rows.length" :class="styles.rowHover">
                         <td :colspan="columns.length + 1" class="px-6 py-8 text-center">
                             <p class="text-[var(--color-text-muted)] text-sm">
@@ -720,8 +719,8 @@ watch(
                             row.getIsSelected()
                                 ? styles.rowSelected
                                 : index % 2 === 0
-                                  ? styles.rowEven
-                                  : styles.rowOdd
+                                ? styles.rowEven
+                                : styles.rowOdd
                         ]">
                         <td class="px-6 py-4">
                             <div class="flex items-center">

@@ -4,6 +4,8 @@ import Default from '@/Layouts/Default.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormSelect from '@/Components/FormSelect.vue'
+import KontrakSearchSelect from './KontrakSearchSelect.vue'
+import FormCurrency from '@/Components/FormCurrency.vue'
 // import FormCheckbox from '@/Components/FormCheckbox.vue' // Jika menggunakan component khusus
 import { ref } from 'vue'
 
@@ -88,11 +90,11 @@ const submit = () => {
 }
 
 // Konversi daftar Kontrak dari props ke format opsi select
-const kontrakOptions = props.kontraks.map(kontrak => ({
-    // Tampilkan Nomor Perjanjian Kontrak sebagai label yang terkait
-    label: `${kontrak.nomor_perjanjian} (ID Kontrak: ${kontrak.id})`,
-    value: kontrak.id // Nilai yang dikirim adalah ID Kontrak
-}))
+// const kontrakOptions = props.kontraks.map(kontrak => ({
+//     // Tampilkan Nomor Perjanjian Kontrak sebagai label yang terkait
+//     label: `${kontrak.nomor_perjanjian} (ID Kontrak: ${kontrak.id})`,
+//     value: kontrak.id // Nilai yang dikirim adalah ID Kontrak
+// }))
 </script>
 
 <template>
@@ -115,18 +117,20 @@ const kontrakOptions = props.kontraks.map(kontrak => ({
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            1. Informasi Kontrak & Termin
-                        </h3>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                1. Informasi Kontrak & Termin
+                            </h3>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <FormSelect
-                                label="Kontrak Terkait (Nomor Perjanjian)"
+                            <KontrakSearchSelect
+                                label="Kontrak Terkait (Nomor Perjanjian / PRK)"
                                 v-model="form.kontrak_id"
-                                :options="kontrakOptions"
+                                :kontraks="props.kontraks"
                                 :error="form.errors.kontrak_id"
-                                placeholder="Pilih Nomor Perjanjian Kontrak"
-                                required />
+                                placeholder="Cari Nomor Perjanjian Kontrak atau PRK"
+                                :disabled="true" />
 
                             <FormInput
                                 label="Termin Pembayaran (Cth: Termin #1)"
@@ -135,13 +139,11 @@ const kontrakOptions = props.kontraks.map(kontrak => ({
                                 :error="form.errors.termin_pembayaran"
                                 required />
 
-                            <FormInput
-                                label="Denda (Rp)"
-                                type="number"
+                            <FormCurrency
+                                label="Denda"
                                 v-model="form.denda"
                                 :error="form.errors.denda"
-                                step="any"
-                                min="0" />
+                                placeholder="Denda" />
 
                             <FormInput
                                 label="Sub ID"
@@ -155,70 +157,65 @@ const kontrakOptions = props.kontraks.map(kontrak => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            2. Detail Nilai Pembayaran (dalam Rupiah)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Masukkan nilai dalam format numerik (tanpa titik/koma ribuan). Gunakan
-                            titik (.) untuk desimal.
-                        </p>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormInput
-                                label="Nilai Tagihan"
-                                type="number"
-                                v-model="form.nilai_tagihan"
-                                :error="form.errors.nilai_tagihan"
-                                step="any"
-                                min="0" />
-                            <FormInput
-                                label="Nilai AKB"
-                                type="number"
-                                v-model="form.nilai_akb"
-                                :error="form.errors.nilai_akb"
-                                step="any"
-                                min="0" />
-                            <FormInput
-                                label="Nilai PPN"
-                                type="number"
-                                v-model="form.nilai_ppn"
-                                :error="form.errors.nilai_ppn"
-                                step="any"
-                                min="0" />
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                2. Detail Nilai Pembayaran (dalam Rupiah)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Masukkan nilai dalam format numerik (tanpa titik/koma ribuan).
+                                Gunakan titik (.) untuk desimal.
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormInput
+                            <FormCurrency
+                                label="Nilai Tagihan"
+                                v-model="form.nilai_tagihan"
+                                :error="form.errors.nilai_tagihan"
+                                placeholder="Nilai Tagihan" />
+
+                            <FormCurrency
+                                label="Nilai AKB"
+                                v-model="form.nilai_akb"
+                                :error="form.errors.nilai_akb"
+                                placeholder="Nilai AKB" />
+
+                            <FormCurrency
+                                label="Nilai PPN"
+                                v-model="form.nilai_ppn"
+                                :error="form.errors.nilai_ppn"
+                                placeholder="Nilai PPN" />
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormCurrency
                                 label="Nilai PPH"
-                                type="number"
                                 v-model="form.nilai_pph"
                                 :error="form.errors.nilai_pph"
-                                step="any"
-                                min="0" />
-                            <FormInput
+                                placeholder="Nilai PPH" />
+
+                            <FormCurrency
                                 label="Nilai Bayar Vendor"
-                                type="number"
                                 v-model="form.nilai_bayar_vendor"
                                 :error="form.errors.nilai_bayar_vendor"
-                                step="any"
-                                min="0" />
-                            <FormInput
+                                placeholder="Nilai Bayar Vendor" />
+
+                            <FormCurrency
                                 label="Nilai Bayar Pajak"
-                                type="number"
                                 v-model="form.nilai_bayar_pajak"
                                 :error="form.errors.nilai_bayar_pajak"
-                                step="any"
-                                min="0" />
+                                placeholder="Nilai Bayar Pajak" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            3. Tanggal Rencana & Realisasi Pembayaran
-                        </h3>
-
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                3. Tanggal Rencana & Realisasi Pembayaran
+                            </h3>
+                        </div>
                         <h4 class="font-semibold text-gray-700 dark:text-gray-300">
                             Pembayaran Vendor
                         </h4>
@@ -255,12 +252,14 @@ const kontrakOptions = props.kontraks.map(kontrak => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            4. Status Dokumen / Checklist
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Tandai status dokumen/proses yang telah selesai.
-                        </p>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                4. Status Dokumen / Checklist
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Tandai status dokumen/proses yang telah selesai.
+                            </p>
+                        </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div v-for="field in checklistFields" :key="field.key">
@@ -287,9 +286,11 @@ const kontrakOptions = props.kontraks.map(kontrak => ({
 
                 <section class="p-6 dark:bg-gray-700">
                     <div class="max-w-4xl space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            5. Keterangan Tambahan
-                        </h3>
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                5. Keterangan Tambahan
+                            </h3>
+                        </div>
                         <div>
                             <FormInput
                                 label="Keterangan"

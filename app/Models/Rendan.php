@@ -17,8 +17,13 @@ class Rendan extends Model
 
    protected $guarded = ['id', 'created_at', 'updated_at'];
 
-   public function prk(): BelongsTo
-   {
-        return $this->belongsTo(Prk::class);
-   }
+   public function enjiniring(): BelongsTo
+    {
+        return $this->belongsTo(Enjiniring::class);
+    }
+
+    public function lakdan()
+    {
+        return $this->hasOne(Lakdan::class, 'rendan_id');
+    }
 }

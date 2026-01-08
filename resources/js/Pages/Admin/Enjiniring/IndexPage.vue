@@ -57,56 +57,84 @@ const handleEdit = enjiniring => {
     router.visit(route('admin.enjiniring.edit', { id: enjiniring.id }))
 }
 
-// --- DEFINISI KOLOM SESUAI PAKET ENJINIRING ---
+// --- DEFINISI KOLOM SESUAI PAKET ---
 const columns = [
-    // KOLOM BARU: Nomor PRK (Relasi langsung)
-    columnHelper.accessor('prk.prk', {
-        header: 'Nomor PRK',
-        cell: info => h('span', info.row.original.prk?.prk || '-')
+    // 1. TAHUN (dari Paket)
+    columnHelper.accessor('paket.tahun', {
+        header: 'Tahun',
+        // Menggunakan optional chaining (?.) untuk menghindari error jika 'paket' adalah null
+        cell: info => h('span', info.row.original.paket?.tahun || '-')
     }),
 
-    // KOLOM SKK (Akses melalui PRK, diasumsikan mengambil SKK dari paket pertama)
-    columnHelper.accessor('prk.pakets', {
-        header: 'Nomor SKK',
+    // 2. NOMOR PRK (dari Paket -> PRK)
+    columnHelper.accessor('paket.prk.prk', {
+        header: 'Nomor PRK',
         cell: info => {
-            // Memerlukan Controller untuk eager load 'prk.pakets'
-            return h('span', info.row.original.prk?.pakets?.[0]?.nomor_skk || '-')
+            // Mengakses melalui paket?.prk?.prk
+            return h('span', info.row.original.paket?.prk?.prk || '-')
         }
     }),
 
-    // KOLOM LAINNYA
-    columnHelper.accessor('target_survey', {
-        header: 'Tgl Target Survey',
-        cell: info => h('span', info.getValue() || '-')
+    // 3. NOMOR SKK (dari Paket)
+    columnHelper.accessor('paket.nomor_skk', {
+        header: 'Nomor SKK',
+        cell: info => h('span', info.row.original.paket?.nomor_skk || '-')
     }),
-    columnHelper.accessor('realisasi_survey', {
-        header: 'Tgl Realisasi Survey',
-        cell: info => h('span', info.getValue() || '-')
+
+    // 4. NILAI SKK (dari Paket)
+    columnHelper.accessor('paket.nilai_skk', {
+        header: 'Nilai SKK (Rp)',
+        cell: info => {
+            const value = info.row.original.paket?.nilai_skk // Akses melalui paket
+            if (value === null || value === undefined) return h('span', '-')
+            return h(
+                'span',
+                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
+            )
+        }
     }),
-    columnHelper.accessor('dokumen_survey', {
-        header: 'Ref. Dokumen Survey',
-        cell: info => h('span', info.getValue() || '-')
+
+    // 5. TGL SKK (dari Paket)
+    columnHelper.accessor('paket.tanggal_skk', {
+        header: 'Tgl SKK',
+        cell: info => h('span', info.row.original.paket?.tanggal_skk || '-') // Akses melalui paket
     }),
-    columnHelper.accessor('target_dokumen_enjiniring', {
-        header: 'Tgl Target Dok. Enjiniring',
-        cell: info => h('span', info.getValue() || '-')
+
+    // 6. STATUS PAKET (dari Paket)
+    columnHelper.accessor('paket.status_paket', {
+        header: 'Status',
+        cell: info => h('span', info.row.original.paket?.status_paket || '-') // Akses melalui paket
     }),
-    columnHelper.accessor('dokumen_rab', {
-        header: 'Ref. Dokumen RAB',
-        cell: info => h('span', info.getValue() || '-')
+
+    // 7. DIBUAT PADA (dari Enjiniring itu sendiri, tidak berubah)
+    columnHelper.accessor('created_at', {
+        header: 'Dibuat Pada',
+        cell: info =>
+            h(
+                'span',
+                new Date(info.getValue()).toLocaleString('id-ID', {
+                    dateStyle: 'short',
+                    timeStyle: 'short'
+                })
+            )
     }),
+
+    // 8. AKSI (Aksi dilakukan pada objek Enjiniring)
     columnHelper.display({
         id: 'actions',
         header: 'Aksi',
         cell: info => {
+            // Objek yang dikirim adalah objek Enjiniring, bukan Paket.
             const enjiniring = info.row.original
+            // Gunakan id Enjiniring untuk Edit/Hapus
             if (!enjiniring?.id) return null
 
+            // --- TOMBOL EDIT BARU ---
             const editButton = h(
                 'button',
                 {
                     class: 'p-2 text-blue-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 cursor-pointer',
-                    onClick: () => handleEdit(enjiniring),
+                    onClick: () => handleEdit(enjiniring), // Kirim objek Enjiniring
                     type: 'button',
                     title: 'Edit'
                 },
@@ -130,12 +158,13 @@ const columns = [
                     )
                 ]
             )
+            // --- AKHIR TOMBOL EDIT BARU ---
 
             const deleteButton = h(
                 'button',
                 {
                     class: 'p-2 text-red-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50 cursor-pointer',
-                    onClick: () => confirmDeleteEnjiniring(enjiniring),
+                    onClick: () => confirmDeleteEnjiniring(enjiniring), // Ubah ke confirmDeleteEnjiniring
                     type: 'button',
                     title: 'Hapus'
                 },

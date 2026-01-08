@@ -96,7 +96,8 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeyDown))
                             ref="closeButton"
                             class="rounded-lg p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 cursor-pointer flex-shrink-0"
                             aria-label="Close modal"
-                            @click="emit('close')">
+                            @click="emit('close')"
+                            type="button">
                             <svg
                                 class="h-4 w-4 sm:h-5 sm:w-5"
                                 fill="none"
