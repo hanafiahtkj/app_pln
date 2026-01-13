@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3' // Asumsi menggunakan Inertia.js sesuai kode Anda
 
 // Definisi Props
@@ -10,8 +11,18 @@ const props = defineProps({
     hasAccess: {
         type: Boolean,
         default: false
+    },
+    isOpen: {
+        type: Boolean,
+        default: false
     }
 })
+
+const isOpen = ref(props.isOpen)
+
+const toggleCollapse = () => {
+    isOpen.value = !isOpen.value
+}
 
 const formatIDR = val => {
     return val
@@ -61,7 +72,8 @@ const openPdfPreview = url => {
             v-if="paket.enjiniring"
             class="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 p-7 rounded-2xl shadow-xs hover:shadow-md transition-all border-l-[6px] border-l-orange-500">
             <div
-                class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200 dark:border-gray-800">
+                @click="toggleCollapse"
+                class="flex flex-wrap justify-between items-center p-7 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-orange-500"></div>
                     <h3
@@ -69,262 +81,282 @@ const openPdfPreview = url => {
                         Detail Enjiniring
                     </h3>
                 </div>
-                <Link
-                    v-if="hasAccess"
-                    :href="route('admin.enjiniring.edit', paket.enjiniring.id)"
-                    class="text-xs font-bold text-blue-600 hover:underline transition-colors uppercase">
-                    PERBARUI DATA
-                </Link>
+                <div class="flex items-center gap-4">
+                    <Link
+                        v-if="hasAccess"
+                        :href="route('admin.enjiniring.edit', paket.enjiniring.id)"
+                        class="text-xs font-bold text-blue-600 hover:underline transition-colors uppercase">
+                        PERBARUI DATA
+                    </Link>
+                    <svg
+                        :class="{ 'rotate-180': isOpen }"
+                        class="w-5 h-5 text-gray-400 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
             </div>
 
-            <section class="dark:bg-gray-700">
-                <div class="max-w-4xl space-y-6">
-                    <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            Status Survey
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Target dan realisasi pelaksanaan survey.
-                        </p>
-                    </div>
-
-                    <div
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Nomor Dokumen Survey
-                            </p>
-                            <p
-                                class="text-sm font-semibold text-gray-800 dark:text-gray-300 truncate">
-                                {{ paket.enjiniring.dokumen_survey || '-' }}
+            <div
+                v-show="isOpen"
+                class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
+                <section class="dark:bg-gray-700">
+                    <div class="max-w-4xl space-y-6">
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                Status Survey
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Target dan realisasi pelaksanaan survey.
                             </p>
                         </div>
 
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Dokumen Survey
-                            </p>
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nomor Dokumen Survey
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-gray-800 dark:text-gray-300 truncate">
+                                    {{ paket.enjiniring.dokumen_survey || '-' }}
+                                </p>
+                            </div>
 
-                            <div v-if="paket.enjiniring.file_survey">
-                                <a
-                                    href="#"
-                                    @click="openPdfPreview(paket.enjiniring.file_survey)"
-                                    class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Dokumen Survey
+                                </p>
+
+                                <div v-if="paket.enjiniring.file_survey">
+                                    <a
+                                        href="#"
+                                        @click="openPdfPreview(paket.enjiniring.file_survey)"
+                                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                        <svg
+                                            class="w-4 h-4 text-rose-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-xs text-gray-500 italic flex items-center gap-2">
                                     <svg
-                                        class="w-4 h-4 text-rose-500"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                             stroke-width="2"
                                             stroke-linecap="round"
                                             stroke-linejoin="round" />
                                     </svg>
-                                    Lihat Dokumen
-                                </a>
+                                    Dokumen belum diunggah
+                                </div>
                             </div>
-                            <div
-                                v-else
-                                class="text-xs text-gray-500 italic flex items-center gap-2">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                Dokumen belum diunggah
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tgl Target Survey
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{ formatTgl(paket.enjiniring.target_survey) || '-' }}
+                                </p>
                             </div>
-                        </div>
 
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Tgl Target Survey
-                            </p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                {{ formatTgl(paket.enjiniring.target_survey) || '-' }}
-                            </p>
-                        </div>
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Tgl Realisasi Survey
-                            </p>
-                            <p
-                                :class="[
-                                    'text-sm font-bold',
-                                    paket.enjiniring.realisasi_survey
-                                        ? 'text-emerald-600'
-                                        : 'text-rose-600'
-                                ]">
-                                {{
-                                    formatTgl(paket.enjiniring.realisasi_survey) ||
-                                    'Belum Realisasi'
-                                }}
-                            </p>
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tgl Realisasi Survey
+                                </p>
+                                <p
+                                    :class="[
+                                        'text-sm font-bold',
+                                        paket.enjiniring.realisasi_survey
+                                            ? 'text-emerald-600'
+                                            : 'text-rose-600'
+                                    ]">
+                                    {{
+                                        formatTgl(paket.enjiniring.realisasi_survey) ||
+                                        'Belum Realisasi'
+                                    }}
+                                </p>
+                            </div>
                         </div>
                     </div>
+                </section>
+
+                <section class="dark:bg-gray-700">
+                    <div class="max-w-4xl space-y-6">
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                Dokumen Enjiniring (RAB & TOR)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail status dokumen enjiniring dan referensi dokumen.
+                            </p>
+                        </div>
+
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-y-8 gap-x-6 mb-8">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tgl Target Dokumen
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{
+                                        formatTgl(paket.enjiniring.target_dokumen_enjiniring) || '-'
+                                    }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tgl Realisasi Dokumen
+                                </p>
+                                <p
+                                    :class="[
+                                        'text-sm font-bold',
+                                        paket.enjiniring.realisasi_dokumen_enjiniring
+                                            ? 'text-emerald-600'
+                                            : 'text-gray-500'
+                                    ]">
+                                    {{
+                                        formatTgl(paket.enjiniring.realisasi_dokumen_enjiniring) ||
+                                        'Proses'
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nomor Dokumen RAB
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{ paket.enjiniring.dokumen_rab || '-' }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Dokumen RAB
+                                </p>
+
+                                <div v-if="paket.enjiniring.file_rab">
+                                    <a
+                                        @click="openPdfPreview(paket.enjiniring.file_rab)"
+                                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                        <svg
+                                            class="w-4 h-4 text-rose-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-xs text-gray-500 italic flex items-center gap-2">
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Dokumen belum diunggah
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nomor Dokumen TOR
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{ paket.enjiniring.dokumen_tor || '-' }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Dokumen TOR
+                                </p>
+
+                                <div v-if="paket.enjiniring.file_tor">
+                                    <a
+                                        @click="openPdfPreview(paket.enjiniring.file_tor)"
+                                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                        <svg
+                                            class="w-4 h-4 text-rose-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-xs text-gray-500 italic flex items-center gap-2">
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Dokumen belum diunggah
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Keterangan
+                    </p>
+                    <p class="text-sm text-gray-700 dark:text-gray-400 leading-relaxed">
+                        {{ paket.enjiniring.keterangan }}
+                    </p>
                 </div>
-            </section>
-
-            <section class="dark:bg-gray-700">
-                <div class="max-w-4xl space-y-6">
-                    <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            Dokumen Enjiniring (RAB & TOR)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail status dokumen enjiniring dan referensi dokumen.
-                        </p>
-                    </div>
-
-                    <div
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-y-8 gap-x-6 mb-8">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Tgl Target Dokumen
-                            </p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                {{ formatTgl(paket.enjiniring.target_dokumen_enjiniring) || '-' }}
-                            </p>
-                        </div>
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Tgl Realisasi Dokumen
-                            </p>
-                            <p
-                                :class="[
-                                    'text-sm font-bold',
-                                    paket.enjiniring.realisasi_dokumen_enjiniring
-                                        ? 'text-emerald-600'
-                                        : 'text-gray-500'
-                                ]">
-                                {{
-                                    formatTgl(paket.enjiniring.realisasi_dokumen_enjiniring) ||
-                                    'Proses'
-                                }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Nomor Dokumen RAB
-                            </p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                {{ paket.enjiniring.dokumen_rab || '-' }}
-                            </p>
-                        </div>
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Dokumen RAB
-                            </p>
-
-                            <div v-if="paket.enjiniring.file_rab">
-                                <a
-                                    @click="openPdfPreview(paket.enjiniring.file_rab)"
-                                    class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
-                                    <svg
-                                        class="w-4 h-4 text-rose-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                    </svg>
-                                    Lihat Dokumen
-                                </a>
-                            </div>
-                            <div
-                                v-else
-                                class="text-xs text-gray-500 italic flex items-center gap-2">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                Dokumen belum diunggah
-                            </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Nomor Dokumen TOR
-                            </p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                {{ paket.enjiniring.dokumen_tor || '-' }}
-                            </p>
-                        </div>
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Dokumen TOR
-                            </p>
-
-                            <div v-if="paket.enjiniring.file_tor">
-                                <a
-                                    @click="openPdfPreview(paket.enjiniring.file_tor)"
-                                    class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
-                                    <svg
-                                        class="w-4 h-4 text-rose-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                    </svg>
-                                    Lihat Dokumen
-                                </a>
-                            </div>
-                            <div
-                                v-else
-                                class="text-xs text-gray-500 italic flex items-center gap-2">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                Dokumen belum diunggah
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                    Keterangan
-                </p>
-                <p class="text-sm text-gray-700 dark:text-gray-400 leading-relaxed">
-                    {{ paket.enjiniring.keterangan }}
-                </p>
             </div>
         </div>
 

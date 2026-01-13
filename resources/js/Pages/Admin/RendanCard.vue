@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3' // Asumsi menggunakan Inertia.js sesuai kode Anda
 
 // Definisi Props
@@ -10,8 +11,18 @@ const props = defineProps({
     hasAccess: {
         type: Boolean,
         default: false
+    },
+    isOpen: {
+        type: Boolean,
+        default: false
     }
 })
+
+const isOpen = ref(props.isOpen)
+
+const toggleCollapse = () => {
+    isOpen.value = !isOpen.value
+}
 
 const formatIDR = val => {
     return val
@@ -61,7 +72,8 @@ const openPdfPreview = url => {
             v-if="paket.enjiniring?.rendan"
             class="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 p-7 rounded-2xl shadow-xs hover:shadow-md transition-all border-l-[6px] border-l-indigo-600">
             <div
-                class="flex justify-between items-center mb-8 pb-4 border-b border-gray-200 dark:border-gray-800">
+                @click="toggleCollapse"
+                class="flex flex-wrap justify-between items-center p-7 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-indigo-600"></div>
                     <h3
@@ -69,173 +81,193 @@ const openPdfPreview = url => {
                         Perencanaan Pengadaan (Rendan)
                     </h3>
                 </div>
-                <Link
-                    v-if="hasAccess"
-                    :href="route('admin.rendan.edit', paket.enjiniring.rendan.id)"
-                    class="text-xs font-bold text-blue-600 hover:underline transition-colors uppercase">
-                    PERBARUI DATA
-                </Link>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
-                <div class="sm:col-span-2 lg:col-span-1 space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Nilai RAB
-                    </p>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white tracking-tight">
-                        {{ formatIDR(paket.enjiniring.rendan.rab) }}
-                    </p>
+                <div class="flex items-center gap-4">
+                    <Link
+                        v-if="hasAccess"
+                        :href="route('admin.rendan.edit', paket.enjiniring.rendan.id)"
+                        class="text-xs font-bold text-blue-600 hover:underline transition-colors uppercase">
+                        PERBARUI DATA
+                    </Link>
+                    <svg
+                        :class="{ 'rotate-180': isOpen }"
+                        class="w-5 h-5 text-gray-400 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7" />
+                    </svg>
                 </div>
             </div>
 
-            <section class="dark:bg-gray-700">
-                <div class="max-w-4xl space-y-6">
-                    <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            Nota Dinas (ND) User
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail Nota Dinas User terkait rencana pengadaan.
+            <div
+                v-show="isOpen"
+                class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
+                    <div class="sm:col-span-2 lg:col-span-1 space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Nilai RAB
+                        </p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white tracking-tight">
+                            {{ formatIDR(paket.enjiniring.rendan.rab) }}
                         </p>
                     </div>
-                    <div
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 mb-8">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Nomor ND User
-                            </p>
-                            <p
-                                class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
-                                {{ paket.enjiniring.rendan.nomor_nd_user || '-' }}
+                </div>
+
+                <section class="dark:bg-gray-700">
+                    <div class="max-w-4xl space-y-6">
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                Nota Dinas (ND) User
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail Nota Dinas User terkait rencana pengadaan.
                             </p>
                         </div>
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 mb-8">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nomor ND User
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
+                                    {{ paket.enjiniring.rendan.nomor_nd_user || '-' }}
+                                </p>
+                            </div>
 
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Tanggal ND
-                            </p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                {{ formatTgl(paket.enjiniring.rendan.tanggal_nd_user) }}
-                            </p>
-                        </div>
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tanggal ND
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{ formatTgl(paket.enjiniring.rendan.tanggal_nd_user) }}
+                                </p>
+                            </div>
 
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Dokumen ND
-                            </p>
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Dokumen ND
+                                </p>
 
-                            <div v-if="paket.enjiniring.rendan.dokumen_nd_user">
-                                <a
-                                    @click="openPdfPreview(paket.enjiniring.rendan.dokumen_nd_user)"
-                                    class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                <div v-if="paket.enjiniring.rendan.dokumen_nd_user">
+                                    <a
+                                        @click="
+                                            openPdfPreview(paket.enjiniring.rendan.dokumen_nd_user)
+                                        "
+                                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                        <svg
+                                            class="w-4 h-4 text-rose-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-xs text-gray-500 italic flex items-center gap-2">
                                     <svg
-                                        class="w-4 h-4 text-rose-500"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                             stroke-width="2"
                                             stroke-linecap="round"
                                             stroke-linejoin="round" />
                                     </svg>
-                                    Lihat Dokumen
-                                </a>
-                            </div>
-                            <div
-                                v-else
-                                class="text-xs text-gray-500 italic flex items-center gap-2">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                Dokumen belum diunggah
+                                    Dokumen belum diunggah
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="dark:bg-gray-700">
-                <div class="max-w-4xl space-y-6">
-                    <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                            Rencana Kerja Syarat (RKS)
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Detail dokumen Rencana Kerja Syarat.
-                        </p>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Nomor RKS
-                            </p>
-                            <p
-                                class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
-                                {{ paket.enjiniring.rendan.nomor_rks || '-' }}
+                <section class="dark:bg-gray-700">
+                    <div class="max-w-4xl space-y-6">
+                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                Rencana Kerja Syarat (RKS)
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Detail dokumen Rencana Kerja Syarat.
                             </p>
                         </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nomor RKS
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
+                                    {{ paket.enjiniring.rendan.nomor_rks || '-' }}
+                                </p>
+                            </div>
 
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Tanggal RKS
-                            </p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                {{ formatTgl(paket.enjiniring.rendan.tanggal_rks) }}
-                            </p>
-                        </div>
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tanggal RKS
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{ formatTgl(paket.enjiniring.rendan.tanggal_rks) }}
+                                </p>
+                            </div>
 
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                Dokumen RKS
-                            </p>
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Dokumen RKS
+                                </p>
 
-                            <div v-if="paket.enjiniring.rendan.dokumen_rks">
-                                <a
-                                    @click="openPdfPreview(paket.enjiniring.rendan.dokumen_rks)"
-                                    class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                <div v-if="paket.enjiniring.rendan.dokumen_rks">
+                                    <a
+                                        @click="openPdfPreview(paket.enjiniring.rendan.dokumen_rks)"
+                                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                        <svg
+                                            class="w-4 h-4 text-rose-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-xs text-gray-500 italic flex items-center gap-2">
                                     <svg
-                                        class="w-4 h-4 text-rose-500"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                             stroke-width="2"
                                             stroke-linecap="round"
                                             stroke-linejoin="round" />
                                     </svg>
-                                    Lihat Dokumen
-                                </a>
-                            </div>
-                            <div
-                                v-else
-                                class="text-xs text-gray-500 italic flex items-center gap-2">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                Dokumen belum diunggah
+                                    Dokumen belum diunggah
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
 
         <div

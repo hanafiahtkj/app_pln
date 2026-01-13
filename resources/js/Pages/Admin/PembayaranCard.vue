@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
 
 // Definisi Props
@@ -10,8 +11,18 @@ const props = defineProps({
     hasAccess: {
         type: Boolean,
         default: false
+    },
+    isOpen: {
+        type: Boolean,
+        default: false
     }
 })
+
+const isOpen = ref(props.isOpen)
+
+const toggleCollapse = () => {
+    isOpen.value = !isOpen.value
+}
 
 const formatIDR = val => {
     return val
@@ -80,7 +91,8 @@ const checklistFields = [
                 :key="bayar.id || index"
                 class="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 p-7 rounded-2xl shadow-xs hover:shadow-md transition-all border-l-[6px] border-l-rose-600">
                 <div
-                    class="flex flex-wrap justify-between items-center mb-8 pb-4 border-b border-gray-200 dark:border-gray-800 gap-4">
+                    @click="toggleCollapse"
+                    class="flex flex-wrap justify-between items-center p-7 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-rose-600"></div>
@@ -90,196 +102,224 @@ const checklistFields = [
                             </h3>
                         </div>
                     </div>
-                    <Link
-                        v-if="hasAccess"
-                        :href="route('admin.pembayaran.edit', bayar.id)"
-                        class="text-xs font-bold text-blue-600 hover:underline uppercase">
-                        PERBARUI DATA
-                    </Link>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 mb-10">
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Termin Pembayaran
-                        </p>
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                            {{ bayar.termin_pembayaran }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Denda
-                        </p>
-                        <p
-                            :class="[
-                                'text-sm font-bold',
-                                bayar.denda > 0 ? 'text-rose-600' : 'text-gray-400'
-                            ]">
-                            {{ formatIDR(bayar.denda) || 'Rp 0' }}
-                        </p>
+                    <div class="flex items-center gap-4">
+                        <Link
+                            v-if="hasAccess"
+                            :href="route('admin.pembayaran.edit', bayar.id)"
+                            class="text-xs font-bold text-blue-600 hover:underline uppercase">
+                            PERBARUI DATA
+                        </Link>
+                        <svg
+                            :class="{ 'rotate-180': isOpen }"
+                            class="w-5 h-5 text-gray-400 transition-transform duration-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 mb-10">
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Total Nilai Tagihan
-                        </p>
-                        <p class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ formatIDR(bayar.nilai_tagihan) }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Nilai AKB
-                        </p>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                            {{ formatIDR(bayar.nilai_akb) }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Nilai Bayar Vendor
-                        </p>
-                        <p class="text-lg font-bold text-emerald-600">
-                            {{ formatIDR(bayar.nilai_bayar_vendor) }}
-                        </p>
-                    </div>
-
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Pajak PPN
-                        </p>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                            {{ formatIDR(bayar.nilai_ppn) || 'Rp 0' }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Pajak PPH
-                        </p>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                            {{ formatIDR(bayar.nilai_pph) || 'Rp 0' }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Nilai Bayar Pajak
-                        </p>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                            {{ formatIDR(bayar.nilai_bayar_pajak) || 'Rp 0' }}
-                        </p>
-                    </div>
-                </div>
-
-                <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
-                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                Tanggal Rencana & Realisasi Pembayaran
-                            </h3>
-                        </div>
-
-                        <div
-                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 mb-10">
-                            <div class="space-y-1">
-                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Tgl Bayar Vendor (Rencana)
-                                </p>
-                                <p
-                                    :class="[
-                                        'text-sm font-bold',
-                                        bayar.rencana_bayar
-                                            ? 'text-emerald-600'
-                                            : 'text-gray-400 italic'
-                                    ]">
-                                    {{ formatTgl(bayar.rencana_bayar) || '-' }}
-                                </p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Tgl Bayar Vendor (Realisasi)
-                                </p>
-                                <p
-                                    :class="[
-                                        'text-sm font-bold',
-                                        bayar.realisasi_bayar
-                                            ? 'text-emerald-600'
-                                            : 'text-gray-400 italic'
-                                    ]">
-                                    {{ formatTgl(bayar.realisasi_bayar) || 'Menunggu Transfer' }}
-                                </p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Tgl Bayar Pajak (Rencana)
-                                </p>
-                                <p
-                                    :class="[
-                                        'text-sm font-bold',
-                                        bayar.rencana_bayar_pajak
-                                            ? 'text-emerald-600'
-                                            : 'text-gray-400 italic'
-                                    ]">
-                                    {{ formatTgl(bayar.rencana_bayar_pajak) || '-' }}
-                                </p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Tgl Bayar Pajak (Realisasi)
-                                </p>
-                                <p
-                                    :class="[
-                                        'text-sm font-bold',
-                                        bayar.realisasi_bayar_pajak
-                                            ? 'text-emerald-600'
-                                            : 'text-gray-400 italic'
-                                    ]">
-                                    {{ formatTgl(bayar.realisasi_bayar_pajak) || 'Belum Setor' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
-                        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                Status Dokumen / Checklist
-                            </h3>
-                        </div>
-
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div v-for="field in checklistFields" :key="field.key">
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        :id="`${field.key}-${bayar.id}`"
-                                        v-model="bayar[field.key]"
-                                        :true-value="1"
-                                        :false-value="0"
-                                        :disabled="!hasAccess"
-                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600" />
-                                    <span
-                                        class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {{ field.label }}
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </section>
 
                 <div
-                    class="mt-10 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed italic">
-                        <span class="font-bold text-rose-600 not-italic mr-1 uppercase">
-                            Catatan:
-                        </span>
-                        {{ bayar.keterangan || '-' }}
-                    </p>
+                    v-show="isOpen"
+                    class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 mb-10">
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Termin Pembayaran
+                            </p>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                                {{ bayar.termin_pembayaran }}
+                            </p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Denda
+                            </p>
+                            <p
+                                :class="[
+                                    'text-sm font-bold',
+                                    bayar.denda > 0 ? 'text-rose-600' : 'text-gray-400'
+                                ]">
+                                {{ formatIDR(bayar.denda) || 'Rp 0' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 mb-10">
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Total Nilai Tagihan
+                            </p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white">
+                                {{ formatIDR(bayar.nilai_tagihan) }}
+                            </p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Nilai AKB
+                            </p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                {{ formatIDR(bayar.nilai_akb) }}
+                            </p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Nilai Bayar Vendor
+                            </p>
+                            <p class="text-lg font-bold text-emerald-600">
+                                {{ formatIDR(bayar.nilai_bayar_vendor) }}
+                            </p>
+                        </div>
+
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Pajak PPN
+                            </p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                {{ formatIDR(bayar.nilai_ppn) || 'Rp 0' }}
+                            </p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Pajak PPH
+                            </p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                {{ formatIDR(bayar.nilai_pph) || 'Rp 0' }}
+                            </p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Nilai Bayar Pajak
+                            </p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                {{ formatIDR(bayar.nilai_bayar_pajak) || 'Rp 0' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <section class="dark:bg-gray-700">
+                        <div class="max-w-4xl space-y-6">
+                            <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Tanggal Rencana & Realisasi Pembayaran
+                                </h3>
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 mb-10">
+                                <div class="space-y-1">
+                                    <p
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Tgl Bayar Vendor (Rencana)
+                                    </p>
+                                    <p
+                                        :class="[
+                                            'text-sm font-bold',
+                                            bayar.rencana_bayar
+                                                ? 'text-emerald-600'
+                                                : 'text-gray-400 italic'
+                                        ]">
+                                        {{ formatTgl(bayar.rencana_bayar) || '-' }}
+                                    </p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Tgl Bayar Vendor (Realisasi)
+                                    </p>
+                                    <p
+                                        :class="[
+                                            'text-sm font-bold',
+                                            bayar.realisasi_bayar
+                                                ? 'text-emerald-600'
+                                                : 'text-gray-400 italic'
+                                        ]">
+                                        {{
+                                            formatTgl(bayar.realisasi_bayar) || 'Menunggu Transfer'
+                                        }}
+                                    </p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Tgl Bayar Pajak (Rencana)
+                                    </p>
+                                    <p
+                                        :class="[
+                                            'text-sm font-bold',
+                                            bayar.rencana_bayar_pajak
+                                                ? 'text-emerald-600'
+                                                : 'text-gray-400 italic'
+                                        ]">
+                                        {{ formatTgl(bayar.rencana_bayar_pajak) || '-' }}
+                                    </p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Tgl Bayar Pajak (Realisasi)
+                                    </p>
+                                    <p
+                                        :class="[
+                                            'text-sm font-bold',
+                                            bayar.realisasi_bayar_pajak
+                                                ? 'text-emerald-600'
+                                                : 'text-gray-400 italic'
+                                        ]">
+                                        {{
+                                            formatTgl(bayar.realisasi_bayar_pajak) || 'Belum Setor'
+                                        }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="dark:bg-gray-700">
+                        <div class="max-w-4xl space-y-6">
+                            <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Status Dokumen / Checklist
+                                </h3>
+                            </div>
+
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div v-for="field in checklistFields" :key="field.key">
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            :id="`${field.key}-${bayar.id}`"
+                                            v-model="bayar[field.key]"
+                                            :true-value="1"
+                                            :false-value="0"
+                                            :disabled="!hasAccess"
+                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600" />
+                                        <span
+                                            class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ field.label }}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div
+                        class="mt-10 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                            <span class="font-bold text-rose-600 not-italic mr-1 uppercase">
+                                Catatan:
+                            </span>
+                            {{ bayar.keterangan || '-' }}
+                        </p>
+                    </div>
                 </div>
             </div>
 

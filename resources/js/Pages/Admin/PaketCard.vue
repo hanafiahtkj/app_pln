@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3' // Asumsi menggunakan Inertia.js sesuai kode Anda
 
 // Definisi Props
@@ -10,8 +11,18 @@ const props = defineProps({
     hasAccess: {
         type: Boolean,
         default: false
+    },
+    isOpen: {
+        type: Boolean,
+        default: false
     }
 })
+
+const isOpen = ref(props.isOpen)
+
+const toggleCollapse = () => {
+    isOpen.value = !isOpen.value
+}
 
 const formatIDR = val => {
     return val
@@ -57,7 +68,8 @@ const openPdfPreview = url => {
         <div
             class="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 p-7 rounded-2xl shadow-xs hover:shadow-md transition-all duration-300 border-l-[6px] border-l-blue-600">
             <div
-                class="flex flex-wrap justify-between items-center mb-8 pb-4 border-b border-gray-200 dark:border-gray-800">
+                @click="toggleCollapse"
+                class="flex flex-wrap justify-between items-center p-7 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-blue-600"></div>
@@ -75,114 +87,138 @@ const openPdfPreview = url => {
                         #{{ paket.id }}
                     </span>
                 </div>
+                <div class="flex items-center gap-4">
+                    <Link
+                        v-if="hasAccess"
+                        :href="route('admin.paket.edit', paket.id)"
+                        class="text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-colors tracking-wide">
+                        PERBARUI DATA
+                    </Link>
 
-                <Link
-                    v-if="hasAccess"
-                    :href="route('admin.paket.edit', paket.id)"
-                    class="text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-colors tracking-wide">
-                    PERBARUI DATA
-                </Link>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 mb-8">
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tahun</p>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                        {{ paket.tahun }}
-                    </p>
-                </div>
-
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">PRK</p>
-                    <p
-                        class="text-sm font-semibold text-gray-800 dark:text-gray-300 truncate"
-                        :title="paket.prk?.prk">
-                        {{ paket.prk?.prk || 'N/A' }}
-                    </p>
-                </div>
-
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Uraian Paket
-                    </p>
-                    <p
-                        class="text-sm font-semibold text-gray-800 dark:text-gray-300 truncate"
-                        :title="paket.uraian_paket">
-                        {{ paket.uraian_paket || 'N/A' }}
-                    </p>
+                    <svg
+                        :class="{ 'rotate-180': isOpen }"
+                        class="w-5 h-5 text-gray-400 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7" />
+                    </svg>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Nomor SKK
-                    </p>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
-                        {{ paket.nomor_skk || '-' }}
-                    </p>
+            <div
+                v-show="isOpen"
+                class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 mb-8">
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Tahun
+                        </p>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                            {{ paket.tahun }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">PRK</p>
+                        <p
+                            class="text-sm font-semibold text-gray-800 dark:text-gray-300 truncate"
+                            :title="paket.prk?.prk">
+                            {{ paket.prk?.prk || 'N/A' }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Uraian Paket
+                        </p>
+                        <p
+                            class="text-sm font-semibold text-gray-800 dark:text-gray-300 truncate"
+                            :title="paket.uraian_paket">
+                            {{ paket.uraian_paket || 'N/A' }}
+                        </p>
+                    </div>
                 </div>
 
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Tanggal SKK
-                    </p>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                        {{ formatTanggal(paket.tanggal_skk) }}
-                    </p>
-                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Nomor SKK
+                        </p>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
+                            {{ paket.nomor_skk || '-' }}
+                        </p>
+                    </div>
 
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Nilai SKK
-                    </p>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white">
-                        {{ formatIDR(paket.nilai_skk) }}
-                    </p>
-                </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Tanggal SKK
+                        </p>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                            {{ formatTanggal(paket.tanggal_skk) }}
+                        </p>
+                    </div>
 
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Status Paket
-                    </p>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white">
-                        {{ paket.status_paket || '-' }}
-                    </p>
-                </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Nilai SKK
+                        </p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">
+                            {{ formatIDR(paket.nilai_skk) }}
+                        </p>
+                    </div>
 
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Dokumen SKK
-                    </p>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Status Paket
+                        </p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">
+                            {{ paket.status_paket || '-' }}
+                        </p>
+                    </div>
 
-                    <div v-if="paket.dokumen_skk">
-                        <a
-                            @click="openPdfPreview(paket.dokumen_skk)"
-                            target="_blank"
-                            class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            Dokumen SKK
+                        </p>
+
+                        <div v-if="paket.dokumen_skk">
+                            <a
+                                @click="openPdfPreview(paket.dokumen_skk)"
+                                target="_blank"
+                                class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                <svg
+                                    class="w-4 h-4 text-rose-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                Lihat Dokumen
+                            </a>
+                        </div>
+                        <div v-else class="text-xs text-gray-500 italic flex items-center gap-2">
                             <svg
-                                class="w-4 h-4 text-rose-500"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path
-                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                     stroke-width="2"
                                     stroke-linecap="round"
                                     stroke-linejoin="round" />
                             </svg>
-                            Lihat Dokumen
-                        </a>
-                    </div>
-                    <div v-else class="text-xs text-gray-500 italic flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        Dokumen belum diunggah
+                            Dokumen belum diunggah
+                        </div>
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import Default from '@/Layouts/Default.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import PdfPreviewModal from '@/Components/PdfPreviewModal.vue'
-import { h, ref, watch } from 'vue'
+import { h, ref, watch, onMounted } from 'vue'
 import PaketCard from '../PaketCard.vue'
 import PrkCard from '../PrkCard.vue'
 import EnjiniringCard from '../EnjiniringCard.vue'
@@ -16,6 +16,24 @@ import PembayaranCard from '../PembayaranCard.vue'
 defineOptions({ layout: Default })
 const props = defineProps({ data: { type: Object, required: true } })
 const paket = props.data
+
+const targetRef = ref(null)
+
+onMounted(() => {
+    setTimeout(() => {
+        if (targetRef.value) {
+            const element = targetRef.value.$el || targetRef.value
+            const offset = 100
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+            const offsetPosition = elementPosition - offset
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            })
+        }
+    }, 100)
+})
 
 const showPdfModal = ref(false)
 const pdfUrl = ref(null)
@@ -66,6 +84,8 @@ const openPdfPreview = path => {
                     <KontrakCard :paket="paket" @openPdfPreview="openPdfPreview" />
                     <PurchaseOrderCard :paket="paket" @openPdfPreview="openPdfPreview" />
                     <PembayaranCard
+                        ref="targetRef"
+                        :isOpen="true"
                         :hasAccess="true"
                         :paket="paket"
                         @openPdfPreview="openPdfPreview" />
