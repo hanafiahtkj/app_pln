@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paket;
 use App\Models\Rendan; // Tetap digunakan untuk relasi
 use App\Models\Lakdan; // Model baru untuk Lakdan (Pelaksanaan Pengadaan)
 use Illuminate\Http\Request;
@@ -10,21 +11,55 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use App\Services\DataTablePaginationService;
 
 class AdminLakdanController extends Controller
 {
+    public function __construct(private DataTablePaginationService $pagination)
+    {
+        $this->middleware('permission:manage-lakdan');
+    }
+
     /**
      * Tampilkan daftar data Lakdan.
      */
     public function index(Request $request)
     {
-        // Eager load relasi rendan
-        $data = Lakdan::latest()
-            ->with('rendan')
-            ->paginate($request->input('per_page', 10));
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
+        // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
+        $statusFilter = $request->input('filter_status', 'belum_diproses');
+
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // Filter berdasarkan unit user
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // LOGIKA FILTER BARU
+        if ($statusFilter === 'belum_diproses') {
+            $query->has('enjiniring.rendan');
+            $query->whereDoesntHave('enjiniring.rendan.lakdan');
+        } elseif ($statusFilter === 'proses') {
+            $query->has('enjiniring.rendan.lakdan');
+        }
+
+        $data = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Lakdan/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'status' => $statusFilter
+            ]
         ]);
     }
 
@@ -173,7 +208,7 @@ class AdminLakdanController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $req->rendan->enjiniring->paket->id)
+                ->route('admin.lakdan.show', $req->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pelaksanaan Pengadaan berhasil ditambahkan.');
 
         } catch (Exception $e) {
@@ -292,7 +327,7 @@ class AdminLakdanController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.lakdan.show', $lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pelaksanaan Pengadaan berhasil diperbarui.');
 
         } catch (Exception $e) {
@@ -321,5 +356,18 @@ class AdminLakdanController extends Controller
                 ->route('admin.lakdan.index')
                 ->with('error', 'Gagal menghapus Pelaksanaan Pengadaan: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Lakdan/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

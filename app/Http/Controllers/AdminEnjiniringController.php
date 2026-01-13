@@ -8,13 +8,14 @@ use App\Models\Enjiniring;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use App\Services\DataTablePaginationService;
 
 // Controller untuk mengelola data Paket Enjiniring (Tanpa File Upload)
 class AdminEnjiniringController extends Controller
 {
-    public function __construct()
+    public function __construct(private DataTablePaginationService $pagination)
     {
-        // $this->middleware('permission:manage-paket-enjiniring');
+        $this->middleware('permission:manage-enjiniring');
     }
 
     /**
@@ -22,12 +23,42 @@ class AdminEnjiniringController extends Controller
      */
     public function index(Request $request)
     {
-        $data = Enjiniring::latest()
-            ->with('paket.prk')
-            ->paginate($request->input('per_page', 10));
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
+        // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
+        $statusFilter = $request->input('filter_status', 'belum_diproses');
+
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // Filter berdasarkan unit user
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // LOGIKA FILTER BARU
+        if ($statusFilter === 'belum_diproses') {
+            // Hanya ambil paket yang BELUM ada di tabel enjiniring
+            $query->whereDoesntHave('enjiniring');
+        } elseif ($statusFilter === 'proses') {
+            // Hanya ambil paket yang SUDAH masuk tahap enjiniring
+            $query->has('enjiniring');
+        }
+
+        $data = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Enjiniring/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'status' => $statusFilter // Kirim kembali state ke Vue
+            ]
         ]);
     }
 
@@ -78,7 +109,7 @@ class AdminEnjiniringController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $req->paket_id)
+                ->route('admin.enjiniring.show', $req->paket_id)
                 ->with('success', 'Data Paket Enjiniring berhasil ditambahkan.');
 
         } catch (\Exception $e) {
@@ -144,7 +175,7 @@ class AdminEnjiniringController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $paketEnjiniring->paket_id)
+                ->route('admin.enjiniring.show', $paketEnjiniring->paket_id)
                 ->with('success', 'Data Paket Enjiniring berhasil diperbarui.');
 
         } catch (\Exception $e) {
@@ -170,5 +201,18 @@ class AdminEnjiniringController extends Controller
                 ->route('admin.enjiniring.index')
                 ->with('error', 'Gagal menghapus Paket Enjiniring: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Enjiniring/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paket;
 use App\Models\Kontrak;
 use App\Models\PurchaseOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Services\DataTablePaginationService;
 
 class AdminPurchaseOrderController extends Controller
 {
@@ -26,6 +28,11 @@ class AdminPurchaseOrderController extends Controller
         'ba_stp',
         'ba_stap',
     ];
+
+    public function __construct(private DataTablePaginationService $pagination)
+    {
+        $this->middleware('permission:manage-konstruksi');
+    }
 
     /**
      * Aturan validasi yang disederhanakan.
@@ -62,12 +69,41 @@ class AdminPurchaseOrderController extends Controller
 
     public function index(Request $request)
     {
-        $data = PurchaseOrder::latest()
-            ->with('kontrak')
-            ->paginate($request->input('per_page', 10));
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
+        // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
+        $statusFilter = $request->input('filter_status', 'belum_diproses');
+
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // Filter berdasarkan unit user
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // LOGIKA FILTER BARU
+        if ($statusFilter === 'belum_diproses') {
+            $query->has('enjiniring.rendan.lakdan.kontrak');
+            $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak.purchase_order');
+        } elseif ($statusFilter === 'proses') {
+            $query->has('enjiniring.rendan.lakdan.kontrak.purchase_order');
+        }
+
+        $data = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/PurchaseOrder/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'status' => $statusFilter
+            ]
         ]);
     }
 
@@ -91,7 +127,7 @@ class AdminPurchaseOrderController extends Controller
             $req = PurchaseOrder::create($validated);
 
             return redirect()
-                ->route('admin.paket.show', $req->kontrak->lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.po.show', $req->kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Purchase Order berhasil disimpan.');
 
         } catch (Exception $e) {
@@ -127,7 +163,7 @@ class AdminPurchaseOrderController extends Controller
             $po->update($validated);
 
             return redirect()
-                ->route('admin.paket.show', $po->kontrak->lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.po.show', $po->kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Purchase Order berhasil diperbarui.');
 
         } catch (Exception $e) {
@@ -148,5 +184,18 @@ class AdminPurchaseOrderController extends Controller
         } catch (Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/PurchaseOrder/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

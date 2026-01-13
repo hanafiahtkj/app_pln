@@ -43,11 +43,11 @@ const openPdfPreview = path => {
                 description="Detail lengkap Paket Pekerjaan."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
-                    { label: 'Data Paket', href: route('admin.paket.index') },
+                    { label: 'Data Paket', href: route('admin.po.index') },
                     { label: 'Detail' }
                 ]">
                 <template #actions>
-                    <Link :href="route('admin.paket.index')" class="btn-primary btn-sm">
+                    <Link :href="route('admin.po.index')" class="btn-primary btn-sm">
                         Kembali ke Daftar
                     </Link>
                 </template>
@@ -59,13 +59,16 @@ const openPdfPreview = path => {
 
                 <div class="space-y-12">
                     <PrkCard :paket="paket" @openPdfPreview="openPdfPreview" />
-                    <PaketCard :hasAccess="true" :paket="paket" @openPdfPreview="openPdfPreview" />
-                    <!-- <EnjiniringCard :paket="paket" @openPdfPreview="openPdfPreview" />
+                    <PaketCard :paket="paket" @openPdfPreview="openPdfPreview" />
+                    <EnjiniringCard :paket="paket" @openPdfPreview="openPdfPreview" />
                     <RendanCard :paket="paket" @openPdfPreview="openPdfPreview" />
                     <LakdanCard :paket="paket" @openPdfPreview="openPdfPreview" />
                     <KontrakCard :paket="paket" @openPdfPreview="openPdfPreview" />
-                    <PurchaseOrderCard :paket="paket" @openPdfPreview="openPdfPreview" />
-                    <PembayaranCard :paket="paket" @openPdfPreview="openPdfPreview" /> -->
+                    <PurchaseOrderCard
+                        :hasAccess="true"
+                        :paket="paket"
+                        @openPdfPreview="openPdfPreview" />
+                    <!-- <PembayaranCard :paket="paket" @openPdfPreview="openPdfPreview" /> -->
                 </div>
             </div>
         </div>

@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paket;
 use App\Models\Kontrak; // Model untuk relasi (Foreign Key)
 use App\Models\Pembayaran; // Model utama (Pembayaran)
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Services\DataTablePaginationService;
 
 class AdminPembayaranController extends Controller
 {
+    public function __construct(private DataTablePaginationService $pagination)
+    {
+        $this->middleware('permission:manage-pembayaran');
+    }
+
     /**
      * Menghasilkan aturan validasi yang dapat digunakan kembali untuk Pembayaran.
      */
@@ -66,13 +73,41 @@ class AdminPembayaranController extends Controller
      */
     public function index(Request $request)
     {
-        // Eager load relasi kontrak
-        $data = Pembayaran::latest()
-            ->with('kontrak')
-            ->paginate($request->input('per_page', 10));
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
+        // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
+        $statusFilter = $request->input('filter_status', 'belum_diproses');
+
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // Filter berdasarkan unit user
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // LOGIKA FILTER BARU
+        if ($statusFilter === 'belum_diproses') {
+            $query->has('enjiniring.rendan.lakdan.kontrak');
+            $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak.pembayaran');
+        } elseif ($statusFilter === 'proses') {
+            $query->has('enjiniring.rendan.lakdan.kontrak.pembayaran');
+        }
+
+        $data = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Pembayaran/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'status' => $statusFilter
+            ]
         ]);
     }
 
@@ -82,7 +117,6 @@ class AdminPembayaranController extends Controller
     public function create()
     {
         $kontraks = Kontrak::with('lakdan.rendan.enjiniring.paket.prk')
-            ->doesntHave('pembayaran')
             ->get();
 
         return Inertia::render('Admin/Pembayaran/CreatePage', [
@@ -101,10 +135,8 @@ class AdminPembayaranController extends Controller
 
         // 2. Query untuk mengambil daftar Kontrak yang tersedia:
         $kontraks = Kontrak::with('lakdan.rendan.enjiniring.paket.prk') // Tambahkan relasi yang dibutuhkan untuk modal
-            // Gunakan where closure untuk menggabungkan kondisi OR
             ->where(function ($query) use ($currentKontrakId) {
-                $query->doesntHave('pembayaran');
-                $query->orWhere('id', $currentKontrakId);
+                $query->where('id', $currentKontrakId);
             })
             ->get();
 
@@ -128,7 +160,7 @@ class AdminPembayaranController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $req->kontrak->lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.pembayaran.show', $req->kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pembayaran berhasil ditambahkan.');
 
         } catch (Exception $e) {
@@ -153,7 +185,7 @@ class AdminPembayaranController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $pembayaran->kontrak->lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.pembayaran.show', $pembayaran->kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Pembayaran berhasil diperbarui.');
 
         } catch (Exception $e) {
@@ -167,9 +199,7 @@ class AdminPembayaranController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = Pembayaran::findOrFail($id);
-
-            // Tidak ada file yang perlu dihapus (karena hanya checklist status)
+            $data = Pembayaran::where('kontrak_id', $id);
 
             $data->delete();
             DB::commit();
@@ -183,5 +213,18 @@ class AdminPembayaranController extends Controller
                 ->route('admin.pembayaran.index')
                 ->with('error', 'Gagal menghapus Pembayaran: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Pembayaran/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

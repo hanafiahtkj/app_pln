@@ -164,12 +164,12 @@ Route::middleware(['web', 'auth', 'auth.session'])->group(function () {
 
                 Route::resource('prk', AdminPrkController::class)->names('prk');
                 Route::resource('paket', AdminPaketController::class)->names('paket');
-                Route::resource('enjiniring', AdminEnjiniringController::class)->except('show')->names('enjiniring');
-                Route::resource('rendan', AdminRendanController::class)->except('show')->names('rendan');
-                Route::resource('lakdan', AdminLakdanController::class)->except('show')->names('lakdan');
-                Route::resource('kontrak', AdminKontrakController::class)->except('show')->names('kontrak');
-                Route::resource('po', AdminPurchaseOrderController::class)->except('show')->names('po');
-                Route::resource('pembayaran', AdminPembayaranController::class)->except('show')->names('pembayaran');
+                Route::resource('enjiniring', AdminEnjiniringController::class)->names('enjiniring');
+                Route::resource('rendan', AdminRendanController::class)->names('rendan');
+                Route::resource('lakdan', AdminLakdanController::class)->names('lakdan');
+                Route::resource('kontrak', AdminKontrakController::class)->names('kontrak');
+                Route::resource('po', AdminPurchaseOrderController::class)->names('po');
+                Route::resource('pembayaran', AdminPembayaranController::class)->names('pembayaran');
             });
         });
 

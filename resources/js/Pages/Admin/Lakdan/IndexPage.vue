@@ -6,6 +6,7 @@ import Modal from '@/Components/Modal.vue'
 import { createColumnHelper } from '@tanstack/vue-table'
 import { h, ref, watch } from 'vue'
 import PageHeader from '@/Components/PageHeader.vue'
+import FormSelect from '@/Components/FormSelect.vue'
 
 defineOptions({
     layout: Default
@@ -15,7 +16,8 @@ const props = defineProps({
     data: {
         type: Object,
         required: true
-    }
+    },
+    filters: Object
 })
 
 const columnHelper = createColumnHelper()
@@ -83,71 +85,94 @@ const renderFileStatus = path => {
     return h('span', { class: 'text-xs text-gray-500' }, 'Tidak Ada File')
 }
 
-// --- DEFINISI KOLOM SESUAI LAKDAN ---
+const handleShow = paket => {
+    if (!paket?.id) return
+    router.visit(route('admin.lakdan.show', { lakdan: paket.id }))
+}
+
+// --- DEFINISI KOLOM SESUAI PAKET ---
 const columns = [
-    columnHelper.accessor('rendan.nomor_nd_user', {
-        header: 'ND User Terkait',
+    columnHelper.accessor('tahun', {
+        header: 'Tahun',
+        cell: info => h('span', info.getValue() || '-')
+    }),
+    columnHelper.accessor('prk.prk', {
+        header: 'PRK',
         cell: info => {
-            return h('span', info.row.original.rendan?.nomor_nd_user || '-')
+            return h('span', info.row.original.prk?.prk || '-')
         }
     }),
-    columnHelper.accessor('proses_pengadaan', {
-        header: 'Proses Pengadaan',
+    columnHelper.accessor('uraian_paket', {
+        header: 'Uraian Paket',
+        cell: info => {
+            return h('span', info.row.original.uraian_paket || '-')
+        }
+    }),
+    columnHelper.accessor('nomor_skk', {
+        header: 'Nomor SKK',
         cell: info => h('span', info.getValue() || '-')
     }),
-    columnHelper.accessor('metode_pengadaan', {
-        header: 'Metode',
-        cell: info => h('span', info.getValue() || '-')
-    }),
-    columnHelper.accessor('nomor_hps', {
-        header: 'Nomor HPS',
-        cell: info => h('span', info.getValue() || '-')
-    }),
-    columnHelper.accessor('nilai_hps', {
-        header: 'Nilai HPS',
+    columnHelper.accessor('nilai_skk', {
+        header: 'Nilai SKK (Rp)',
         cell: info => {
             const value = info.getValue()
+            if (value === null) return h('span', '-')
             return h(
                 'span',
-                value
-                    ? `Rp ${value.toLocaleString('id-ID', {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 2
-                      })}`
-                    : '-'
+                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
             )
         }
     }),
-    columnHelper.accessor('dokumen_hps', {
-        header: 'Dokumen HPS',
-        cell: info => renderFileStatus(info.getValue())
-    }),
-    columnHelper.accessor('realisasi_pengumuman_lelang', {
-        header: 'Tgl. Realisasi Lelang',
+    columnHelper.accessor('tanggal_skk', {
+        header: 'Tgl SKK',
         cell: info => h('span', info.getValue() || '-')
     }),
-    columnHelper.accessor('nomor_penunjukan_pemenang', {
-        header: 'Nomor Penunjukan Pemenang',
+    columnHelper.accessor('status_paket', {
+        header: 'Status',
         cell: info => h('span', info.getValue() || '-')
     }),
-    columnHelper.accessor('dokumen_penunjukan_pemenang', {
-        header: 'Dokumen Pemenang',
-        cell: info => renderFileStatus(info.getValue())
+    columnHelper.display({
+        id: 'progress_tracker',
+        header: 'Progres',
+        cell: info => {
+            const status = getProgressStatus(info.row.original)
+            return h('div', { class: 'flex items-center' }, [
+                h(
+                    'span',
+                    {
+                        class: `px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${status.color}`
+                    },
+                    status.label
+                )
+            ])
+        }
+    }),
+    columnHelper.accessor('created_at', {
+        header: 'Dibuat Pada',
+        cell: info =>
+            h(
+                'span',
+                new Date(info.getValue()).toLocaleString('id-ID', {
+                    dateStyle: 'short',
+                    timeStyle: 'short'
+                })
+            )
     }),
     columnHelper.display({
         id: 'actions',
         header: 'Aksi',
         cell: info => {
-            const lakdan = info.row.original
-            if (!lakdan?.id) return null
+            const paket = info.row.original
+            if (!paket?.id) return null
 
-            const editButton = h(
+            // 1. Tombol Detail (Selalu muncul)
+            const showButton = h(
                 'button',
                 {
                     class: 'p-2 text-blue-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 cursor-pointer',
-                    onClick: () => handleEdit(lakdan),
+                    onClick: () => handleShow(paket),
                     type: 'button',
-                    title: 'Edit'
+                    title: 'Lihat Detail'
                 },
                 [
                     h(
@@ -163,63 +188,78 @@ const columns = [
                                 'stroke-linecap': 'round',
                                 'stroke-linejoin': 'round',
                                 'stroke-width': '2',
-                                d: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'
-                            })
-                        ]
-                    )
-                ]
-            )
-
-            const deleteButton = h(
-                'button',
-                {
-                    class: 'p-2 text-red-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50 cursor-pointer',
-                    onClick: () => confirmDeleteLakdan(lakdan),
-                    type: 'button',
-                    title: 'Hapus'
-                },
-                [
-                    h(
-                        'svg',
-                        {
-                            class: 'w-4 h-4',
-                            fill: 'none',
-                            stroke: 'currentColor',
-                            viewBox: '0 0 24 24'
-                        },
-                        [
+                                d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+                            }),
                             h('path', {
                                 'stroke-linecap': 'round',
                                 'stroke-linejoin': 'round',
                                 'stroke-width': '2',
-                                d: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                                d: 'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
                             })
                         ]
                     )
                 ]
             )
 
-            return h(
-                'div',
-                {
-                    class: 'flex items-center gap-2 justify-end'
-                },
-                [editButton, deleteButton]
-            )
+            // 2. Tombol Delete (Hanya muncul jika SUDAH diproses / memiliki data enjiniring)
+            const deleteButton = paket.enjiniring?.rendan?.lakdan
+                ? h(
+                      'button',
+                      {
+                          class: 'p-2 text-red-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50 cursor-pointer',
+                          onClick: () => confirmDeleteLakdan(paket.enjiniring.rendan.lakdan), // Pastikan nama fungsi sesuai logic delete Anda
+                          type: 'button',
+                          title: 'Hapus'
+                      },
+                      [
+                          h(
+                              'svg',
+                              {
+                                  class: 'w-4 h-4',
+                                  fill: 'none',
+                                  stroke: 'currentColor',
+                                  viewBox: '0 0 24 24'
+                              },
+                              [
+                                  h('path', {
+                                      'stroke-linecap': 'round',
+                                      'stroke-linejoin': 'round',
+                                      'stroke-width': '2',
+                                      d: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                                  })
+                              ]
+                          )
+                      ]
+                  )
+                : null // Jika belum diproses, return null
+
+            // 3. Gabungkan tombol ke dalam array
+            const actionButtons = [showButton]
+            if (deleteButton) actionButtons.push(deleteButton)
+
+            return h('div', { class: 'flex items-center gap-2 justify-end' }, actionButtons)
         }
     })
 ]
 
+// Inisialisasi state filter dari props atau default
+const filterStatus = ref(props.filters?.status || 'belum_diproses')
+
+const resetFilters = () => {
+    filterStatus.value = 'belum_diproses'
+}
+
+// Update Watcher untuk menyertakan filter_status
 watch(
-    pagination,
-    newPagination => {
+    [pagination, filterStatus], // Pantau keduanya
+    ([newPagination, newStatus]) => {
         loading.value = true
         router.get(
-            // Rute disesuaikan ke admin.lakdan.index
             route('admin.lakdan.index'),
             {
                 page: newPagination.current_page,
-                per_page: Number(newPagination.per_page)
+                per_page: Number(newPagination.per_page),
+                filter_status: newStatus // Kirim status filter ke server
             },
             {
                 preserveState: true,
@@ -230,6 +270,43 @@ watch(
     },
     { deep: true }
 )
+
+const getProgressStatus = paket => {
+    // 1. Cek Tahapan Awal (Sequential/Berurutan)
+    if (!paket.enjiniring)
+        return { label: 'Paket', color: 'bg-gray-100 text-gray-600 border-gray-200' }
+
+    if (!paket.enjiniring.rendan)
+        return { label: 'Enjiniring', color: 'bg-blue-100 text-blue-700 border-blue-200' }
+
+    if (!paket.enjiniring.rendan.lakdan)
+        return { label: 'Rendan', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' }
+
+    if (!paket.enjiniring.rendan.lakdan.kontrak)
+        return { label: 'Lakdan', color: 'bg-purple-100 text-purple-700 border-purple-200' }
+
+    // 2. Tahapan Kontrak & Paralel (PO & Pembayaran)
+    const kontrak = paket.enjiniring.rendan.lakdan.kontrak
+    const hasPO = !!kontrak.purchase_order
+    const hasBayar = !!kontrak.pembayaran
+
+    // Kondisi jika keduanya sudah ada
+    if (hasPO && hasBayar) {
+        return { label: 'PO & Bayar', color: 'bg-emerald-600 text-white border-emerald-700' }
+    }
+
+    // Kondisi paralel: salah satu sudah ada
+    if (hasBayar) {
+        return { label: 'Pembayaran', color: 'bg-emerald-500 text-white border-emerald-600' }
+    }
+
+    if (hasPO) {
+        return { label: 'PO', color: 'bg-orange-100 text-orange-700 border-orange-200' }
+    }
+
+    // Default jika baru sampai tahap kontrak saja
+    return { label: 'Kontrak', color: 'bg-pink-100 text-pink-700 border-pink-200' }
+}
 </script>
 
 <template>
@@ -243,12 +320,45 @@ watch(
                     { label: 'Dashboard', href: route('dashboard') },
                     { label: 'Data Lakdan' }
                 ]">
-                <template #actions>
+                <!-- <template #actions>
                     <Link :href="route('admin.lakdan.create')" class="btn-primary btn-sm">
                         Tambah
                     </Link>
-                </template>
+                </template> -->
             </PageHeader>
+
+            <div
+                class="p-6 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <div class="space-y-1">
+                        <FormSelect
+                            label="Filter Status"
+                            v-model="filterStatus"
+                            :options="[
+                                { value: 'belum_diproses', label: 'Menunggu Diproses' },
+                                { value: 'proses', label: 'Sedang Diproses' }
+                                // { value: 'semua', label: 'Semua Status' }
+                            ]" />
+                    </div>
+
+                    <div class="flex items-center pb-0">
+                        <button @click="resetFilters" type="button" class="btn-secondary btn-sm">
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div class="p-6 dark:bg-gray-900">
                 <DataTable

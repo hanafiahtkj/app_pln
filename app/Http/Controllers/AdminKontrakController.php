@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paket;
 use App\Models\Lakdan; // Model untuk relasi (Foreign Key)
 use App\Models\Kontrak; // Model utama (Kontrak)
 use Illuminate\Http\Request;
@@ -10,21 +11,55 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use App\Services\DataTablePaginationService;
 
 class AdminKontrakController extends Controller
 {
+    public function __construct(private DataTablePaginationService $pagination)
+    {
+        $this->middleware('permission:manage-kontrak');
+    }
+
     /**
      * Tampilkan daftar data Kontrak.
      */
     public function index(Request $request)
     {
-        // Eager load relasi lakdan
-        $data = Kontrak::latest()
-            ->with('lakdan')
-            ->paginate($request->input('per_page', 10));
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
+        // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
+        $statusFilter = $request->input('filter_status', 'belum_diproses');
+
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // Filter berdasarkan unit user
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // LOGIKA FILTER BARU
+        if ($statusFilter === 'belum_diproses') {
+            $query->has('enjiniring.rendan.lakdan');
+            $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak');
+        } elseif ($statusFilter === 'proses') {
+            $query->has('enjiniring.rendan.lakdan.kontrak');
+        }
+
+        $data = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Kontrak/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'status' => $statusFilter
+            ]
         ]);
     }
 
@@ -114,7 +149,7 @@ class AdminKontrakController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $req->lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.kontrak.show', $req->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Kontrak berhasil ditambahkan.');
 
         } catch (Exception $e) {
@@ -176,7 +211,7 @@ class AdminKontrakController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $kontrak->lakdan->rendan->enjiniring->paket->id)
+                ->route('admin.kontrak.show', $kontrak->lakdan->rendan->enjiniring->paket->id)
                 ->with('success', 'Data Kontrak berhasil diperbarui.');
 
         } catch (Exception $e) {
@@ -205,5 +240,18 @@ class AdminKontrakController extends Controller
                 ->route('admin.kontrak.index')
                 ->with('error', 'Gagal menghapus Kontrak: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Kontrak/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

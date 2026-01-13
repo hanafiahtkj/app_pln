@@ -28,7 +28,7 @@ const page = usePage()
 const { settings: { passwordlessLogin = true } = {} } = page.props
 
 const form = useForm({
-    email: 'ota@example.com',
+    email: 'super@admin.com',
     password: 'password',
     remember: false
 })

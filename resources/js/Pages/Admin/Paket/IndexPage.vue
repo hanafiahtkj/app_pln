@@ -18,9 +18,24 @@ const props = defineProps({
     data: {
         type: Object,
         required: true
-    }
-    // Asumsi: 'prks' (list PRK) juga dikirim dari controller jika diperlukan
+    },
+    filters: Object
 })
+
+// --- STATE FILTER ---
+const filterTahun = ref(props.filters?.tahun || '')
+
+// Generate list tahun (10 tahun terakhir)
+const currentYear = new Date().getFullYear()
+const yearsOptions = Array.from({ length: 10 }, (_, i) => {
+    const year = currentYear - i
+    return { value: year.toString(), label: year.toString() }
+})
+
+// Fungsi Reset
+const resetFilters = () => {
+    filterTahun.value = ''
+}
 
 const columnHelper = createColumnHelper()
 const loading = ref(false)
@@ -142,10 +157,10 @@ const columns = [
             return h('span', info.row.original.prk?.prk || '-')
         }
     }),
-    columnHelper.accessor('prk.uraian', {
-        header: 'Uraian',
+    columnHelper.accessor('uraian_paket', {
+        header: 'Uraian Paket',
         cell: info => {
-            return h('span', info.row.original.prk?.uraian || '-')
+            return h('span', info.row.original.uraian_paket || '-')
         }
     }),
     columnHelper.accessor('nomor_skk', {
@@ -296,14 +311,15 @@ const handleShow = paket => {
 }
 
 watch(
-    pagination,
-    newPagination => {
+    [pagination, filterTahun], // Watch keduanya sekaligus
+    ([newPagination, newTahun]) => {
         loading.value = true
         router.get(
-            route('admin.paket.index'), // Rute disesuaikan
+            route('admin.paket.index'),
             {
                 page: newPagination.current_page,
-                per_page: Number(newPagination.per_page)
+                per_page: Number(newPagination.per_page),
+                tahun: newTahun // Kirim ke backend
             },
             {
                 preserveState: true,
@@ -316,38 +332,40 @@ watch(
 )
 
 const getProgressStatus = paket => {
-    // 1. Cek Enjiniring
+    // 1. Cek Tahapan Awal (Sequential/Berurutan)
     if (!paket.enjiniring)
         return { label: 'Paket', color: 'bg-gray-100 text-gray-600 border-gray-200' }
 
-    // 2. Cek Rendan
     if (!paket.enjiniring.rendan)
         return { label: 'Enjiniring', color: 'bg-blue-100 text-blue-700 border-blue-200' }
 
-    // 3. Cek Lakdan
     if (!paket.enjiniring.rendan.lakdan)
         return { label: 'Rendan', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' }
 
-    // 4. Cek Kontrak
     if (!paket.enjiniring.rendan.lakdan.kontrak)
         return { label: 'Lakdan', color: 'bg-purple-100 text-purple-700 border-purple-200' }
 
+    // 2. Tahapan Kontrak & Paralel (PO & Pembayaran)
     const kontrak = paket.enjiniring.rendan.lakdan.kontrak
+    const hasPO = !!kontrak.purchase_order
+    const hasBayar = !!kontrak.pembayaran
 
-    // 5. Cek Purchase Order (PO)
-    if (!kontrak.purchase_order)
-        return { label: 'Kontrak', color: 'bg-pink-100 text-pink-700 border-pink-200' }
-
-    // 6. Cek Pembayaran (Tahap Akhir)
-    if (kontrak.pembayaran) {
-        return {
-            label: 'Pembayaran',
-            color: 'bg-emerald-500 text-white border-emerald-600'
-        }
+    // Kondisi jika keduanya sudah ada
+    if (hasPO && hasBayar) {
+        return { label: 'PO & Bayar', color: 'bg-emerald-600 text-white border-emerald-700' }
     }
 
-    // Jika sudah ada PO tapi belum ada pembayaran
-    return { label: 'PO', color: 'bg-orange-100 text-orange-700 border-orange-200' }
+    // Kondisi paralel: salah satu sudah ada
+    if (hasBayar) {
+        return { label: 'Pembayaran', color: 'bg-emerald-500 text-white border-emerald-600' }
+    }
+
+    if (hasPO) {
+        return { label: 'PO', color: 'bg-orange-100 text-orange-700 border-orange-200' }
+    }
+
+    // Default jika baru sampai tahap kontrak saja
+    return { label: 'Kontrak', color: 'bg-pink-100 text-pink-700 border-pink-200' }
 }
 </script>
 
@@ -369,6 +387,39 @@ const getProgressStatus = paket => {
                     </Link>
                 </template>
             </PageHeader>
+
+            <div
+                class="p-6 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <div class="space-y-1">
+                        <FormSelect
+                            label="Filter Tahun"
+                            v-model="filterTahun"
+                            :options="[{ value: '', label: 'Semua Tahun' }, ...yearsOptions]" />
+                    </div>
+
+                    <div class="flex items-center pb-0">
+                        <button
+                            @click="resetFilters"
+                            type="button"
+                            class="btn-secondary btn-sm flex items-center gap-2"
+                            v-if="filterTahun">
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div class="p-6 dark:bg-gray-900">
                 <DataTable

@@ -23,7 +23,7 @@ const props = defineProps({
 const defaultFungsiOptions = [
     { label: 'Gardu Induk', value: 'Gardu Induk' },
     { label: 'Transmisi', value: 'Transmisi' },
-    { label: 'Operasi Sistem', value: 'Operasi Sistem' }
+    { label: 'Sarana', value: 'Sarana' }
 ]
 
 const defaultStatusOptions = [
@@ -135,7 +135,7 @@ const submit = () => {
                             <FormSelect
                                 label="Fungsi"
                                 v-model="form.fungsi"
-                                :options="fungsiOptions"
+                                :options="defaultFungsiOptions"
                                 :error="form.errors.fungsi"
                                 placeholder="Pilih Fungsi" />
                         </div>
@@ -153,7 +153,7 @@ const submit = () => {
                             <FormSelect
                                 label="Status PRK"
                                 v-model="form.status"
-                                :options="statusOptions"
+                                :options="defaultStatusOptions"
                                 :error="form.errors.status"
                                 placeholder="Pilih Status" />
 

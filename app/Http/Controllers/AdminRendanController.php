@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paket;
 use App\Models\Rendan;
 use App\Models\Enjiniring;
 use App\Models\Prk;
@@ -11,19 +12,52 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage; // Wajib diaktifkan kembali
 use Exception;
+use App\Services\DataTablePaginationService;
 
 class AdminRendanController extends Controller
 {
-    // ... (Metode __construct, index, create, dan edit tetap sama) ...
+    public function __construct(private DataTablePaginationService $pagination)
+    {
+        $this->middleware('permission:manage-rendan');
+    }
 
     public function index(Request $request)
     {
-        $data = Rendan::latest()
-            ->with('enjiniring.paket.prk')
-            ->paginate($request->input('per_page', 10));
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
+        // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
+        $statusFilter = $request->input('filter_status', 'belum_diproses');
+
+        $query = Paket::latest()->with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ]);
+
+        $user = auth()->user();
+
+        // Filter berdasarkan unit user
+        if ($user->hasRole('user')) {
+            $query->whereHas('prk', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        // LOGIKA FILTER BARU
+        if ($statusFilter === 'belum_diproses') {
+            $query->has('enjiniring');
+            $query->whereDoesntHave('enjiniring.rendan');
+        } elseif ($statusFilter === 'proses') {
+            $query->has('enjiniring.rendan');
+        }
+
+        $data = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Rendan/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'status' => $statusFilter
+            ]
         ]);
     }
 
@@ -88,7 +122,7 @@ class AdminRendanController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $req->enjiniring->paket->id)
+                ->route('admin.rendan.show', $req->enjiniring->paket->id)
                 ->with('success', 'Data Rendan berhasil ditambahkan.');
 
         } catch (Exception $e) {
@@ -134,7 +168,7 @@ class AdminRendanController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.paket.show', $rendan->enjiniring->paket->id)
+                ->route('admin.rendan.show', $rendan->enjiniring->paket->id)
                 ->with('success', 'Data Rendan berhasil diperbarui.');
 
         } catch (Exception $e) {
@@ -162,5 +196,18 @@ class AdminRendanController extends Controller
                 ->route('admin.rendan.index')
                 ->with('error', 'Gagal menghapus Rendan: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        $paket = Paket::with([
+            'prk.bidang',
+            'enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Rendan/ShowPage', [
+            'data' => $paket,
+        ]);
     }
 }

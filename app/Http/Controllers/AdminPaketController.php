@@ -9,16 +9,19 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Prk;
+use App\Services\DataTablePaginationService;
 
 class AdminPaketController extends Controller
 {
-    public function __construct()
+    public function __construct(private DataTablePaginationService $pagination)
     {
-        // $this->middleware('permission:manage-holidays');
+        $this->middleware('permission:manage-paket');
     }
 
     public function index(Request $request)
     {
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
         // 1. Inisialisasi query dasar dengan eager loading relasi prk
         $query = Paket::latest()->with([
             'prk.bidang',
@@ -35,8 +38,12 @@ class AdminPaketController extends Controller
             });
         }
 
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
         // 3. Eksekusi pagination
-        $data = $query->paginate($request->input('per_page', 10));
+        $data = $query->paginate($perPage);
 
         return Inertia::render('Admin/Paket/IndexPage', [
             'data' => $data,
@@ -71,7 +78,7 @@ class AdminPaketController extends Controller
         $validated = $request->validate([
             'prk_id' => ['required', 'exists:prks,id'], // Foreign Key ke tabel prks
             'tahun' => ['required', 'integer', 'digits:4'],
-
+            'uraian_paket' => ['required', 'string'],
             // SKK Fields
             'nomor_skk' => ['required', 'string', Rule::unique('pakets', 'nomor_skk')], // Nomor SKK harus unik
             'tanggal_skk' => ['nullable', 'date'],
@@ -127,7 +134,7 @@ class AdminPaketController extends Controller
         $validated = $request->validate([
             'prk_id' => ['required', 'exists:prks,id'],
             'tahun' => ['required', 'integer', 'digits:4'],
-
+            'uraian_paket' => ['required', 'string'],
             // SKK Fields
             // Abaikan Nomor SKK saat ini untuk validasi unique
             'nomor_skk' => ['required', 'string', Rule::unique('pakets', 'nomor_skk')->ignore($paket->id)],

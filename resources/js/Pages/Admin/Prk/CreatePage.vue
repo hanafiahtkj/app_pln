@@ -19,7 +19,7 @@ const props = defineProps({
 const defaultFungsiOptions = [
     { label: 'Gardu Induk', value: 'Gardu Induk' },
     { label: 'Transmisi', value: 'Transmisi' },
-    { label: 'Operasi Sistem', value: 'Operasi Sistem' }
+    { label: 'Sarana', value: 'Sarana' }
 ]
 
 const defaultStatusOptions = [

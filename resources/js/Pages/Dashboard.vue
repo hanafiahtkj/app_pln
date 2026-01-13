@@ -320,11 +320,11 @@ const getSteps = paket => {
                                 </th>
                                 <th
                                     class="px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
-                                    Uraian Paket & Referensi PRK
+                                    Referensi PRK
                                 </th>
                                 <th
                                     class="px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
-                                    Realisasi Bayar
+                                    Uraian Paket
                                 </th>
                                 <th
                                     class="px-3 py-4 text-right pr-8 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
@@ -420,6 +420,7 @@ const getSteps = paket => {
                                                         class="text-xs font-mono font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
                                                         {{ prk.prk }}
                                                     </span>
+                                                    |
                                                     <span
                                                         class="text-xs text-gray-400 uppercase font-medium">
                                                         {{ prk.bidang?.name || 'N/A' }}
@@ -431,12 +432,8 @@ const getSteps = paket => {
                                         <td class="px-3 py-5">
                                             <div class="flex flex-col">
                                                 <span
-                                                    class="text-sm text-emerald-600 font-bold dark:text-emerald-400">
-                                                    {{ formatRupiah(hitungTotalBayar(paket)) }}
-                                                </span>
-                                                <span
-                                                    class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">
-                                                    Confirmed
+                                                    class="italic text-xs text-[var(--color-text)] text-gray-800 dark:text-gray-200 group-hover:text-sky-600 transition-colors">
+                                                    {{ paket.uraian_paket || '-' }}
                                                 </span>
                                             </div>
                                         </td>

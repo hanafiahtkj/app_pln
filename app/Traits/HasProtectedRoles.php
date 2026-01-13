@@ -6,7 +6,8 @@ trait HasProtectedRoles
 {
     protected function getProtectedRoles(): array
     {
-        return ['superuser', 'user'];
+        // return ['superuser', 'user'];
+        return [];
     }
 
     protected function isProtectedRole(string $roleName): bool

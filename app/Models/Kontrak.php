@@ -29,6 +29,6 @@ class Kontrak extends Model
 
     public function pembayaran()
     {
-        return $this->hasOne(Pembayaran::class, 'kontrak_id');
+        return $this->hasMany(Pembayaran::class, 'kontrak_id');
     }
 }

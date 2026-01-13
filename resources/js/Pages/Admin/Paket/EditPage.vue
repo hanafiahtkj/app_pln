@@ -8,6 +8,7 @@ import PrkSearchSelect from './PrkSearchSelect.vue'
 import FormCurrency from '@/Components/FormCurrency.vue'
 import { ref, computed, watch } from 'vue'
 import FileManagerInput from '@/Components/FileManagerInput.vue'
+import FormTextarea from '@/Components/FormTextarea.vue'
 
 defineOptions({ layout: Default })
 
@@ -71,6 +72,7 @@ const form = useForm({
     // Core fields (diambil dari props.data)
     prk_id: props.data.prk_id,
     tahun: props.data.tahun,
+    uraian_paket: props.data.uraian_paket,
 
     // Informasi SKK
     nomor_skk: props.data.nomor_skk,
@@ -225,6 +227,12 @@ const prkOptions = props.prks.map(prk => ({
 
                             <div class="hidden md:block"></div>
                         </div>
+
+                        <FormTextarea
+                            label="Uraian Paket"
+                            v-model="form.uraian_paket"
+                            :error="form.errors.uraian_paket"
+                            rows="3" />
                     </div>
                 </section>
 

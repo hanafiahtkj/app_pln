@@ -50,6 +50,7 @@ const getFileName = url => {
 const form = useForm({
     prk_id: null, // Foreign Key ke PRK
     tahun: currentYear,
+    uraian_paket: '',
 
     // Informasi SKK (Surat Keputusan Kebutuhan)
     nomor_skk: '',
@@ -203,6 +204,12 @@ const submit = () => {
 
                             <div class="hidden md:block"></div>
                         </div>
+
+                        <FormTextarea
+                            label="Uraian Paket"
+                            v-model="form.uraian_paket"
+                            :error="form.errors.uraian_paket"
+                            rows="3" />
                     </div>
                 </section>
 

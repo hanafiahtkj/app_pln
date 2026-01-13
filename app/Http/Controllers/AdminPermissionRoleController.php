@@ -38,12 +38,24 @@ class AdminPermissionRoleController extends Controller
                 ];
             });
 
+        $permissionsList = Permission::query()
+            ->get() // Ambil semua data
+            ->map(function ($permission) { // Gunakan map untuk collection
+                return [
+                    'id'           => $permission->id,
+                    'name'         => $permission->name,
+                    'description'  => $permission->description,
+                    'created_at'   => $permission->created_at->diffForHumans(),
+                    'is_protected' => $this->isProtectedPermission($permission->name),
+                ];
+            });
+
         $roles = Role::with(['permissions', 'users'])->get();
         $users = User::all();
 
         return Inertia::render('Admin/PermissionRole/IndexPermissionRolePage', [
             'permissions'          => $permissions,
-            'permissionsList'      => $permissions->items(),
+            'permissionsList'      => $permissionsList,
             'roles'                => $roles,
             'users'                => $users,
             'protectedRoles'       => $this->getProtectedRoles(),

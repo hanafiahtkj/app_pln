@@ -10,16 +10,19 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Services\DataTablePaginationService;
 
 class AdminPrkController extends Controller
 {
-    public function __construct()
+    public function __construct(private DataTablePaginationService $pagination)
     {
-        // $this->middleware('permission:manage-holidays');
+        $this->middleware('permission:manage-prk');
     }
 
     public function index(Request $request)
     {
+        $perPage = $this->pagination->resolvePerPageWithDefaults($request);
+
         // 1. Mulai query dasar
         $query = Prk::latest();
 
@@ -32,8 +35,12 @@ class AdminPrkController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
         // 4. Eksekusi pagination
-        $data = $query->paginate($request->input('per_page', 10));
+        $data = $query->paginate($perPage);
 
         return Inertia::render('Admin/Prk/IndexPage', [
             'data' => $data,

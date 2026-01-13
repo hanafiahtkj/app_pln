@@ -18,8 +18,24 @@ const props = defineProps({
     data: {
         type: Object,
         required: true
-    }
+    },
+    filters: Object
 })
+
+// --- STATE FILTER ---
+const filterTahun = ref(props.filters?.tahun || '')
+
+// Generate list tahun (10 tahun terakhir)
+const currentYear = new Date().getFullYear()
+const yearsOptions = Array.from({ length: 10 }, (_, i) => {
+    const year = currentYear - i
+    return { value: year.toString(), label: year.toString() }
+})
+
+// Fungsi Reset
+const resetFilters = () => {
+    filterTahun.value = ''
+}
 
 const columnHelper = createColumnHelper()
 const loading = ref(false)
@@ -327,14 +343,15 @@ const handleShow = prk => {
 // ganti `onClick` tombol edit di atas menjadi `onClick: () => handleEdit(prk)`.
 
 watch(
-    pagination,
-    newPagination => {
+    [pagination, filterTahun], // Watch keduanya sekaligus
+    ([newPagination, newTahun]) => {
         loading.value = true
         router.get(
             route('admin.prk.index'),
             {
                 page: newPagination.current_page,
-                per_page: Number(newPagination.per_page)
+                per_page: Number(newPagination.per_page),
+                tahun: newTahun // Kirim ke backend
             },
             {
                 preserveState: true,
@@ -370,6 +387,40 @@ const handleEdit = prk => {
                     <Link :href="route('admin.prk.create')" class="btn-primary btn-sm">Tambah</Link>
                 </template>
             </PageHeader>
+
+            <div
+                class="p-6 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <div class="space-y-1">
+                        <FormSelect
+                            label="Filter Tahun"
+                            v-model="filterTahun"
+                            :options="[{ value: '', label: 'Semua Tahun' }, ...yearsOptions]" />
+                    </div>
+
+                    <div class="flex items-center pb-0">
+                        <button
+                            @click="resetFilters"
+                            type="button"
+                            class="btn-secondary btn-sm flex items-center gap-2"
+                            v-if="filterTahun">
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="p-6 dark:bg-gray-900">
                 <DataTable
                     :data="data.data"
