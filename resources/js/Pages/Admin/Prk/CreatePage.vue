@@ -1,18 +1,30 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head, useForm, usePage } from '@inertiajs/vue3'
 import Default from '@/Layouts/Default.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
 import FormTextarea from '@/Components/FormTextarea.vue'
 import FormSelect from '@/Components/FormSelect.vue'
 import FormCurrency from '@/Components/FormCurrency.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
 
 const props = defineProps({
-    bidangs: Object // <-- Terima data Bidangs
+    bidangs: Object, // <-- Terima data Bidangs
+    units: Object
+})
+
+const page = usePage()
+
+const formattedUnits = computed(() => {
+    return (
+        props.units?.data.map(unit => ({
+            ...unit,
+            label_with_code: `${unit.kode} - ${unit.name}`
+        })) || []
+    )
 })
 
 // --- Definisikan opsi statis default untuk Fungsi dan Status ---
@@ -57,6 +69,7 @@ const form = useForm({
     status: '',
     ai_rupiah: null,
     bidang_id: null,
+    unit_id: page.props.auth.user?.unit?.id || null,
 
     // Dokumen & Tanggal Kajian
     dokumen_kkp: '',
@@ -144,6 +157,15 @@ const submit = () => {
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormSelect
+                                label="Unit"
+                                v-model.number="form.unit_id"
+                                :options="formattedUnits || []"
+                                option-label="label_with_code"
+                                option-value="id"
+                                :error="form.errors.unit_id"
+                                placeholder="Pilih Unit" />
+
                             <FormSelect
                                 label="Bidang Pelaksana"
                                 v-model.number="form.bidang_id"

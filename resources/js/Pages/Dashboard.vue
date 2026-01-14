@@ -6,6 +6,7 @@ import StockWidget from '@/Components/Widgets/StockWidget.vue'
 import StatWidget from '@/Components/Widgets/StatWidget.vue'
 import ProgressWidget from '@/Components/Widgets/ProgressWidget.vue'
 import ChartWidget from '@/Components/Widgets/ChartWidget.vue'
+import ApexBarChart from '@/Components/Charts/ApexBarChart.vue'
 
 defineOptions({
     layout: Default
@@ -32,8 +33,59 @@ const props = defineProps({
         // Terima props filter dari controller
         type: Object,
         default: () => ({ tahun: '' })
-    }
+    },
+
+    totalStats: Object
 })
+
+const paketChartData = computed(() => ({
+    labels: ['Status Paket Pekerjaan'], // Satu label untuk grup batang
+    datasets: [
+        {
+            label: 'Total Paket',
+            data: [props.totalStats.paket.total],
+            backgroundColor: '#3b82f6'
+        },
+        {
+            label: 'Terkontrak',
+            data: [props.totalStats.paket.terkontrak],
+            backgroundColor: '#10b981'
+        }
+    ]
+}))
+
+// Grafik 2: Total Rencana vs Realisasi Bayar
+const financialChartData = computed(() => ({
+    labels: ['Realisasi Keuangan'],
+    datasets: [
+        {
+            label: 'Total Nilai Kontrak',
+            data: [props.totalStats.keuangan.rencana],
+            backgroundColor: '#6366f1'
+        },
+        {
+            label: 'Total Terbayar',
+            data: [props.totalStats.keuangan.realisasi],
+            backgroundColor: '#f59e0b'
+        }
+    ]
+}))
+
+const styleMuted =
+    'text-[10px] font-medium text-gray-400 border-b border-gray-100 dark:border-gray-800 pb-0.5'
+
+const getStatusColor = (target, realisasi) => {
+    if (!realisasi) return styleMuted
+    if (!target) return 'text-[10px] font-mono font-bold text-gray-700' // Default jika tidak ada target
+
+    const tglTarget = new Date(target)
+    const tglRealisasi = new Date(realisasi)
+
+    // Jika realisasi lebih cepat atau sama dengan target = Hijau, jika telat = Merah
+    return tglRealisasi <= tglTarget
+        ? 'text-[10px] font-mono font-bold text-emerald-600'
+        : 'text-[10px] font-mono font-bold text-rose-600'
+}
 
 // State untuk filter tahun
 const selectedTahun = ref(props.filters.tahun || '')
@@ -225,6 +277,31 @@ const getSteps = paket => {
         }
     ]
 }
+
+const formatTglSingkat = dateString => {
+    if (!dateString) return '-'
+
+    const date = new Date(dateString)
+
+    // Menggunakan locale 'id-ID' dengan format numeric
+    // year: '2-digit' akan menghasilkan '25' bukan '2025'
+    return date
+        .toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit'
+        })
+        .replace(/\./g, '/') // Mengganti pemisah titik (default ID) menjadi garis miring
+}
+
+const formatIDR = val => {
+    if (!val || val === 0) return 'Rp 0'
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+    }).format(val)
+}
 </script>
 
 <template>
@@ -319,16 +396,109 @@ const getSteps = paket => {
                                     Tahun
                                 </th>
                                 <th
-                                    class="px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
+                                    class="min-w-[250px] px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
                                     Referensi PRK
                                 </th>
                                 <th
-                                    class="px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
+                                    class="min-w-[250px] px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
                                     Uraian Paket
                                 </th>
                                 <th
-                                    class="px-3 py-4 text-right pr-8 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
+                                    class="min-w-[200px] px-3 py-4 text-right pr-8 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
                                     Status Tahapan
+                                </th>
+
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    KKP
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    Risk
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    GRC
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    TVV
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    SKAI
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    SKKI
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    Survey
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    TOR & HPE
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    RKS
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    ND User
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    HPS
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    Lelang
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    Penunjukan
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    Perjanjian
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    Bank Garansi
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    Efektif Kontrak
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    PO
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    MOS
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    25%
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    50%
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    75%
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800">
+                                    100%
+                                </th>
+                                <th
+                                    class="px-3 py-4 text-center text-[10px] font-bold uppercase tracking-wider text-blue-600 border-b border-gray-100 dark:border-gray-800 text-nowrap">
+                                    Terbayar Tahun Ini
                                 </th>
                             </tr>
                         </thead>
@@ -369,6 +539,7 @@ const getSteps = paket => {
                                             -
                                         </span>
                                     </td>
+                                    <td colspan="23"></td>
                                 </tr>
 
                                 <template
@@ -423,6 +594,11 @@ const getSteps = paket => {
                                                     |
                                                     <span
                                                         class="text-xs text-gray-400 uppercase font-medium">
+                                                        {{ prk.unit?.name || 'N/A' }}
+                                                    </span>
+                                                    |
+                                                    <span
+                                                        class="text-xs text-gray-400 uppercase font-medium">
                                                         {{ prk.bidang?.name || 'N/A' }}
                                                     </span>
                                                 </div>
@@ -443,28 +619,672 @@ const getSteps = paket => {
                                                 {{ getStatusTahapan(paket) }}
                                             </span>
                                         </td>
+
+                                        <td class="px-3 py-4 text-center">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        prk.tanggal_kkp
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{ formatTglSingkat(prk.tanggal_kkp) }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        prk.tanggal_ulasan_kajian_risiko
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            prk.tanggal_ulasan_kajian_risiko
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        prk.tanggal_grc
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{ formatTglSingkat(prk.tanggal_grc) }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        prk.tanggal_tvv
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{ formatTglSingkat(prk.tanggal_tvv) }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        prk.tanggal_skai
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{ formatTglSingkat(prk.tanggal_skai) }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        paket.tanggal_skk
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{ formatTglSingkat(paket.tanggal_skk) }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.target_survey
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.target_survey
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.target_survey,
+                                                            paket.enjiniring?.realisasi_survey
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.realisasi_survey
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.target_dokumen_enjiniring
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring
+                                                                ?.target_dokumen_enjiniring
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring
+                                                                ?.target_dokumen_enjiniring,
+                                                            paket.enjiniring
+                                                                ?.realisasi_dokumen_enjiniring
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring
+                                                                ?.realisasi_dokumen_enjiniring
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.tanggal_rks
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.tanggal_rks
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.tanggal_nd_user
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan
+                                                                ?.tanggal_nd_user
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan
+                                                            ?.rencana_tanggal_hps
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.rencana_tanggal_hps
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.rencana_tanggal_hps,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.realisasi_tanggal_hps
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.realisasi_tanggal_hps
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan
+                                                            ?.rencana_pengumuman_pengadaan
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.rencana_pengumuman_pengadaan
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.rencana_pengumuman_pengadaan,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.realisasi_pengumuman_pengadaan
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.realisasi_pengumuman_pengadaan
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan
+                                                            ?.rencana_penunjukan_penyedia
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.rencana_penunjukan_penyedia
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.rencana_penunjukan_penyedia,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.realisasi_penunjukan_penyedia
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.realisasi_penunjukan_penyedia
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.rencana_tanggal_perjanjian
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.rencana_tanggal_perjanjian
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.rencana_tanggal_perjanjian,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.realisasi_tanggal_perjanjian
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.realisasi_tanggal_perjanjian
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.rencana_jaminan_pelaksanaan
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.rencana_jaminan_pelaksanaan
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.rencana_jaminan_pelaksanaan,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.realisasi_jaminan_pelaksanaan
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak
+                                                                ?.realisasi_jaminan_pelaksanaan
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span :class="styleMuted">-</span>
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.tanggal_berakhir
+                                                            ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.tanggal_berakhir
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.purchase_order?.rencana_po
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_po
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_po,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_po
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_po
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.purchase_order?.rencana_mos
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_mos
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_mos,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_mos
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_mos
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.purchase_order?.rencana_progress_25
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_progress_25
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_progress_25,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_progress_25
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_progress_25
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.purchase_order?.rencana_progress_50
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_progress_50
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_progress_50,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_progress_50
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_progress_50
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.purchase_order?.rencana_progress_75
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_progress_75
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_progress_75,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_progress_75
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_progress_75
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center bg-sky-50/20">
+                                            <div class="flex flex-col gap-1.5">
+                                                <span
+                                                    :class="
+                                                        paket.enjiniring?.rendan?.lakdan?.kontrak
+                                                            ?.purchase_order?.rencana_cod
+                                                            ? 'text-[10px] font-mono text-blue-500 border-b border-blue-100 pb-0.5'
+                                                            : styleMuted
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_cod
+                                                        )
+                                                    }}
+                                                </span>
+                                                <span
+                                                    :class="
+                                                        getStatusColor(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.rencana_cod,
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_cod
+                                                        )
+                                                    ">
+                                                    {{
+                                                        formatTglSingkat(
+                                                            paket.enjiniring?.rendan?.lakdan
+                                                                ?.kontrak?.purchase_order
+                                                                ?.realisasi_cod
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center min-w-[150px]">
+                                            <div class="flex flex-col gap-1">
+                                                <span
+                                                    class="text-[9px] font-medium text-gray-400 border-b border-gray-100 pb-0.5">
+                                                    Target: {{ formatIDR(paket.nilai_perjanjian) }}
+                                                </span>
+
+                                                <div class="flex flex-col items-center">
+                                                    <span
+                                                        :class="[
+                                                            'text-[11px] font-bold font-mono',
+                                                            paket.total_terbayar >=
+                                                                paket.nilai_perjanjian &&
+                                                            paket.nilai_perjanjian > 0
+                                                                ? 'text-emerald-600'
+                                                                : 'text-blue-600'
+                                                        ]">
+                                                        {{ formatIDR(paket.total_terbayar) }}
+                                                    </span>
+
+                                                    <span
+                                                        v-if="paket.nilai_perjanjian > 0"
+                                                        class="text-[8px] font-bold text-gray-400 uppercase">
+                                                        ({{
+                                                            (
+                                                                (paket.total_terbayar /
+                                                                    paket.nilai_perjanjian) *
+                                                                100
+                                                            ).toFixed(1)
+                                                        }}%)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
 
                                     <tr v-if="isExpanded(paket.id)">
                                         <td colspan="4" class="p-0 bg-gray-50/50 dark:bg-black/20">
                                             <div class="p-8 border-x-4 border-sky-500/20">
-                                                <div
-                                                    class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                                                    <div
-                                                        v-for="item in getStatItems(paket)"
-                                                        :key="item.label"
-                                                        class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                                                        <p
-                                                            class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                                                            {{ item.label }}
-                                                        </p>
-                                                        <p
-                                                            class="text-sm font-bold text-gray-800 dark:text-gray-100">
-                                                            {{ item.value || '-' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
                                                 <div
                                                     class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
                                                     <div class="flex justify-between relative">
@@ -514,6 +1334,7 @@ const getSteps = paket => {
                                                 </div>
                                             </div>
                                         </td>
+                                        <td colspan="23"></td>
                                     </tr>
                                 </template>
                             </template>
@@ -547,6 +1368,45 @@ const getSteps = paket => {
                     </div>
                 </div>
             </section>
+
+            <div class="max-w-6xl mx-auto py-6 space-y-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div
+                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Total Paket</p>
+                        <p class="text-2xl font-black text-blue-600">
+                            {{ totalStats.paket.total }}
+                        </p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Terkontrak</p>
+                        <p class="text-2xl font-black text-emerald-600">
+                            {{ totalStats.paket.terkontrak }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <section
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3
+                            class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase">
+                            Perbandingan Kontrak
+                        </h3>
+                        <ApexBarChart :chart-data="paketChartData" height="300" />
+                    </section>
+
+                    <section
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3
+                            class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase">
+                            Perbandingan Pembayaran
+                        </h3>
+                        <ApexBarChart :chart-data="financialChartData" height="300" />
+                    </section>
+                </div>
+            </div>
         </div>
     </main>
 </template>

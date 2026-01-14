@@ -361,6 +361,7 @@ class AdminLakdanController extends Controller
     public function show($id)
     {
         $paket = Paket::with([
+            'prk.unit',
             'prk.bidang',
             'enjiniring.rendan.lakdan.kontrak.purchase_order',
             'enjiniring.rendan.lakdan.kontrak.pembayaran'

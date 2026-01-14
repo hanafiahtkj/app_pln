@@ -7,6 +7,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use App\Models\Prk;
+use App\Models\Paket;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -19,6 +20,7 @@ class DashboardController extends Controller
         $tahunFilter = $request->query('tahun');
 
         $query = Prk::with([
+            'unit',
             'bidang',
             'pakets.enjiniring.rendan.lakdan.kontrak.purchase_order',
             'pakets.enjiniring.rendan.lakdan.kontrak.pembayaran'
@@ -35,9 +37,54 @@ class DashboardController extends Controller
         // withQueryString() memastikan filter tahun tetap terbawa saat pindah halaman (paging)
         $prks = $query->paginate(10)->withQueryString();
 
+        $prks->getCollection()->transform(function ($prk) {
+            $prk->pakets->transform(function ($paket) {
+                $kontrak = $paket->enjiniring?->rendan?->lakdan?->kontrak;
+
+                // Hitung jumlah dari semua record pembayaran
+                $totalBayar = $kontrak?->pembayaran->sum('nilai_bayar_vendor') ?? 0;
+
+                // Ambil nilai perjanjian
+                $nilaiPerjanjian = $kontrak?->nilai_perjanjian_ppn ?? 0;
+
+                // Tempelkan data ke objek paket
+                $paket->total_terbayar = $totalBayar;
+                $paket->nilai_perjanjian = $nilaiPerjanjian;
+
+                return $paket;
+            });
+            return $prk;
+        });
+
+        // Statistik / Grafik
+        $allPakets = Paket::with(['enjiniring.rendan.lakdan.kontrak.pembayaran'])
+            ->when($tahunFilter, function($q) use ($tahunFilter) {
+                $q->where('tahun', $tahunFilter);
+            })->get();
+
+        // 1. Akumulasi Paket
+        $totalPaket = $allPakets->count();
+        $totalTerkontrak = $allPakets->filter(fn($p) => $p->enjiniring?->rendan?->lakdan?->kontrak)->count();
+
+        // 2. Akumulasi Keuangan
+        $totalRencanaBayar = $allPakets->sum(fn($p) => $p->enjiniring?->rendan?->lakdan?->kontrak?->nilai_perjanjian_ppn ?? 0);
+        $totalRealisasiBayar = $allPakets->sum(function($p) {
+            return $p->enjiniring?->rendan?->lakdan?->kontrak?->pembayaran->sum('nilai_bayar_vendor') ?? 0;
+        });
+
         return Inertia::render('Dashboard', [
             'prks'   => $prks,
             'stats'  => $this->getStats(),
+            'totalStats' => [
+                'paket' => [
+                    'total' => $totalPaket,
+                    'terkontrak' => $totalTerkontrak
+                ],
+                'keuangan' => [
+                    'rencana' => $totalRencanaBayar,
+                    'realisasi' => $totalRealisasiBayar
+                ]
+            ],
             'filters'=> $request->only(['tahun']) // Kirim balik nilai filter ke Vue
         ]);
     }

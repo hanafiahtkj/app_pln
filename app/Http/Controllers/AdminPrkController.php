@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Prk;
 use App\Models\Bidang;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -24,7 +25,10 @@ class AdminPrkController extends Controller
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
         // 1. Mulai query dasar
-        $query = Prk::latest();
+        $query = Prk::with([
+            'bidang',
+            'unit',
+        ])->latest();
 
         // 2. Ambil user yang sedang login
         $user = auth()->user();
@@ -51,11 +55,12 @@ class AdminPrkController extends Controller
     {
         // $this->authorize('create-lapangan');
 
-        $bidangs = Bidang::select(['id', 'name'])->get();
-
         return Inertia::render('Admin/Prk/CreatePage', [
             'bidangs' => [
-                'data' => $bidangs,
+                'data' => Bidang::select(['id', 'name'])->get(),
+            ],
+            'units' => [
+                'data' => Unit::select(['id', 'kode', 'name'])->get(),
             ],
         ]);
     }
@@ -72,7 +77,8 @@ class AdminPrkController extends Controller
             'uraian' => ['required', 'string'],
             'status' => ['required', 'string'],
             'ai_rupiah' => ['required', 'numeric'],
-            'bidang_id' => ['nullable', 'exists:bidangs,id'],
+            'bidang_id' => ['required', 'exists:bidangs,id'],
+            'unit_id' => ['required', 'exists:units,id'],
 
             // Dokumen Kaji Ulang
             'dokumen_kkp' => ['nullable', 'string'],
@@ -106,7 +112,7 @@ class AdminPrkController extends Controller
             $prkData = $validated;
 
             $prkData['user_id'] = $user->id;
-            $prkData['unit_id'] = $user->unit_id;
+            // $prkData['unit_id'] = $user->unit_id;
 
             Prk::create($prkData);
 
@@ -130,12 +136,13 @@ class AdminPrkController extends Controller
         // 1. Ambil data Prk berdasarkan ID
         $prk = Prk::findOrFail($id);
 
-        $bidangs = Bidang::select(['id', 'name'])->get();
-
         return Inertia::render('Admin/Prk/EditPage', [
             'data' => $prk, // <-- Kirim data arsip yang akan diedit
             'bidangs' => [
-                'data' => $bidangs,
+                'data' => Bidang::select(['id', 'name'])->get(),
+            ],
+            'units' => [
+                'data' => Unit::select(['id', 'kode', 'name'])->get(),
             ],
         ]);
     }
@@ -158,7 +165,8 @@ class AdminPrkController extends Controller
             'uraian' => ['required', 'string'],
             'status' => ['required', 'string'],
             'ai_rupiah' => ['nullable', 'numeric'],
-            'bidang_id' => ['nullable', 'exists:bidangs,id'],
+            'bidang_id' => ['required', 'exists:bidangs,id'],
+            'unit_id' => ['required', 'exists:units,id'],
 
             // Dokumen Kaji Ulang
             'dokumen_kkp' => ['nullable', 'string'],
@@ -191,8 +199,8 @@ class AdminPrkController extends Controller
 
             $prkData = $validated;
 
-            $prkData['user_id'] = $user->id;
-            $prkData['unit_id'] = $user->unit_id;
+            // $prkData['user_id'] = $user->id;
+            // $prkData['unit_id'] = $user->unit_id;
 
             $prk->update($prkData);
 
@@ -231,6 +239,7 @@ class AdminPrkController extends Controller
     {
         $paket = Prk::with([
             'bidang',
+            'unit',
         ])->findOrFail($id);
 
         return Inertia::render('Admin/Prk/ShowPage', [

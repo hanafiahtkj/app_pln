@@ -6,7 +6,7 @@ import FormInput from '@/Components/FormInput.vue'
 import FormTextarea from '@/Components/FormTextarea.vue'
 import FormSelect from '@/Components/FormSelect.vue'
 import FormCurrency from '@/Components/FormCurrency.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import FileManagerInput from '@/Components/FileManagerInput.vue'
 
 defineOptions({ layout: Default })
@@ -16,7 +16,17 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    bidangs: Object
+    bidangs: Object,
+    units: Object
+})
+
+const formattedUnits = computed(() => {
+    return (
+        props.units?.data.map(unit => ({
+            ...unit,
+            label_with_code: `${unit.kode} - ${unit.name}`
+        })) || []
+    )
 })
 
 // --- Definisikan opsi statis default ---
@@ -141,6 +151,15 @@ const submit = () => {
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormSelect
+                                label="Unit"
+                                v-model.number="form.unit_id"
+                                :options="formattedUnits || []"
+                                option-label="label_with_code"
+                                option-value="id"
+                                :error="form.errors.unit_id"
+                                placeholder="Pilih Unit" />
+
                             <FormSelect
                                 label="Bidang Pelaksana"
                                 v-model.number="form.bidang_id"
