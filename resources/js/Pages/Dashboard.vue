@@ -1438,23 +1438,77 @@ const formatIDR = val => {
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                <div class="max-w-7xl mx-auto py-6 space-y-8">
                     <section
-                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <h3
-                            class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest border-b pb-2">
-                            Monitoring Kontrak Per Unit
-                        </h3>
-                        <ApexBarChart :chart-data="paketChartData" height="350" />
+                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <div
+                            class="p-6 border-b border-gray-50 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3
+                                    class="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <span class="w-2 h-5 bg-blue-500 rounded-full"></span>
+                                    Monitoring Progres Kontrak Per Unit
+                                </h3>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    Komparasi jumlah paket yang masuk dengan paket yang berhasil
+                                    terkontrak.
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold">
+                                        Total Ratio
+                                    </p>
+                                    <p class="text-sm font-black text-blue-600">
+                                        {{
+                                            (
+                                                (totalStats.paket.terkontrak /
+                                                    totalStats.paket.total) *
+                                                100
+                                            ).toFixed(1)
+                                        }}% Terkontrak
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gray-50/30 dark:bg-gray-900/10">
+                            <div class="h-[400px]">
+                                <ApexBarChart :chart-data="paketChartData" height="400" />
+                            </div>
+                        </div>
                     </section>
 
                     <section
-                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <h3
-                            class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest border-b pb-2">
-                            Monitoring Keuangan Per Unit
-                        </h3>
-                        <ApexBarChart :chart-data="financialChartData" height="350" />
+                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <div
+                            class="p-6 border-b border-gray-50 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h3
+                                    class="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <span class="w-2 h-5 bg-amber-500 rounded-full"></span>
+                                    Monitoring Realisasi Pembayaran Per Unit
+                                </h3>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    Perbandingan nilai total perjanjian (kontrak) dengan total dana
+                                    yang sudah dibayarkan.
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold">
+                                        Total Penyerapan
+                                    </p>
+                                    <p class="text-sm font-black text-amber-600">
+                                        {{ totalStats.keuangan.persen_serapan }}% Terbayar
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gray-50/30 dark:bg-gray-900/10">
+                            <div class="h-[400px]">
+                                <ApexBarChart :chart-data="financialChartData" height="400" />
+                            </div>
+                        </div>
                     </section>
                 </div>
             </div>
