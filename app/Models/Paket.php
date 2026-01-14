@@ -26,4 +26,9 @@ class Paket extends Model
     {
         return $this->hasOne(Enjiniring::class, 'paket_id');
     }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
 }

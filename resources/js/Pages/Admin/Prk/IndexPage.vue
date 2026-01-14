@@ -186,10 +186,10 @@ const columns = [
         cell: info => h('span', info.getValue() || '-'),
         maxSize: 300
     }),
-    columnHelper.accessor('unit.name', {
-        header: 'Unit',
-        cell: info => h('span', info.getValue() || '-')
-    }),
+    // columnHelper.accessor('unit.name', {
+    //     header: 'Unit',
+    //     cell: info => h('span', info.getValue() || '-')
+    // }),
     columnHelper.accessor('bidang.name', {
         header: 'Bidang',
         cell: info => h('span', info.getValue() || '-')

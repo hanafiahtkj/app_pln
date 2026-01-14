@@ -155,7 +155,7 @@ const openPdfPreview = url => {
                                 </p>
                             </div>
 
-                            <div class="space-y-1">
+                            <!-- <div class="space-y-1">
                                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Unit
                                 </p>
@@ -163,7 +163,7 @@ const openPdfPreview = url => {
                                     class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
                                     {{ paket.prk.unit.name || '-' }}
                                 </p>
-                            </div>
+                            </div> -->
 
                             <div class="space-y-1">
                                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">

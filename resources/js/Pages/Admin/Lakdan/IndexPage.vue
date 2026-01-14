@@ -108,6 +108,10 @@ const columns = [
             return h('span', info.row.original.uraian_paket || '-')
         }
     }),
+    columnHelper.accessor('unit.name', {
+        header: 'Unit',
+        cell: info => h('span', info.getValue() || '-')
+    }),
     columnHelper.accessor('nomor_skk', {
         header: 'Nomor SKK',
         cell: info => h('span', info.getValue() || '-')

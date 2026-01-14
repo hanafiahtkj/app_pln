@@ -21,7 +21,17 @@ const props = defineProps({
     prks: {
         type: Array,
         default: () => []
-    }
+    },
+    units: Object
+})
+
+const formattedUnits = computed(() => {
+    return (
+        props.units?.data.map(unit => ({
+            ...unit,
+            label_with_code: `${unit.kode} - ${unit.name}`
+        })) || []
+    )
 })
 
 // --- Definisikan opsi statis default untuk Status Paket ---
@@ -73,6 +83,7 @@ const form = useForm({
     prk_id: props.data.prk_id,
     tahun: props.data.tahun,
     uraian_paket: props.data.uraian_paket,
+    unit_id: props.data.unit_id,
 
     // Informasi SKK
     nomor_skk: props.data.nomor_skk,
@@ -224,6 +235,15 @@ const prkOptions = props.prks.map(prk => ({
                                 :prks="filteredPrks"
                                 :error="form.errors.prk_id"
                                 placeholder="Cari PRK..." />
+
+                            <FormSelect
+                                label="Unit"
+                                v-model.number="form.unit_id"
+                                :options="formattedUnits || []"
+                                option-label="label_with_code"
+                                option-value="id"
+                                :error="form.errors.unit_id"
+                                placeholder="Pilih Unit" />
 
                             <div class="hidden md:block"></div>
                         </div>

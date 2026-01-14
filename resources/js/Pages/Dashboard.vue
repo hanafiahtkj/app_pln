@@ -35,38 +35,56 @@ const props = defineProps({
         default: () => ({ tahun: '' })
     },
 
-    totalStats: Object
+    totalStats: {
+        type: Object,
+        default: () => ({
+            paket: { total: 0, terkontrak: 0 },
+            keuangan: { rencana: 0, realisasi: 0 }
+        })
+    },
+
+    unitStats: {
+        type: Array,
+        default: () => [] // Memberikan array kosong jika data belum dikirim
+    }
 })
 
+// Grafik 1: Perbandingan Paket per Unit (Nasional/Per Unit)
 const paketChartData = computed(() => ({
-    labels: ['Status Paket Pekerjaan'], // Satu label untuk grup batang
+    // Mengambil semua nama unit untuk sumbu X
+    labels: props.unitStats.map(u => u.unit_name),
     datasets: [
         {
             label: 'Total Paket',
-            data: [props.totalStats.paket.total],
-            backgroundColor: '#3b82f6'
+            data: props.unitStats.map(u => u.total),
+            backgroundColor: '#3b82f6', // Biru
+            borderRadius: 4
         },
         {
             label: 'Terkontrak',
-            data: [props.totalStats.paket.terkontrak],
-            backgroundColor: '#10b981'
+            data: props.unitStats.map(u => u.terkontrak),
+            backgroundColor: '#10b981', // Hijau
+            borderRadius: 4
         }
     ]
 }))
 
-// Grafik 2: Total Rencana vs Realisasi Bayar
+// Grafik 2: Perbandingan Keuangan (Rencana vs Realisasi) per Unit
 const financialChartData = computed(() => ({
-    labels: ['Realisasi Keuangan'],
+    // Mengambil semua nama unit untuk sumbu X
+    labels: props.unitStats.map(u => u.unit_name),
     datasets: [
         {
             label: 'Total Nilai Kontrak',
-            data: [props.totalStats.keuangan.rencana],
-            backgroundColor: '#6366f1'
+            data: props.unitStats.map(u => u.rencana),
+            backgroundColor: '#6366f1', // Indigo
+            borderRadius: 4
         },
         {
             label: 'Total Terbayar',
-            data: [props.totalStats.keuangan.realisasi],
-            backgroundColor: '#f59e0b'
+            data: props.unitStats.map(u => u.realisasi),
+            backgroundColor: '#f59e0b', // Amber
+            borderRadius: 4
         }
     ]
 }))
@@ -396,7 +414,7 @@ const formatIDR = val => {
                                     Tahun
                                 </th>
                                 <th
-                                    class="min-w-[250px] px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
+                                    class="min-w-[300px] px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
                                     Referensi PRK
                                 </th>
                                 <th
@@ -594,12 +612,12 @@ const formatIDR = val => {
                                                     |
                                                     <span
                                                         class="text-xs text-gray-400 uppercase font-medium">
-                                                        {{ prk.unit?.name || 'N/A' }}
+                                                        {{ prk.bidang?.name || 'N/A' }}
                                                     </span>
                                                     |
                                                     <span
                                                         class="text-xs text-gray-400 uppercase font-medium">
-                                                        {{ prk.bidang?.name || 'N/A' }}
+                                                        {{ paket.unit?.name || 'N/A' }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1369,41 +1387,74 @@ const formatIDR = val => {
                 </div>
             </section>
 
-            <div class="max-w-6xl mx-auto py-6 space-y-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="max-w-7xl mx-auto py-6 space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div
-                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-500 uppercase font-bold">Total Paket</p>
+                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                            Total Paket
+                        </p>
                         <p class="text-2xl font-black text-blue-600">
                             {{ totalStats.paket.total }}
                         </p>
                     </div>
                     <div
-                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-500 uppercase font-bold">Terkontrak</p>
+                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                            Terkontrak
+                        </p>
                         <p class="text-2xl font-black text-emerald-600">
                             {{ totalStats.paket.terkontrak }}
                         </p>
                     </div>
+
+                    <div
+                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                            Nilai Kontrak
+                        </p>
+                        <p
+                            class="text-xl font-black text-indigo-600 truncate"
+                            :title="formatIDR(totalStats.keuangan.rencana)">
+                            {{ formatIDR(totalStats.keuangan.rencana) }}
+                        </p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                                Realisasi Bayar
+                            </p>
+                            <span
+                                class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+                                {{ totalStats.keuangan.persen_serapan }}%
+                            </span>
+                        </div>
+                        <p
+                            class="text-xl font-black text-amber-600 truncate"
+                            :title="formatIDR(totalStats.keuangan.realisasi)">
+                            {{ formatIDR(totalStats.keuangan.realisasi) }}
+                        </p>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <section
-                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3
-                            class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase">
-                            Perbandingan Kontrak
+                            class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest border-b pb-2">
+                            Monitoring Kontrak Per Unit
                         </h3>
-                        <ApexBarChart :chart-data="paketChartData" height="300" />
+                        <ApexBarChart :chart-data="paketChartData" height="350" />
                     </section>
 
                     <section
-                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3
-                            class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase">
-                            Perbandingan Pembayaran
+                            class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest border-b pb-2">
+                            Monitoring Keuangan Per Unit
                         </h3>
-                        <ApexBarChart :chart-data="financialChartData" height="300" />
+                        <ApexBarChart :chart-data="financialChartData" height="350" />
                     </section>
                 </div>
             </div>

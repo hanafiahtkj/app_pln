@@ -34,9 +34,9 @@ class AdminPrkController extends Controller
         $user = auth()->user();
 
         // 3. Cek apakah user memiliki role 'user' (menggunakan spatie)
-        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
-            $query->where('unit_id', $user->unit_id);
-        }
+        // if (!$user->hasRole('superuser') && $user->unit_id != 1) {
+        //     $query->where('unit_id', $user->unit_id);
+        // }
 
         if ($request->filled('tahun')) {
             $query->where('tahun', $request->tahun);
@@ -77,7 +77,7 @@ class AdminPrkController extends Controller
             'status' => ['required', 'string'],
             'ai_rupiah' => ['required', 'numeric'],
             'bidang_id' => ['required', 'exists:bidangs,id'],
-            'unit_id' => ['required', 'exists:units,id'],
+            // 'unit_id' => ['required', 'exists:units,id'],
 
             // Dokumen Kaji Ulang
             'dokumen_kkp' => ['nullable', 'string'],
@@ -165,7 +165,7 @@ class AdminPrkController extends Controller
             'status' => ['required', 'string'],
             'ai_rupiah' => ['nullable', 'numeric'],
             'bidang_id' => ['required', 'exists:bidangs,id'],
-            'unit_id' => ['required', 'exists:units,id'],
+            // 'unit_id' => ['required', 'exists:units,id'],
 
             // Dokumen Kaji Ulang
             'dokumen_kkp' => ['nullable', 'string'],

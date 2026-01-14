@@ -75,6 +75,7 @@ class AdminPurchaseOrderController extends Controller
         $statusFilter = $request->input('filter_status', 'belum_diproses');
 
         $query = Paket::latest()->with([
+            'unit',
             'prk.bidang',
             'enjiniring.rendan.lakdan.kontrak.purchase_order',
             'enjiniring.rendan.lakdan.kontrak.pembayaran'
@@ -84,9 +85,7 @@ class AdminPurchaseOrderController extends Controller
 
         // Filter berdasarkan unit user
         if (!$user->hasRole('superuser') && $user->unit_id != 1) {
-            $query->whereHas('prk', function ($q) use ($user) {
-                $q->where('unit_id', $user->unit_id);
-            });
+            $query->where('unit_id', $user->unit_id);
         }
 
         // LOGIKA FILTER BARU
@@ -189,6 +188,7 @@ class AdminPurchaseOrderController extends Controller
     public function show($id)
     {
         $paket = Paket::with([
+            'unit',
             'prk.unit',
             'prk.bidang',
             'enjiniring.rendan.lakdan.kontrak.purchase_order',

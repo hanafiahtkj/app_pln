@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Paket;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -24,6 +25,7 @@ class AdminPaketController extends Controller
 
         // 1. Inisialisasi query dasar dengan eager loading relasi prk
         $query = Paket::latest()->with([
+            'unit',
             'prk.bidang',
             'enjiniring.rendan.lakdan.kontrak.purchase_order',
             'enjiniring.rendan.lakdan.kontrak.pembayaran'
@@ -33,9 +35,7 @@ class AdminPaketController extends Controller
 
         // 2. Filter berdasarkan unit_id yang ada di tabel PRK
         if (!$user->hasRole('superuser') && $user->unit_id != 1) {
-            $query->whereHas('prk', function ($q) use ($user) {
-                $q->where('unit_id', $user->unit_id);
-            });
+            $query->where('unit_id', $user->unit_id);
         }
 
         if ($request->filled('tahun')) {
@@ -53,6 +53,7 @@ class AdminPaketController extends Controller
     public function show($id)
     {
         $paket = Paket::with([
+            'unit',
             'prk.unit',
             'prk.bidang',
             'enjiniring.rendan.lakdan.kontrak.purchase_order',
@@ -70,6 +71,9 @@ class AdminPaketController extends Controller
 
         return Inertia::render('Admin/Paket/CreatePage', [
             'prks' => Prk::get(),
+            'units' => [
+                'data' => Unit::select(['id', 'kode', 'name'])->get(),
+            ],
         ]);
     }
 
@@ -80,6 +84,7 @@ class AdminPaketController extends Controller
             'prk_id' => ['required', 'exists:prks,id'], // Foreign Key ke tabel prks
             'tahun' => ['required', 'integer', 'digits:4'],
             'uraian_paket' => ['required', 'string'],
+            'unit_id' => ['required', 'exists:units,id'],
             // SKK Fields
             'nomor_skk' => ['required', 'string', Rule::unique('pakets', 'nomor_skk')], // Nomor SKK harus unik
             'tanggal_skk' => ['nullable', 'date'],
@@ -120,6 +125,9 @@ class AdminPaketController extends Controller
         return Inertia::render('Admin/Paket/EditPage', [
             'data' => $paket, // <-- Kirim data paket yang akan diedit
             'prks' => Prk::get(),
+            'units' => [
+                'data' => Unit::select(['id', 'kode', 'name'])->get(),
+            ],
         ]);
     }
 
@@ -136,6 +144,7 @@ class AdminPaketController extends Controller
             'prk_id' => ['required', 'exists:prks,id'],
             'tahun' => ['required', 'integer', 'digits:4'],
             'uraian_paket' => ['required', 'string'],
+            'unit_id' => ['required', 'exists:units,id'],
             // SKK Fields
             // Abaikan Nomor SKK saat ini untuk validasi unique
             'nomor_skk' => ['required', 'string', Rule::unique('pakets', 'nomor_skk')->ignore($paket->id)],

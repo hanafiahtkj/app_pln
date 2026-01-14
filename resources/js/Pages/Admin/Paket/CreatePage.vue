@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head, useForm, usePage } from '@inertiajs/vue3'
 import Default from '@/Layouts/Default.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import FormInput from '@/Components/FormInput.vue'
@@ -17,7 +17,19 @@ const props = defineProps({
     prks: {
         type: Array,
         default: () => []
-    }
+    },
+    units: Object
+})
+
+const page = usePage()
+
+const formattedUnits = computed(() => {
+    return (
+        props.units?.data.map(unit => ({
+            ...unit,
+            label_with_code: `${unit.kode} - ${unit.name}`
+        })) || []
+    )
 })
 
 // --- Definisikan opsi statis default untuk Status Paket ---
@@ -51,6 +63,7 @@ const form = useForm({
     prk_id: null, // Foreign Key ke PRK
     tahun: currentYear,
     uraian_paket: '',
+    unit_id: page.props.auth.user?.unit?.id || null,
 
     // Informasi SKK (Surat Keputusan Kebutuhan)
     nomor_skk: '',
@@ -201,6 +214,15 @@ const submit = () => {
                                 :prks="filteredPrks"
                                 :error="form.errors.prk_id"
                                 placeholder="Cari PRK..." />
+
+                            <FormSelect
+                                label="Unit"
+                                v-model.number="form.unit_id"
+                                :options="formattedUnits || []"
+                                option-label="label_with_code"
+                                option-value="id"
+                                :error="form.errors.unit_id"
+                                placeholder="Pilih Unit" />
 
                             <div class="hidden md:block"></div>
                         </div>

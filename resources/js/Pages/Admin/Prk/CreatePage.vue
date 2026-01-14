@@ -69,7 +69,7 @@ const form = useForm({
     status: '',
     ai_rupiah: null,
     bidang_id: null,
-    unit_id: page.props.auth.user?.unit?.id || null,
+    // unit_id: page.props.auth.user?.unit?.id || null,
 
     // Dokumen & Tanggal Kajian
     dokumen_kkp: '',
@@ -157,14 +157,14 @@ const submit = () => {
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <FormSelect
+                            <!-- <FormSelect
                                 label="Unit"
                                 v-model.number="form.unit_id"
                                 :options="formattedUnits || []"
                                 option-label="label_with_code"
                                 option-value="id"
                                 :error="form.errors.unit_id"
-                                placeholder="Pilih Unit" />
+                                placeholder="Pilih Unit" /> -->
 
                             <FormSelect
                                 label="Bidang Pelaksana"
