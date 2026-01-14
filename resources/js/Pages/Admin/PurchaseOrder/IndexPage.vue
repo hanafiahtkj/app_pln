@@ -64,7 +64,7 @@ const deletePO = () => {
 const handleEdit = po => {
     if (!po?.id) return
     // Menggunakan rute admin.po.edit
-    router.visit(route('admin.po.edit', { po: po.id }))
+    router.visit(route('admin.po.edit', { id: po.id }))
 }
 
 // Helper untuk menampilkan status file
@@ -221,6 +221,38 @@ const columns = [
                 ]
             )
 
+            const editButton = paket.enjiniring?.rendan?.lakdan?.kontrak?.purchase_order
+                ? h(
+                      'button',
+                      {
+                          class: 'p-2 text-blue-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 cursor-pointer',
+                          onClick: () =>
+                              handleEdit(paket.enjiniring.rendan.lakdan.kontrak?.purchase_order), // Ganti handleEdit
+                          type: 'button',
+                          title: 'Edit'
+                      },
+                      [
+                          h(
+                              'svg',
+                              {
+                                  class: 'w-4 h-4',
+                                  fill: 'none',
+                                  stroke: 'currentColor',
+                                  viewBox: '0 0 24 24'
+                              },
+                              [
+                                  h('path', {
+                                      'stroke-linecap': 'round',
+                                      'stroke-linejoin': 'round',
+                                      'stroke-width': '2',
+                                      d: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'
+                                  })
+                              ]
+                          )
+                      ]
+                  )
+                : null
+
             // 2. Tombol Delete (Hanya muncul jika SUDAH diproses / memiliki data enjiniring)
             const deleteButton = paket.enjiniring?.rendan?.lakdan?.kontrak?.purchase_order
                 ? h(
@@ -258,6 +290,7 @@ const columns = [
 
             // 3. Gabungkan tombol ke dalam array
             const actionButtons = [showButton]
+            if (editButton) actionButtons.push(editButton)
             if (deleteButton) actionButtons.push(deleteButton)
 
             return h('div', { class: 'flex items-center gap-2 justify-end' }, actionButtons)

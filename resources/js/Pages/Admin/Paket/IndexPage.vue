@@ -261,6 +261,35 @@ const columns = [
                     )
                 ]
             )
+
+            const editButton = h(
+                'button',
+                {
+                    class: 'p-2 text-blue-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 cursor-pointer',
+                    onClick: () => handleEdit(paket), // Ganti handleEdit
+                    type: 'button',
+                    title: 'Edit'
+                },
+                [
+                    h(
+                        'svg',
+                        {
+                            class: 'w-4 h-4',
+                            fill: 'none',
+                            stroke: 'currentColor',
+                            viewBox: '0 0 24 24'
+                        },
+                        [
+                            h('path', {
+                                'stroke-linecap': 'round',
+                                'stroke-linejoin': 'round',
+                                'stroke-width': '2',
+                                d: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'
+                            })
+                        ]
+                    )
+                ]
+            )
             // --- AKHIR TOMBOL EDIT BARU ---
 
             const deleteButton = h(
@@ -297,7 +326,7 @@ const columns = [
                 {
                     class: 'flex items-center gap-2 justify-end'
                 },
-                [showButton, deleteButton]
+                [showButton, editButton, deleteButton]
             )
         }
     })
