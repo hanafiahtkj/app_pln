@@ -189,7 +189,7 @@ const deleteUser = () => {
                                                 class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-6">
                                                 <FormInput
                                                     v-model="form.name"
-                                                    label="Legal name"
+                                                    label="Nama Lengkap"
                                                     :error="form.errors.name"
                                                     name="name" />
                                                 <FormInput
@@ -229,7 +229,7 @@ const deleteUser = () => {
                                                     option-label="name"
                                                     option-value="id"
                                                     name="role"
-                                                    label="Assigned role"
+                                                    label="Pilih role"
                                                     :error="form.errors.role" />
                                             </div>
 
@@ -240,7 +240,7 @@ const deleteUser = () => {
                                                     option-label="name"
                                                     option-value="id"
                                                     name="unit"
-                                                    label="Unit Pengguna"
+                                                    label="Pilih Unit"
                                                     :error="form.errors.unit_id"
                                                     placeholder="Pilih Unit" />
                                             </div>

@@ -39,7 +39,7 @@ class AdminLakdanController extends Controller
         $user = auth()->user();
 
         // Filter berdasarkan unit user
-        if ($user->hasRole('user')) {
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->whereHas('prk', function ($q) use ($user) {
                 $q->where('unit_id', $user->unit_id);
             });

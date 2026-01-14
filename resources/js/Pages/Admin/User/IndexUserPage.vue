@@ -115,7 +115,7 @@ const createUser = () => {
 
 const columns = [
     columnHelper.accessor('name', {
-        header: 'Name',
+        header: 'Nama',
         cell: info => h('span', info.getValue() || '-')
     }),
     columnHelper.accessor('email', {
@@ -134,6 +134,10 @@ const columns = [
                 roleName
             )
         }
+    }),
+    columnHelper.accessor('unit', {
+        header: 'Unit',
+        cell: info => h('span', info.getValue() || '-')
     }),
     columnHelper.accessor('created_at_formatted', {
         header: 'Created At',
@@ -253,7 +257,7 @@ watch(
                     { label: 'Users Management' }
                 ]">
                 <template #actions>
-                    <button @click="openCreateModal" class="btn-primary btn-sm">Add User</button>
+                    <button @click="openCreateModal" class="btn-primary btn-sm">Tambah User</button>
                 </template>
             </PageHeader>
 
@@ -353,7 +357,7 @@ watch(
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormInput
                         v-model="form.name"
-                        label="Legal name"
+                        label="Nama Lengkap"
                         :error="form.errors.name"
                         name="name" />
                     <FormInput
@@ -373,7 +377,7 @@ watch(
                         autocomplete="new-password" />
                     <FormInput
                         v-model="form.password_confirmation"
-                        label="Confirm password"
+                        label="Konfirmasi password"
                         name="password_confirmation"
                         id="password_confirmation"
                         type="password"
@@ -388,7 +392,7 @@ watch(
                         option-label="name"
                         option-value="id"
                         name="role"
-                        label="Assigned role"
+                        label="Pilih role"
                         :error="form.errors.role" />
                 </div>
                 <div>
@@ -398,7 +402,7 @@ watch(
                         option-label="name"
                         option-value="id"
                         name="unit"
-                        label="Unit Pengguna"
+                        label="Pilih Unit"
                         :error="form.errors.unit_id"
                         placeholder="Pilih Unit" />
                 </div>

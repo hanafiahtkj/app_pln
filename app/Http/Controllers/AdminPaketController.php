@@ -32,7 +32,7 @@ class AdminPaketController extends Controller
         $user = auth()->user();
 
         // 2. Filter berdasarkan unit_id yang ada di tabel PRK
-        if ($user->hasRole('user')) {
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->whereHas('prk', function ($q) use ($user) {
                 $q->where('unit_id', $user->unit_id);
             });

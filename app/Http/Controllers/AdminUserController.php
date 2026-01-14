@@ -23,7 +23,7 @@ class AdminUserController extends Controller
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
         $users = User::query()
-            ->with(['roles', 'permissions'])
+            ->with(['roles', 'permissions', 'unit'])
             ->latest()
             ->paginate($perPage)
             ->withQueryString()
@@ -40,6 +40,7 @@ class AdminUserController extends Controller
                     'roles'                 => $user->roles,
                     'permissions'           => $user->permissions,
                     'is_superuser'          => $user->isSuperUser(),
+                    'unit'          => $user->unit->name ?? null,
                 ];
             });
 

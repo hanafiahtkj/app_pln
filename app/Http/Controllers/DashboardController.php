@@ -30,7 +30,7 @@ class DashboardController extends Controller
         })
         ->latest();
 
-        if ($user->hasRole('user')) {
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->where('unit_id', $user->unit_id);
         }
 
@@ -57,10 +57,18 @@ class DashboardController extends Controller
         });
 
         // Statistik / Grafik
-        $allPakets = Paket::with(['enjiniring.rendan.lakdan.kontrak.pembayaran'])
+        $query = Paket::with(['prk', 'enjiniring.rendan.lakdan.kontrak.pembayaran'])
             ->when($tahunFilter, function($q) use ($tahunFilter) {
                 $q->where('tahun', $tahunFilter);
-            })->get();
+            });
+
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
+            $query->whereHas('prk', function($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        $allPakets = $query->get();
 
         // 1. Akumulasi Paket
         $totalPaket = $allPakets->count();

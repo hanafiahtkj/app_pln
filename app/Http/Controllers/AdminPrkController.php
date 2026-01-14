@@ -34,8 +34,7 @@ class AdminPrkController extends Controller
         $user = auth()->user();
 
         // 3. Cek apakah user memiliki role 'user' (menggunakan spatie)
-        // Asumsi: kolom di tabel prks adalah 'unit_id' dan di tabel users adalah 'unit_id'
-        if ($user->hasRole('user')) {
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->where('unit_id', $user->unit_id);
         }
 
