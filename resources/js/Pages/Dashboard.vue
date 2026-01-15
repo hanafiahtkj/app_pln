@@ -675,11 +675,11 @@ const formatIDR = val => {
                                                 <span :class="styleMuted">-</span>
                                                 <span
                                                     :class="
-                                                        prk.tanggal_grc
+                                                        prk.tanggal_dokumen_grc
                                                             ? 'text-[10px] font-mono font-bold text-gray-700 dark:text-gray-300'
                                                             : styleMuted
                                                     ">
-                                                    {{ formatTglSingkat(prk.tanggal_grc) }}
+                                                    {{ formatTglSingkat(prk.tanggal_dokumen_grc) }}
                                                 </span>
                                             </div>
                                         </td>
