@@ -233,34 +233,36 @@ const getStatItems = paket => {
 }
 
 const getStatusTahapan = paket => {
-    if (paket.enjiniring?.rendan?.lakdan?.kontrak?.purchase_order) return 'Purchase Order'
+    const hasPO = !!paket.enjiniring?.rendan?.lakdan?.kontrak?.purchase_order
+    const hasBayar = !!paket.enjiniring?.rendan?.lakdan?.kontrak?.pembayaran?.length // Pembayaran biasanya array
+
+    if (hasPO && hasBayar) return 'PO & Pembayaran'
+    if (hasBayar) return 'Pembayaran'
+    if (hasPO) return 'Purchase Order'
+
     if (paket.enjiniring?.rendan?.lakdan?.kontrak) return 'Kontrak'
-    if (paket.enjiniring?.rendan?.lakdan) return 'Pelaksanaan Pengadaan'
+    if (paket.enjiniring?.rendan?.lakdan) return 'Lakdan'
+    if (paket.enjiniring?.rendan) return 'Rendan'
+    if (paket.enjiniring) return 'Enjiniring'
+
     return 'Perencanaan'
 }
 
 const getStatusStyles = paket => {
     const status = getStatusTahapan(paket)
     const base =
-        'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border-2 shadow-sm transition-all'
+        'px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm transition-all'
 
-    switch (status) {
-        case 'Purchase Order':
-            return {
-                badge: `${base} bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-950/30 dark:border-orange-900`
-            }
-        case 'Selesai / Pembayaran':
-            return {
-                badge: `${base} bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900`
-            }
-        case 'Kontrak':
-            return {
-                badge: `${base} bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-950/30 dark:border-indigo-900`
-            }
-        default:
-            return {
-                badge: `${base} bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:border-blue-900`
-            }
+    const styles = {
+        'PO & Pembayaran': `${base} bg-gradient-to-r from-orange-50 to-emerald-50 text-emerald-700 border-emerald-200 dark:from-orange-950/20 dark:to-emerald-950/20`,
+        'Purchase Order': `${base} bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:border-orange-800`,
+        Pembayaran: `${base} bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800`,
+        Kontrak: `${base} bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800`,
+        default: `${base} bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800`
+    }
+
+    return {
+        badge: styles[status] || styles['default']
     }
 }
 
