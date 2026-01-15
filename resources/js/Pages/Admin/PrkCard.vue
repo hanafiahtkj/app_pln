@@ -372,7 +372,7 @@ const openPdfPreview = url => {
                                     Tanggal GRC
                                 </p>
                                 <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                    {{ formatTanggal(paket.prk.tanggal_grc) }}
+                                    {{ formatTanggal(paket.prk.tanggal_dokumen_grc) }}
                                 </p>
                             </div>
 

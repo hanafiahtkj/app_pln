@@ -400,7 +400,7 @@ const openPdfPreview = path => {
                                             </p>
                                             <p
                                                 class="text-sm font-semibold text-gray-800 dark:text-gray-300">
-                                                {{ formatTanggal(prk.tanggal_grc) }}
+                                                {{ formatTanggal(prk.tanggal_dokumen_grc) }}
                                             </p>
                                         </div>
 
