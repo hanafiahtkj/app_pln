@@ -50,8 +50,24 @@ class DashboardController extends Controller
             $prk->pakets->transform(function ($paket) {
                 $kontrak = $paket->enjiniring?->rendan?->lakdan?->kontrak;
 
-                // Hitung jumlah dari semua record pembayaran
-                $totalBayar = $kontrak?->pembayaran->sum('nilai_bayar_vendor') ?? 0;
+                // Inisialisasi awal
+                $totalBayarVendor = 0;
+                $totalBayarPajak = 0;
+
+                if ($kontrak && $kontrak->pembayaran) {
+                    // Hitung hanya yang Lunas Vendor
+                    $totalBayarVendor = $kontrak->pembayaran
+                        ->where('lunas_vendor', true)
+                        ->sum('nilai_bayar_vendor');
+
+                    // Hitung hanya yang Lunas Pajak
+                    $totalBayarPajak = $kontrak->pembayaran
+                        ->where('lunas_pajak', true)
+                        ->sum('nilai_bayar_pajak');
+                }
+
+                // Total akumulasi
+                $totalBayar = $totalBayarVendor + $totalBayarPajak;
 
                 // Ambil nilai perjanjian
                 $nilaiPerjanjian = $kontrak?->nilai_perjanjian_ppn ?? 0;
@@ -78,8 +94,20 @@ class DashboardController extends Controller
             $totalTerkontrak = $pakets->filter(fn($p) => $p->enjiniring?->rendan?->lakdan?->kontrak)->count();
 
             $rencana = $pakets->sum(fn($p) => $p->enjiniring?->rendan?->lakdan?->kontrak?->nilai_perjanjian_ppn ?? 0);
+
+            // Nilai Realisasi (Total Pembayaran yang sudah Lunas)
             $realisasi = $pakets->sum(function($p) {
-                return $p->enjiniring?->rendan?->lakdan?->kontrak?->pembayaran->sum('nilai_bayar_vendor') ?? 0;
+                $kontrak = $p->enjiniring?->rendan?->lakdan?->kontrak;
+
+                if (!$kontrak || !$kontrak->pembayaran) {
+                    return 0;
+                }
+
+                // Hanya jumlahkan vendor yang lunas + pajak yang lunas
+                $bayarVendor = $kontrak->pembayaran->where('lunas_vendor', true)->sum('nilai_bayar_vendor');
+                $bayarPajak = $kontrak->pembayaran->where('lunas_pajak', true)->sum('nilai_bayar_pajak');
+
+                return $bayarVendor + $bayarPajak;
             });
 
             return [
