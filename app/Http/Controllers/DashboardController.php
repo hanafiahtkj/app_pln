@@ -23,6 +23,11 @@ class DashboardController extends Controller
         $query = Prk::with([
             'unit',
             'bidang',
+            'pakets' => function ($q) use ($user) {
+                if (!$user->hasRole('superuser') && $user->unit_id != 1) {
+                    $q->where('unit_id', $user->unit_id);
+                }
+            },
             'pakets.unit',
             'pakets.enjiniring.rendan.lakdan.kontrak.purchase_order',
             'pakets.enjiniring.rendan.lakdan.kontrak.pembayaran'
@@ -34,7 +39,7 @@ class DashboardController extends Controller
 
         if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->whereHas('pakets', function ($q) use ($user) {
-                $q->where('pakets.unit_id', $user->unit_id);
+                $q->where('unit_id', $user->unit_id);
             });
         }
 
