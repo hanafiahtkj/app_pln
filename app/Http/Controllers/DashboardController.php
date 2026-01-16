@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->whereHas('pakets', function ($q) use ($user) {
-                $q->where('unit_id', $user->unit_id);
+                $q->where('pakets.unit_id', $user->unit_id);
             });
         }
 

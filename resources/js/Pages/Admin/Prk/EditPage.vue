@@ -38,7 +38,7 @@ const defaultFungsiOptions = [
 
 const defaultStatusOptions = [
     { label: 'Murni', value: 'Murni' },
-    { label: 'Revisi', value: 'Revisi' }
+    { label: 'Lanjutan', value: 'Lanjutan' }
 ]
 
 const defaultTvvStatusOptions = [
