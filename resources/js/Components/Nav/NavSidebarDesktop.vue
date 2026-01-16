@@ -195,7 +195,9 @@ const navigationSections = reactive([
                 route: 'admin.prk.index',
                 permission: 'access-perencanaan',
                 children: [
-                    { name: 'PRK', route: 'admin.prk.index', permission: 'manage-prk' },
+                    ...(user.value?.unit_id === 1 || user.value?.roles?.includes('superuser')
+                        ? [{ name: 'PRK', route: 'admin.prk.index', permission: 'manage-prk' }]
+                        : []),
                     { name: 'Paket', route: 'admin.paket.index', permission: 'manage-paket' },
                     {
                         name: 'Enjiniring',
