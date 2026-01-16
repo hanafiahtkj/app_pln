@@ -186,4 +186,38 @@ class DashboardController extends Controller
 
         return (($current - $previous) / $previous) * 100;
     }
+
+    public function exportExcel(Request $request)
+    {
+        $user = auth()->user();
+        $tahunFilter = $request->query('tahun');
+
+        $query = Prk::with([
+             'pakets' => function ($q) use ($user) {
+                if (!$user->hasRole('superuser') && $user->unit_id != 1) {
+                    $q->where('unit_id', $user->unit_id);
+                }
+            },
+            'pakets.unit',
+            'pakets.enjiniring.rendan.lakdan.kontrak.purchase_order',
+            'pakets.enjiniring.rendan.lakdan.kontrak.pembayaran'
+        ])
+        ->when($tahunFilter, function ($q) use ($tahunFilter) {
+            $q->where('tahun', $tahunFilter);
+        });
+
+        // Filter akses unit
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
+            $query->whereHas('pakets', function ($q) use ($user) {
+                $q->where('unit_id', $user->unit_id);
+            });
+        }
+
+        $prks = $query->get();
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\MonitoringExport($prks),
+            'Monitoring_Anggaran_' . ($tahunFilter ?? 'Semua_Tahun') . '.xlsx'
+        );
+    }
 }

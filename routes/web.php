@@ -44,6 +44,7 @@ Route::middleware(['web', 'auth', 'auth.session'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('home');
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/export', [DashboardController::class, 'exportExcel'])->name('dashboard.export');
 
         Route::post('/upload/digital-document', [FileUploaderController::class, 'uploadDigitalDocument'])
             ->name('upload.digital-document')
