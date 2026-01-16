@@ -1389,131 +1389,139 @@ const formatIDR = val => {
                 </div>
             </section>
 
-            <div class="max-w-7xl mx-auto py-6 space-y-6">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div
-                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-                            Total Paket
-                        </p>
-                        <p class="text-2xl font-black text-blue-600">
-                            {{ totalStats.paket.total }}
-                        </p>
-                    </div>
-                    <div
-                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-                            Terkontrak
-                        </p>
-                        <p class="text-2xl font-black text-emerald-600">
-                            {{ totalStats.paket.terkontrak }}
-                        </p>
-                    </div>
+            <section class="mb-10">
+                <h2
+                    class="text-xl font-bold text-[var(--color-text)] dark:text-white tracking-tight">
+                    Statistik Proses Anggaran
+                </h2>
 
-                    <div
-                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-                            Nilai Kontrak
-                        </p>
-                        <p
-                            class="text-xl font-black text-indigo-600 truncate"
-                            :title="formatIDR(totalStats.keuangan.rencana)">
-                            {{ formatIDR(totalStats.keuangan.rencana) }}
-                        </p>
-                    </div>
-                    <div
-                        class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <div class="flex justify-between items-start">
+                <div class="max-w-7xl mx-auto py-6 space-y-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div
+                            class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-                                Realisasi Bayar
+                                Total Paket
                             </p>
-                            <span
-                                class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
-                                {{ totalStats.keuangan.persen_serapan }}%
-                            </span>
+                            <p class="text-2xl font-black text-blue-600">
+                                {{ totalStats.paket.total }}
+                            </p>
                         </div>
-                        <p
-                            class="text-xl font-black text-amber-600 truncate"
-                            :title="formatIDR(totalStats.keuangan.realisasi)">
-                            {{ formatIDR(totalStats.keuangan.realisasi) }}
-                        </p>
+                        <div
+                            class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                                Terkontrak
+                            </p>
+                            <p class="text-2xl font-black text-emerald-600">
+                                {{ totalStats.paket.terkontrak }}
+                            </p>
+                        </div>
+
+                        <div
+                            class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                                Nilai Kontrak
+                            </p>
+                            <p
+                                class="text-xl font-black text-indigo-600 truncate"
+                                :title="formatIDR(totalStats.keuangan.rencana)">
+                                {{ formatIDR(totalStats.keuangan.rencana) }}
+                            </p>
+                        </div>
+                        <div
+                            class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <p
+                                    class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">
+                                    Realisasi Bayar
+                                </p>
+                                <span
+                                    class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+                                    {{ totalStats.keuangan.persen_serapan }}%
+                                </span>
+                            </div>
+                            <p
+                                class="text-xl font-black text-amber-600 truncate"
+                                :title="formatIDR(totalStats.keuangan.realisasi)">
+                                {{ formatIDR(totalStats.keuangan.realisasi) }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="max-w-7xl mx-auto py-6 space-y-8">
+                        <section
+                            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                            <div
+                                class="p-6 border-b border-gray-50 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h3
+                                        class="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                        <span class="w-2 h-5 bg-blue-500 rounded-full"></span>
+                                        Monitoring Progres Kontrak Per Unit
+                                    </h3>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        Komparasi jumlah paket yang masuk dengan paket yang berhasil
+                                        terkontrak.
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-gray-400 uppercase font-bold">
+                                            Total Ratio
+                                        </p>
+                                        <p class="text-sm font-black text-blue-600">
+                                            {{
+                                                (
+                                                    (totalStats.paket.terkontrak /
+                                                        totalStats.paket.total) *
+                                                    100
+                                                ).toFixed(1)
+                                            }}% Terkontrak
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50/30 dark:bg-gray-900/10">
+                                <div class="h-[400px]">
+                                    <ApexBarChart :chart-data="paketChartData" height="400" />
+                                </div>
+                            </div>
+                        </section>
+
+                        <section
+                            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                            <div
+                                class="p-6 border-b border-gray-50 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h3
+                                        class="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                        <span class="w-2 h-5 bg-amber-500 rounded-full"></span>
+                                        Monitoring Realisasi Pembayaran Per Unit
+                                    </h3>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        Perbandingan nilai total perjanjian (kontrak) dengan total
+                                        dana yang sudah dibayarkan.
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-gray-400 uppercase font-bold">
+                                            Total Penyerapan
+                                        </p>
+                                        <p class="text-sm font-black text-amber-600">
+                                            {{ totalStats.keuangan.persen_serapan }}% Terbayar
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50/30 dark:bg-gray-900/10">
+                                <div class="h-[400px]">
+                                    <ApexBarChart :chart-data="financialChartData" height="400" />
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
-
-                <div class="max-w-7xl mx-auto py-6 space-y-8">
-                    <section
-                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                        <div
-                            class="p-6 border-b border-gray-50 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h3
-                                    class="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                                    <span class="w-2 h-5 bg-blue-500 rounded-full"></span>
-                                    Monitoring Progres Kontrak Per Unit
-                                </h3>
-                                <p class="text-xs text-gray-400 mt-1">
-                                    Komparasi jumlah paket yang masuk dengan paket yang berhasil
-                                    terkontrak.
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 uppercase font-bold">
-                                        Total Ratio
-                                    </p>
-                                    <p class="text-sm font-black text-blue-600">
-                                        {{
-                                            (
-                                                (totalStats.paket.terkontrak /
-                                                    totalStats.paket.total) *
-                                                100
-                                            ).toFixed(1)
-                                        }}% Terkontrak
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-4 bg-gray-50/30 dark:bg-gray-900/10">
-                            <div class="h-[400px]">
-                                <ApexBarChart :chart-data="paketChartData" height="400" />
-                            </div>
-                        </div>
-                    </section>
-
-                    <section
-                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                        <div
-                            class="p-6 border-b border-gray-50 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h3
-                                    class="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                                    <span class="w-2 h-5 bg-amber-500 rounded-full"></span>
-                                    Monitoring Realisasi Pembayaran Per Unit
-                                </h3>
-                                <p class="text-xs text-gray-400 mt-1">
-                                    Perbandingan nilai total perjanjian (kontrak) dengan total dana
-                                    yang sudah dibayarkan.
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 uppercase font-bold">
-                                        Total Penyerapan
-                                    </p>
-                                    <p class="text-sm font-black text-amber-600">
-                                        {{ totalStats.keuangan.persen_serapan }}% Terbayar
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-4 bg-gray-50/30 dark:bg-gray-900/10">
-                            <div class="h-[400px]">
-                                <ApexBarChart :chart-data="financialChartData" height="400" />
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
+            </section>
         </div>
     </main>
 </template>

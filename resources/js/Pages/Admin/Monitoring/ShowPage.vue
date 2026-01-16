@@ -60,11 +60,11 @@ const openPdfPreview = path => {
                 description="Detail lengkap Paket Pekerjaan."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
-                    { label: 'Data Paket', href: route('admin.pembayaran.index') },
+                    { label: 'Data Paket', href: route('admin.monitoring.index') },
                     { label: 'Detail' }
                 ]">
                 <template #actions>
-                    <Link :href="route('admin.pembayaran.index')" class="btn-primary btn-sm">
+                    <Link :href="route('admin.monitoring.index')" class="btn-primary btn-sm">
                         Kembali ke Daftar
                     </Link>
                 </template>
