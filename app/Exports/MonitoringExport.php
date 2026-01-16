@@ -24,6 +24,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function collection()
     {
         $data = collect();
+        $no = 1; // Inisialisasi nomor urut
 
         foreach ($this->prks as $prk) {
             foreach ($prk->pakets as $paket) {
@@ -45,6 +46,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
                 // --- BARIS 1: TARGET / RENCANA ---
                 $data->push([
+                    'NO'            => $no, // Nomor urut di baris pertama paket
                     'TAHUN'         => "#" . $prk->tahun,
                     'PRK'           => $prk->prk,
                     'REFERENSI'     => $prk->uraian ?? '-',
@@ -77,9 +79,10 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
                 // --- BARIS 2: REALISASI ---
                 $data->push([
+                    'NO'            => '', // Kosongkan di baris kedua paket agar rapi
                     'TAHUN'         => '',
                     'PRK'           => '',
-                    'REFERENSI'     => 'BIDANG: ' . ($prk->bidang?->name ?? 'N/A'),
+                    'REFERENSI'     => '',
                     'URAIAN_PAKET'  => '',
                     'UNIT'          => '',
                     'KKP'           => $fmt($prk->tanggal_kkp),
@@ -106,6 +109,8 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     'P100'          => $fmt($po?->realisasi_cod),
                     'TERBAYAR'      => number_format($totalTerbayar, 0, ',', '.') . " (" . $persenSerapan . ")"
                 ]);
+
+                $no++;
             }
         }
         return $data;
@@ -114,7 +119,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function headings(): array
     {
         return [
-            'TAHUN', 'PRK', 'REFERENSI PRK', 'URAIAN PAKET', 'UNIT',
+            'NO', 'TAHUN', 'PRK', 'REFERENSI PRK', 'URAIAN PAKET', 'UNIT',
             'KKP', 'RISK', 'GRC', 'TVV', 'SKAI', 'SKKI', 'SURVEY',
             'TOR & HPE', 'RKS', 'ND USER', 'HPS', 'LELANG',
             'PENUNJUKAN', 'PERJANJIAN', 'BANK GARANSI', 'EFEKTIF KONTRAK',
@@ -126,8 +131,8 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     {
         $lastRow = $sheet->getHighestRow();
 
-        // Style Header (Huruf Besar & Bold)
-        $sheet->getStyle('A1:AB1')->applyFromArray([
+        // Style Header (Sekarang kolom berakhir di AC)
+        $sheet->getStyle('A1:AC1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E40AF']],
             'alignment' => [
@@ -140,8 +145,8 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             $rT = $i;
             $rR = $i + 1;
 
-            // Indeks Kolom Pewarnaan (L=Survey sampai AA=P100)
-            $cols = ['L', 'M', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z', 'AA'];
+            // Indeks Kolom Pewarnaan Geser ke Kanan (M=Survey sampai AB=P100)
+            $cols = ['M', 'N', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z', 'AA', 'AB'];
             foreach ($cols as $col) {
                 $valT = $sheet->getCell($col . $rT)->getValue();
                 $valR = $sheet->getCell($col . $rR)->getValue();
@@ -157,21 +162,23 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             }
 
             // Style Target (Baris Pertama Paket)
-            $sheet->getStyle("F$rT:AA$rT")->getFont()->getColor()->setARGB('3B82F6');
+            // Kolom F sampai AB berwarna biru
+            $sheet->getStyle("G$rT:AB$rT")->getFont()->getColor()->setARGB('3B82F6');
 
-            // Style Realisasi (Baris Kedua Paket)
-            $sheet->getStyle("AB$rR")->getFont()->setBold(true);
+            // Kolom AC (Terbayar) di Baris Realisasi dibuat Bold
+            $sheet->getStyle("AC$rR")->getFont()->setBold(true);
 
-            // Border Pemisah antar paket (Medium agar terlihat jelas)
-            $sheet->getStyle("A$rR:AB$rR")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+            // Border Pemisah antar paket
+            $sheet->getStyle("A$rR:AC$rR")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
 
             // Zebra Striping
-            if (($i / 2) % 2 == 0) {
-                $sheet->getStyle("A$rT:AB$rR")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('F9FAFB');
+            if (($no_paket = $i / 2) % 2 == 0) {
+                $sheet->getStyle("A$rT:AC$rR")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('F9FAFB');
             }
         }
 
-        $sheet->getStyle('A1:AB' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:AC' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:A' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         return [];
     }
