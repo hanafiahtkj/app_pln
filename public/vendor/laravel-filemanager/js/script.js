@@ -603,10 +603,21 @@ function preview(items) {
     var carouselItem = imageTemplate.clone()
       .addClass(index === 0 ? 'active' : '');
 
-    if (item.thumb_url) {
-      carouselItem.find('.carousel-image').css('background-image', 'url(\'' + item.url + '\')');
+    var $container = carouselItem.find('.carousel-image');
+
+    // Cek apakah file adalah PDF berdasarkan url atau properti icon/mime
+    var isPDF = item.url.toLowerCase().endsWith('.pdf') || item.icon === 'pdf';
+
+    if (isPDF) {
+      // Jika PDF, gunakan iframe
+      $container.css('background-image', 'none') // Reset background jika ada
+                .html('<iframe src="' + item.url + '" width="100%" height="500px" style="border:none;"></iframe>');
+    } else if (item.thumb_url) {
+      // Jika gambar biasa
+      $container.css('background-image', 'url(\'' + item.url + '\')').html('');
     } else {
-      carouselItem.find('.carousel-image').css('width', '50vh').append($('<div>').addClass('mime-icon ico-' + item.icon));
+      // Jika file lain (icon mime)
+      $container.css('width', '50vh').html('').append($('<div>').addClass('mime-icon ico-' + item.icon));
     }
 
     carouselItem.find('.carousel-label').attr('target', '_blank').attr('href', item.url)
@@ -619,7 +630,7 @@ function preview(items) {
       .addClass(index === 0 ? 'active' : '')
       .attr('data-slide-to', index);
     carousel.children('.carousel-indicators').append(carouselIndicator);
-  });
+});
 
 
   // carousel swipe control
