@@ -190,6 +190,24 @@ const navigationSections = reactive([
     {
         items: [
             {
+                name: 'Manager',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
+                route: 'admin.monitoring.index',
+                permission: 'access-manager',
+                children: [
+                    {
+                        name: 'Monitoring Paket',
+                        route: 'admin.monitoring.index',
+                        permission: 'manage-monitoring'
+                    }
+                ]
+            },
+            { type: 'divider' }
+        ]
+    },
+    {
+        items: [
+            {
                 name: 'Perencanaan',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
                 route: 'admin.prk.index',
@@ -229,7 +247,7 @@ const navigationSections = reactive([
         items: [
             {
                 name: 'Konstruksi',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.652.885a.75.75 0 0 1-.926-.264L.01 22.01l4.004-4.004a.75.75 0 0 1 .264-.926l-.885-2.652a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Z" />',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
                 route: 'admin.po.index',
                 permission: 'manage-konstruksi'
             },
@@ -240,7 +258,7 @@ const navigationSections = reactive([
         items: [
             {
                 name: 'Pembayaran',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h-.375a1.125 1.125 0 0 0 0 2.25h.375v.75c0 .621.504 1.125 1.125 1.125h14.25c.621 0 1.125-.504 1.125-1.125v-.75h.375a1.125 1.125 0 1 0 0-2.25h-.375V9h.375a1.125 1.125 0 1 0 0-2.25h-.375V6.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5Z" />',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
                 route: 'admin.pembayaran.index',
                 permission: 'manage-pembayaran'
             },

@@ -323,7 +323,7 @@ const checklistFields = [
                 </div>
             </div>
 
-            <div class="flex justify-center mt-4">
+            <div class="flex justify-center mt-4" v-if="hasAccess">
                 <Link
                     :href="
                         route('admin.pembayaran.create', {
