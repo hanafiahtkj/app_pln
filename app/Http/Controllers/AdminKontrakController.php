@@ -40,8 +40,12 @@ class AdminKontrakController extends Controller
         $user = auth()->user();
 
         // Filter berdasarkan unit user
-       if (!$user->hasRole('superuser') && $user->unit_id != 1) {
+        if (!$user->hasRole('superuser') && $user->unit_id != 1) {
             $query->where('unit_id', $user->unit_id);
+        }
+
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
         }
 
         // LOGIKA FILTER BARU
@@ -50,6 +54,9 @@ class AdminKontrakController extends Controller
             $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan.kontrak');
+        }
+        else {
+            $query->has('enjiniring.rendan.lakdan');
         }
 
         $data = $query->paginate($perPage)->withQueryString();

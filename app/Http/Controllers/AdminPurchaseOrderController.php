@@ -88,12 +88,19 @@ class AdminPurchaseOrderController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
             $query->has('enjiniring.rendan.lakdan.kontrak');
             $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak.purchase_order');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan.kontrak.purchase_order');
+        }
+        else {
+            $query->has('enjiniring.rendan.lakdan.kontrak');
         }
 
         $data = $query->paginate($perPage)->withQueryString();

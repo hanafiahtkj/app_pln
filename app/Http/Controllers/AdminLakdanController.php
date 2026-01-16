@@ -44,12 +44,19 @@ class AdminLakdanController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
             $query->has('enjiniring.rendan');
             $query->whereDoesntHave('enjiniring.rendan.lakdan');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan');
+        }
+        else {
+            $query->has('enjiniring.rendan');
         }
 
         $data = $query->paginate($perPage)->withQueryString();

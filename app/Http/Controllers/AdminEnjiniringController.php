@@ -42,6 +42,10 @@ class AdminEnjiniringController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
             // Hanya ambil paket yang BELUM ada di tabel enjiniring

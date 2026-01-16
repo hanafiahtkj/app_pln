@@ -252,23 +252,35 @@ const columns = [
     })
 ]
 
+// --- STATE FILTER ---
+const filterTahun = ref(props.filters?.tahun || '')
+
+// Generate list tahun (10 tahun terakhir)
+const currentYear = new Date().getFullYear()
+const yearsOptions = Array.from({ length: 10 }, (_, i) => {
+    const year = currentYear - i
+    return { value: year.toString(), label: year.toString() }
+})
+
 // Inisialisasi state filter dari props atau default
 const filterStatus = ref(props.filters?.status || 'belum_diproses')
 
 const resetFilters = () => {
+    filterTahun.value = ''
     filterStatus.value = 'belum_diproses'
 }
 
 // Update Watcher untuk menyertakan filter_status
 watch(
-    [pagination, filterStatus], // Pantau keduanya
-    ([newPagination, newStatus]) => {
+    [pagination, filterTahun, filterStatus], // Pantau keduanya
+    ([newPagination, newTahun, newStatus]) => {
         loading.value = true
         router.get(
             route('admin.enjiniring.index'),
             {
                 page: newPagination.current_page,
                 per_page: Number(newPagination.per_page),
+                tahun: newTahun,
                 filter_status: newStatus // Kirim status filter ke server
             },
             {
@@ -342,12 +354,18 @@ const getProgressStatus = paket => {
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     <div class="space-y-1">
                         <FormSelect
+                            label="Filter Tahun"
+                            v-model="filterTahun"
+                            :options="[{ value: '', label: 'Semua Tahun' }, ...yearsOptions]" />
+                    </div>
+                    <div class="space-y-1">
+                        <FormSelect
                             label="Filter Status"
                             v-model="filterStatus"
                             :options="[
                                 { value: 'belum_diproses', label: 'Menunggu Diproses' },
-                                { value: 'proses', label: 'Sedang Diproses' }
-                                // { value: 'semua', label: 'Semua Status' }
+                                { value: 'proses', label: 'Sedang Diproses' },
+                                { value: 'semua', label: 'Semua Status' }
                             ]" />
                     </div>
 

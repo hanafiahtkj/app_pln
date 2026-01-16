@@ -92,11 +92,8 @@ class AdminMonitoringController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
-        // LOGIKA FILTER BARU
-        if ($statusFilter === 'belum_diproses') {
-
-        } elseif ($statusFilter === 'proses') {
-
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
         }
 
         $data = $query->paginate($perPage)->withQueryString();

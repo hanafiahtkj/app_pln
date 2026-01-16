@@ -42,12 +42,19 @@ class AdminRendanController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
             $query->has('enjiniring');
             $query->whereDoesntHave('enjiniring.rendan');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan');
+        }
+        else {
+            $query->has('enjiniring');
         }
 
         $data = $query->paginate($perPage)->withQueryString();
