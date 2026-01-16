@@ -90,6 +90,7 @@ class AdminEnjiniringController extends Controller
             'keterangan' => ['nullable', 'string'],
 
             // Field dokumen hanya dipertahankan sebagai string/text biasa
+            'rab' => ['nullable', 'numeric'],
             'dokumen_survey' => ['nullable', 'string', 'max:255'],
             'dokumen_rab' => ['nullable', 'string', 'max:255'],
             'dokumen_tor' => ['nullable', 'string', 'max:255'],
@@ -156,6 +157,7 @@ class AdminEnjiniringController extends Controller
             'keterangan' => ['nullable', 'string'],
 
             // Field dokumen hanya dipertahankan sebagai string/text biasa
+            'rab' => ['nullable', 'numeric'],
             'dokumen_survey' => ['nullable', 'string', 'max:255'],
             'dokumen_rab' => ['nullable', 'string', 'max:255'],
             'dokumen_tor' => ['nullable', 'string', 'max:255'],

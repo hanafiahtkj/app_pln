@@ -8,6 +8,7 @@ import FormSelect from '@/Components/FormSelect.vue'
 import PaketSearchSelect from './PaketSearchSelect.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import FileManagerInput from '@/Components/FileManagerInput.vue'
+import FormCurrency from '@/Components/FormCurrency.vue'
 
 defineOptions({ layout: Default })
 
@@ -35,6 +36,7 @@ const form = useForm({
     dokumen_survey: '',
     dokumen_rab: '',
     dokumen_tor: '',
+    rab: '',
 
     // Keterangan
     keterangan: '',
@@ -160,7 +162,7 @@ onMounted(() => {
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <FormInput
                                 label="Tanggal Target Dokumen Enjiniring"
                                 type="date"
@@ -172,6 +174,15 @@ onMounted(() => {
                                 type="date"
                                 v-model="form.realisasi_dokumen_enjiniring"
                                 :error="form.errors.realisasi_dokumen_enjiniring" />
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormCurrency
+                                label="RAB (Rupiah)"
+                                v-model="form.rab"
+                                :error="form.errors.rab"
+                                placeholder="RAB Rupiah" />
+
+                            <div class="hidden md:block"></div>
 
                             <FormInput
                                 label="Nomor/Nama Dokumen RAB"

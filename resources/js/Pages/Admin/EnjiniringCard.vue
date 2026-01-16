@@ -242,6 +242,19 @@ const openPdfPreview = url => {
                                     }}
                                 </p>
                             </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nilai RAB
+                                </p>
+                                <p
+                                    :class="[
+                                        'text-sm font-bold',
+                                        paket.enjiniring.rab ? 'text-emerald-600' : 'text-gray-500'
+                                    ]">
+                                    {{ formatIDR(paket.enjiniring.rab) }}
+                                </p>
+                            </div>
                         </div>
 
                         <div
