@@ -318,7 +318,7 @@ onMounted(() => {
                                 placeholder="Pilih Dokumen" />
 
                             <FormInput
-                                label="Tgl Efektif ontrak"
+                                label="Tgl Efektif Kontrak"
                                 type="date"
                                 v-model="form.tanggal_efektif"
                                 :error="form.errors.tanggal_efektif"
