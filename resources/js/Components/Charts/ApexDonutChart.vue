@@ -24,6 +24,10 @@ onUnmounted(() => observer.disconnect())
 const series = computed(() => props.chartData.datasets[0].data)
 const labels = computed(() => props.chartData.labels)
 
+const totalValue = computed(() => {
+    return series.value.reduce((a, b) => a + b, 0).toLocaleString()
+})
+
 const fontFamily = 'Zalando Sans'
 const chartOptions = computed(() => {
     const dark = isDark.value
@@ -78,7 +82,7 @@ const chartOptions = computed(() => {
                     labels: {
                         show: true,
                         total: {
-                            show: true,
+                            show: false,
                             label: 'Total',
                             formatter(w) {
                                 return w.globals.seriesTotals
@@ -96,6 +100,12 @@ const chartOptions = computed(() => {
         },
         dataLabels: {
             enabled: true,
+            style: {
+                colors: ['#000000'] // Mengunci warna teks menjadi putih agar kontras
+            },
+            dropShadow: {
+                enabled: false // Menambah bayangan agar angka lebih terbaca jika background terang
+            },
             formatter(val, opts) {
                 return opts.w.globals.seriesTotals[opts.seriesIndex].toLocaleString()
             }
@@ -106,6 +116,10 @@ const chartOptions = computed(() => {
                 fontFamily: fontFamily
             },
             y: { formatter: val => val.toLocaleString() }
+        },
+        legend: {
+            show: true,
+            position: 'bottom'
         },
         states: {
             hover: { filter: { type: 'lighten', value: 0.1 } },
@@ -137,13 +151,24 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-    <div class="w-full h-full">
-        <VueApexCharts
-            :key="isDark"
-            type="donut"
-            :height="height"
-            :options="chartOptions"
-            :series="series"
-            class="w-full" />
+    <div class="w-full flex flex-col items-center">
+        <div class="w-full" :style="{ height: height }">
+            <VueApexCharts
+                :key="isDark"
+                type="donut"
+                height="100%"
+                :options="chartOptions"
+                :series="series" />
+        </div>
+
+        <div class="mt-4 text-center">
+            <p
+                class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Total Keseluruhan
+            </p>
+            <h2 class="text-md font-black text-gray-900 dark:text-white mt-1">
+                {{ totalValue }}
+            </h2>
+        </div>
     </div>
 </template>

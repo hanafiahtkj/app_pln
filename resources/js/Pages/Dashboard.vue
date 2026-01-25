@@ -157,9 +157,6 @@ const getFinancialUnitChartData = unit => {
 
 // Fungsi helper untuk memformat angka singkat (opsional agar tidak sesak)
 const formatShortIDR = value => {
-    // if (value >= 1000000000) return (value / 1000000000).toFixed(1) + ' M'
-    // if (value >= 1000000) return (value / 1000000).toFixed(1) + ' Jt'
-    // if (value >= 1000) return (value / 1000).toFixed(1) + ' Rb'
     return value.toLocaleString('id-ID')
 }
 
@@ -539,10 +536,7 @@ const formatIDR = val => {
                                 class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-4 uppercase">
                                 Status Progress Paket (Fisik)
                             </h3>
-                            <ApexDonutChart
-                                :chart-data="piePaketChartData"
-                                title="Terkontrak vs Total"
-                                height="300px" />
+                            <ApexDonutChart :chart-data="piePaketChartData" height="300px" />
                         </div>
 
                         <div
@@ -551,10 +545,7 @@ const formatIDR = val => {
                                 class="text-sm font-bold text-gray-700 dark:text-gray-200 mb-4 uppercase">
                                 Serapan Anggaran (IDR)
                             </h3>
-                            <ApexDonutChart
-                                :chart-data="pieFinancialChartData"
-                                title="Realisasi vs Kontrak"
-                                height="300px" />
+                            <ApexDonutChart :chart-data="pieFinancialChartData" height="300px" />
                         </div>
                     </div>
 
@@ -611,17 +602,17 @@ const formatIDR = val => {
                                                 :chart-data="getUnitChartData(unit)"
                                                 height="150px" />
 
-                                            <div
+                                            <!-- <div
                                                 class="absolute inset-0 flex flex-col items-center justify-center pt-4">
                                                 <span
                                                     class="text-xs font-black text-gray-800 dark:text-white">
                                                     {{ unit.terkontrak }}/{{ unit.total }}
                                                 </span>
                                                 <span class="text-[8px] text-gray-400">Paket</span>
-                                            </div>
+                                            </div> -->
                                         </div>
 
-                                        <p class="mt-2 text-[10px] font-bold text-emerald-600">
+                                        <!-- <p class="mt-2 text-[10px] font-bold text-emerald-600">
                                             {{
                                                 unit.total > 0
                                                     ? Math.round(
@@ -629,7 +620,7 @@ const formatIDR = val => {
                                                       )
                                                     : 0
                                             }}% Progress
-                                        </p>
+                                        </p> -->
                                     </div>
                                 </div>
                             </div>
@@ -680,7 +671,7 @@ const formatIDR = val => {
                                                 :chart-data="getFinancialUnitChartData(unit)"
                                                 height="150px" />
 
-                                            <div
+                                            <!-- <div
                                                 class="absolute inset-0 flex items-center justify-center pt-4">
                                                 <span class="text-xs font-black text-amber-600">
                                                     {{
@@ -692,16 +683,15 @@ const formatIDR = val => {
                                                             : 0
                                                     }}%
                                                 </span>
-                                            </div>
+                                            </div> -->
                                         </div>
 
-                                        <div class="mt-2 text-center">
-                                            <p class="text-[9px] text-gray-400">Terbayar:</p>
-                                            <p
-                                                class="text-[10px] font-bold text-gray-700 dark:text-gray-200">
+                                        <!-- <div class="mt-2 text-center">
+                                            <p class="text-[9px] text-amber-600">Terbayar:</p>
+                                            <p class="text-[10px] font-bold text-amber-600">
                                                 {{ formatShortIDR(unit.realisasi) }}
                                             </p>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                             </div>
