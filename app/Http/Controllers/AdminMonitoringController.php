@@ -63,7 +63,7 @@ class AdminMonitoringController extends Controller
         ]);
 
         if ($tahunFilter !== 'semua') {
-            $query->where('tahun', $request->tahun);
+            $query->where('tahun', $tahunFilter);
         }
 
         if ($canFilterUnit) {

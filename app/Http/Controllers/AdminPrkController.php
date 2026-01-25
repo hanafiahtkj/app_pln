@@ -41,7 +41,7 @@ class AdminPrkController extends Controller
         // }
 
        if ($tahunFilter !== 'semua') {
-            $query->where('tahun', $request->tahun);
+            $query->where('tahun', $tahunFilter);
         }
 
         // 4. Eksekusi pagination

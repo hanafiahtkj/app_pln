@@ -91,7 +91,7 @@ class AdminPurchaseOrderController extends Controller
         }
 
         if ($tahunFilter !== 'semua') {
-            $query->where('tahun', $request->tahun);
+            $query->where('tahun', $tahunFilter);
         }
 
         // LOGIKA FILTER BARU

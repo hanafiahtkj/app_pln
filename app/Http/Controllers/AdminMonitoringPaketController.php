@@ -44,7 +44,7 @@ class AdminMonitoringPaketController extends Controller
         }
 
         if ($tahunFilter !== 'semua') {
-            $query->where('tahun', $request->tahun);
+            $query->where('tahun', $tahunFilter);
         }
 
         $data = $query->paginate($perPage)->withQueryString();
