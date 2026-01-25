@@ -114,7 +114,7 @@ const pieFinancialChartData = computed(() => ({
                 props.totalStats.keuangan.realisasi,
                 props.totalStats.keuangan.rencana - props.totalStats.keuangan.realisasi
             ],
-            backgroundColor: ['#00599C', '#EF4444'],
+            backgroundColor: ['#24a8e1', '#EF4444'],
             borderWidth: 1
         }
     ]
@@ -148,7 +148,7 @@ const getFinancialUnitChartData = unit => {
                     // Jika realisasi melebihi rencana (kasus khusus), sisa jadi 0
                     Math.max(0, unit.rencana - unit.realisasi)
                 ],
-                backgroundColor: ['#00599C', '#EF4444'],
+                backgroundColor: ['#24a8e1', '#EF4444'],
                 borderWidth: 1
             }
         ]
