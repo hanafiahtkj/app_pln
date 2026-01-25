@@ -99,7 +99,7 @@ const piePaketChartData = computed(() => ({
                 props.totalStats.paket.terkontrak,
                 props.totalStats.paket.total - props.totalStats.paket.terkontrak
             ],
-            backgroundColor: ['#10b981', '#FFD600'],
+            backgroundColor: ['#FFD600', '#24a8e1'],
             borderWidth: 1
         }
     ]
@@ -114,7 +114,7 @@ const pieFinancialChartData = computed(() => ({
                 props.totalStats.keuangan.realisasi,
                 props.totalStats.keuangan.rencana - props.totalStats.keuangan.realisasi
             ],
-            backgroundColor: ['#24a8e1', '#EF4444'],
+            backgroundColor: ['#FFD600', '#24a8e1'],
             borderWidth: 1
         }
     ]
@@ -130,7 +130,7 @@ const getUnitChartData = unit => {
                     unit.terkontrak,
                     unit.total - unit.terkontrak // Sisa paket yang belum kontrak
                 ],
-                backgroundColor: ['#10b981', '#FFD600'],
+                backgroundColor: ['#FFD600', '#24a8e1'],
                 borderWidth: 1
             }
         ]
@@ -148,7 +148,7 @@ const getFinancialUnitChartData = unit => {
                     // Jika realisasi melebihi rencana (kasus khusus), sisa jadi 0
                     Math.max(0, unit.rencana - unit.realisasi)
                 ],
-                backgroundColor: ['#24a8e1', '#EF4444'],
+                backgroundColor: ['#FFD600', '#24a8e1'],
                 borderWidth: 1
             }
         ]

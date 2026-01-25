@@ -127,17 +127,17 @@ const columns = [
     //     header: 'Nomor SKK',
     //     cell: info => h('span', info.getValue() || '-')
     // }),
-    // columnHelper.accessor('nilai_skk', {
-    //     header: 'Nilai SKK (Rp)',
-    //     cell: info => {
-    //         const value = info.getValue()
-    //         if (value === null) return h('span', '-')
-    //         return h(
-    //             'span',
-    //             new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
-    //         )
-    //     }
-    // }),
+    columnHelper.accessor('nilai_skk', {
+        header: 'Nilai SKK (Rp)',
+        cell: info => {
+            const value = info.getValue()
+            if (value === null) return h('span', '-')
+            return h(
+                'span',
+                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
+            )
+        }
+    }),
     // columnHelper.accessor('tanggal_skk', {
     //     header: 'Tgl SKK',
     //     cell: info => h('span', info.getValue() || '-')
