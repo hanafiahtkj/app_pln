@@ -26,7 +26,8 @@ class AdminRendanController extends Controller
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
         // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
-        $statusFilter = $request->input('filter_status', 'belum_diproses');
+        $tahunFilter = $request->query('tahun') ?? date('Y');
+        $statusFilter = $request->input('filter_status', 'semua');
 
         $query = Paket::latest()->with([
             'unit',
@@ -42,7 +43,7 @@ class AdminRendanController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
-        if ($request->filled('tahun')) {
+        if ($tahunFilter !== 'semua') {
             $query->where('tahun', $request->tahun);
         }
 
@@ -62,7 +63,8 @@ class AdminRendanController extends Controller
         return Inertia::render('Admin/Rendan/IndexPage', [
             'data' => $data,
             'filters' => [
-                'status' => $statusFilter
+                'status' => $statusFilter,
+                'tahun' => $tahunFilter,
             ]
         ]);
     }
@@ -111,11 +113,14 @@ class AdminRendanController extends Controller
 
             // RAB Field
             'rab' => ['nullable', 'numeric'],
+            'nilai_hpe' => ['nullable', 'numeric'],
 
             // RKS Fields
             'nomor_rks' => ['nullable', 'string'],
+            'target_tanggal_rks' => ['nullable', 'date'],
             'tanggal_rks' => ['nullable', 'date'],
             'dokumen_rks' => ['nullable', 'string'],
+            'dokumen_hpe' => ['nullable', 'string'],
         ]);
 
         try {
@@ -157,11 +162,14 @@ class AdminRendanController extends Controller
 
             // RAB Field
             'rab' => ['nullable', 'numeric'],
+            'nilai_hpe' => ['nullable', 'numeric'],
 
             // RKS Fields
             'nomor_rks' => ['nullable', 'string'],
+            'target_tanggal_rks' => ['nullable', 'date'],
             'tanggal_rks' => ['nullable', 'date'],
             'dokumen_rks' => ['nullable', 'string'],
+            'dokumen_hpe' => ['nullable', 'string'],
         ]);
 
         try {

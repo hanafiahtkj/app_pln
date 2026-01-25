@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         // Ambil tahun dari request (default null)
-        $tahunFilter = $request->query('tahun');
+        $tahunFilter = $request->query('tahun') ?? date('Y');
 
         $query = Prk::with([
             'unit',
@@ -33,7 +33,9 @@ class DashboardController extends Controller
             'pakets.enjiniring.rendan.lakdan.kontrak.pembayaran'
         ])
         ->when($tahunFilter, function ($q) use ($tahunFilter) {
-            $q->where('tahun', $tahunFilter); // Memfilter kolom tahun di tabel PRK
+            if ($tahunFilter !== 'semua') {
+                $q->where('tahun', $tahunFilter);
+            }
         })
         ->latest();
 
@@ -84,7 +86,9 @@ class DashboardController extends Controller
         // Statistik / Grafik
         $unitStats = Unit::with(['pakets' => function($q) use ($tahunFilter) {
             $q->when($tahunFilter, function($query) use ($tahunFilter) {
-                $query->where('tahun', $tahunFilter);
+                if ($tahunFilter !== 'semua') {
+                    $query->where('tahun', $tahunFilter);
+                }
             })->with(['enjiniring.rendan.lakdan.kontrak.pembayaran']);
         }])->get()->map(function($unit) {
             $pakets = $unit->pakets;
@@ -139,7 +143,9 @@ class DashboardController extends Controller
                     'persen_serapan' => $totalRencanaAll > 0 ? round(($totalRealisasiAll / $totalRencanaAll) * 100, 1) : 0
                 ]
             ],
-            'filters'=> $request->only(['tahun']) // Kirim balik nilai filter ke Vue
+            'filters' => [
+                'tahun' => $tahunFilter,
+            ]
         ]);
     }
 

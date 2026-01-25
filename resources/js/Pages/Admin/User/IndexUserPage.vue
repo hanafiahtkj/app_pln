@@ -119,7 +119,7 @@ const columns = [
         cell: info => h('span', info.getValue() || '-')
     }),
     columnHelper.accessor('email', {
-        header: 'Email',
+        header: 'Username',
         cell: info => h('span', info.getValue() || '-')
     }),
     columnHelper.accessor('role', {
@@ -362,8 +362,7 @@ watch(
                         name="name" />
                     <FormInput
                         v-model="form.email"
-                        label="Email address"
-                        type="email"
+                        label="Username"
                         :error="form.errors.email"
                         name="email" />
                     <FormInput

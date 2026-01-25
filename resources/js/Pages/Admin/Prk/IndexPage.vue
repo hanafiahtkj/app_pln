@@ -34,7 +34,7 @@ const yearsOptions = Array.from({ length: 10 }, (_, i) => {
 
 // Fungsi Reset
 const resetFilters = () => {
-    filterTahun.value = ''
+    filterTahun.value = currentYear
 }
 
 const columnHelper = createColumnHelper()
@@ -382,7 +382,7 @@ const handleEdit = prk => {
 <template>
     <Head title="Data PRK" />
 
-    <main class="max-w-6xl mx-auto" role="main">
+    <main class="mx-auto" role="main">
         <div class="container-border overflow-hidden">
             <PageHeader
                 title="Data PRK"
@@ -403,7 +403,10 @@ const handleEdit = prk => {
                         <FormSelect
                             label="Filter Tahun"
                             v-model="filterTahun"
-                            :options="[{ value: '', label: 'Semua Tahun' }, ...yearsOptions]" />
+                            :options="[
+                                { value: 'semua', label: 'Semua Tahun' },
+                                ...yearsOptions
+                            ]" />
                     </div>
 
                     <div class="flex items-center pb-0">

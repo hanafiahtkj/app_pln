@@ -107,7 +107,7 @@ const openPdfPreview = url => {
                 v-show="isOpen"
                 class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Status Survey
@@ -202,7 +202,7 @@ const openPdfPreview = url => {
                 </section>
 
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Dokumen Enjiniring (RAB & TOR)

@@ -77,11 +77,11 @@ const submit = () => {
 
 <template>
     <Head :title="`Edit Data Enjiniring: ${props.data.prk_id || props.data.id}`" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="edit-paket-enjiniring">
+    <main class="mx-auto space-y-8" aria-labelledby="edit-paket-enjiniring">
         <h1 class="sr-only" id="edit-paket-enjiniring">Edit Data Enjiniring</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data Enjiniring : ${props.data.id}`"
+                :title="`Edit Data Enjiniring`"
                 description="Perbarui detail lengkap status Enjiniring untuk Paket tertentu."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -94,7 +94,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Paket Terkait
@@ -120,7 +120,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Status Survey
@@ -160,7 +160,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Dokumen Enjiniring (RAB & TOR)

@@ -56,10 +56,10 @@ const openPdfPreview = path => {
 <template>
     <Head :title="`Detail Proyek - ${prk.nomor_skk || prk.id}`" />
 
-    <main class="max-w-6xl mx-auto space-y-8">
+    <main class="mx-auto space-y-8">
         <div class="container-border overflow-hidden">
             <PageHeader
-                :title="`Detail Prk: ${props.data.id}`"
+                :title="`Detail Prk`"
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
                     { label: 'Data Prk', href: route('admin.prk.index') },
@@ -94,7 +94,7 @@ const openPdfPreview = path => {
                             </div>
 
                             <section class="dark:bg-gray-700">
-                                <div class="max-w-4xl space-y-6">
+                                <div class="max-w-6xl space-y-6">
                                     <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                                         <h3
                                             class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -193,7 +193,7 @@ const openPdfPreview = path => {
                             </section>
 
                             <section class="dark:bg-gray-700">
-                                <div class="max-w-4xl space-y-6">
+                                <div class="max-w-6xl space-y-6">
                                     <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                                         <h3
                                             class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -242,7 +242,7 @@ const openPdfPreview = path => {
                             </section>
 
                             <section class="dark:bg-gray-700">
-                                <div class="max-w-4xl space-y-6">
+                                <div class="max-w-6xl space-y-6">
                                     <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                                         <h3
                                             class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -450,7 +450,7 @@ const openPdfPreview = path => {
                             </section>
 
                             <section class="dark:bg-gray-700">
-                                <div class="max-w-4xl space-y-6">
+                                <div class="max-w-6xl space-y-6">
                                     <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                                         <h3
                                             class="text-xl font-semibold text-gray-900 dark:text-white">

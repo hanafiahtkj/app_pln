@@ -67,7 +67,9 @@ const form = useForm({
 
     // Document Fields
     dokumen_perjanjian: null,
-    dokumen_jaminan_pelaksanaan: null
+    dokumen_jaminan_pelaksanaan: null,
+
+    tanggal_efektif: ''
 })
 
 // Opsi status proses dan jenis perjanjian untuk FormSelect
@@ -186,7 +188,7 @@ onMounted(() => {
 
 <template>
     <Head title="Buat Data Kontrak" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="create-kontrak">
+    <main class="mx-auto space-y-8" aria-labelledby="create-kontrak">
         <h1 class="sr-only" id="create-kontrak">Buat Data Kontrak</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
@@ -203,7 +205,7 @@ onMounted(() => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Utama Kontrak
@@ -260,7 +262,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Detail Perjanjian (Kontrak)
@@ -314,12 +316,19 @@ onMounted(() => {
                                 v-model="form.dokumen_perjanjian"
                                 :error="form.errors.dokumen_perjanjian"
                                 placeholder="Pilih Dokumen" />
+
+                            <FormInput
+                                label="Tgl Efektif ontrak"
+                                type="date"
+                                v-model="form.tanggal_efektif"
+                                :error="form.errors.tanggal_efektif"
+                                placeholder="Cth: PT Sinar Jaya" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Detail Jaminan Pelaksanaan
@@ -374,7 +383,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Metrik dan Keterangan Tambahan

@@ -108,7 +108,7 @@ const submit = () => {
 
 <template>
     <Head title="Buat Data PRK" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="create-prk">
+    <main class="mx-auto space-y-8" aria-labelledby="create-prk">
         <h1 class="sr-only" id="create-prk">Buat Data PRK</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
@@ -125,7 +125,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Pokok PRK
@@ -194,7 +194,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Anggaran dan Paket
@@ -228,7 +228,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Kaji Ulang Dokumen (KKP, Risiko, GRC)
@@ -288,7 +288,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Persetujuan (TVV & SKAI)

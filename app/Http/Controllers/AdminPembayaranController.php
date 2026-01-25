@@ -33,6 +33,7 @@ class AdminPembayaranController extends Controller
             // --- Nilai (Decimal Fields) ---
             'nilai_tagihan' => ['nullable', 'numeric', 'min:0'],
             'nilai_akb' => ['nullable', 'numeric', 'min:0'],
+            'bulan_tahun_akb' => ['nullable', 'date'],
             'nilai_ppn' => ['nullable', 'numeric', 'min:0'],
             'nilai_pph' => ['nullable', 'numeric', 'min:0'],
             'nilai_bayar_vendor' => ['nullable', 'numeric', 'min:0'],
@@ -76,7 +77,8 @@ class AdminPembayaranController extends Controller
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
         // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
-        $statusFilter = $request->input('filter_status', 'belum_diproses');
+        $tahunFilter = $request->query('tahun') ?? date('Y');
+        $statusFilter = $request->input('filter_status', 'semua');
 
         $query = Paket::latest()->with([
             'unit',
@@ -92,7 +94,7 @@ class AdminPembayaranController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
-        if ($request->filled('tahun')) {
+        if ($tahunFilter !== 'semua') {
             $query->where('tahun', $request->tahun);
         }
 
@@ -112,7 +114,8 @@ class AdminPembayaranController extends Controller
         return Inertia::render('Admin/Pembayaran/IndexPage', [
             'data' => $data,
             'filters' => [
-                'status' => $statusFilter
+                'status' => $statusFilter,
+                'tahun' => $tahunFilter,
             ]
         ]);
     }

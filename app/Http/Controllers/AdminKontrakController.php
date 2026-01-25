@@ -28,7 +28,8 @@ class AdminKontrakController extends Controller
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
         // Ambil status filter dari request, default-kan ke 'belum_diproses' jika tidak ada filter lain
-        $statusFilter = $request->input('filter_status', 'belum_diproses');
+        $tahunFilter = $request->query('tahun') ?? date('Y');
+        $statusFilter = $request->input('filter_status', 'semua');
 
         $query = Paket::latest()->with([
             'unit',
@@ -44,7 +45,7 @@ class AdminKontrakController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
-        if ($request->filled('tahun')) {
+        if ($tahunFilter !== 'semua') {
             $query->where('tahun', $request->tahun);
         }
 
@@ -64,7 +65,8 @@ class AdminKontrakController extends Controller
         return Inertia::render('Admin/Kontrak/IndexPage', [
             'data' => $data,
             'filters' => [
-                'status' => $statusFilter
+                'status' => $statusFilter,
+                'tahun' => $tahunFilter,
             ]
         ]);
     }
@@ -143,6 +145,8 @@ class AdminKontrakController extends Controller
             // Document Fields
             'dokumen_perjanjian' => ['nullable', 'string'],
             'dokumen_jaminan_pelaksanaan' => ['nullable', 'string'],
+
+            'tanggal_efektif' => ['nullable', 'date'],
         ]);
 
         try {
@@ -205,6 +209,8 @@ class AdminKontrakController extends Controller
             // Document Fields (Hanya perlu path/name jika ada upload baru)
             'dokumen_perjanjian' => ['nullable', 'string'],
             'dokumen_jaminan_pelaksanaan' => ['nullable', 'string'],
+
+            'tanggal_efektif' => ['nullable', 'date'],
         ]);
 
         try {

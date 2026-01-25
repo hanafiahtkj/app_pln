@@ -190,14 +190,24 @@ const navigationSections = reactive([
     {
         items: [
             {
+                name: 'Monitoring',
+                route: 'admin.monitoring.index',
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />'
+            },
+            { type: 'divider' }
+        ]
+    },
+    {
+        items: [
+            {
                 name: 'Manager',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.25v4.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25v-4.5m16.5-7.5V12a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75h-6v5.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75V6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75Z" />',
-                route: 'admin.monitoring.index',
+                route: 'admin.monitoring-paket.index',
                 permission: 'access-manager',
                 children: [
                     {
-                        name: 'Monitoring Paket',
-                        route: 'admin.monitoring.index',
+                        name: 'Monitoring',
+                        route: 'admin.monitoring-paket.index',
                         permission: 'manage-monitoring'
                     }
                 ]
@@ -326,10 +336,10 @@ const toggleParent = item => {
                                         isCurrentRoute(item.route)
                                             ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30'
                                             : // 2. Child Active: Latar Belakang Hitam Opasitas 20%
-                                            isChildCurrentRoute(item)
-                                            ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30' // <-- Diganti dari bg-gray-800
-                                            : // 3. Default/Hover
-                                              'text-gray-200 hover:bg-black/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-600' // <-- Diganti dari hover:bg-gray-800
+                                              isChildCurrentRoute(item)
+                                              ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30' // <-- Diganti dari bg-gray-800
+                                              : // 3. Default/Hover
+                                                'text-gray-200 hover:bg-black/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-600' // <-- Diganti dari hover:bg-gray-800
                                     ]">
                                     <svg
                                         :class="[
@@ -339,8 +349,8 @@ const toggleParent = item => {
                                             isCurrentRoute(item.route)
                                                 ? 'text-white' // Aktif Penuh: Putih
                                                 : isChildCurrentRoute(item)
-                                                ? 'text-white' // CHILD AKTIF: Icon Amber
-                                                : 'text-gray-300 group-hover:text-white'
+                                                  ? 'text-white' // CHILD AKTIF: Icon Amber
+                                                  : 'text-gray-300 group-hover:text-white'
                                         ]"
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -385,10 +395,10 @@ const toggleParent = item => {
                                         isCurrentRoute(item.route)
                                             ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30'
                                             : // 2. Child Active: Latar Belakang Hitam Opasitas 20%
-                                            isChildCurrentRoute(item)
-                                            ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30' // <-- Diganti dari bg-gray-800
-                                            : // 3. Default/Hover
-                                              'text-gray-200 hover:bg-black/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-600' // <-- Diganti dari hover:bg-gray-800
+                                              isChildCurrentRoute(item)
+                                              ? 'bg-amber-300 text-white shadow-lg shadow-amber-600/30' // <-- Diganti dari bg-gray-800
+                                              : // 3. Default/Hover
+                                                'text-gray-200 hover:bg-black/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-600' // <-- Diganti dari hover:bg-gray-800
                                     ]">
                                     <svg
                                         :class="[
@@ -398,8 +408,8 @@ const toggleParent = item => {
                                             isCurrentRoute(item.route)
                                                 ? 'text-white' // Aktif Penuh: Putih
                                                 : isChildCurrentRoute(item)
-                                                ? 'text-white' // CHILD AKTIF: Icon Amber
-                                                : 'text-gray-300 group-hover:text-white'
+                                                  ? 'text-white' // CHILD AKTIF: Icon Amber
+                                                  : 'text-gray-300 group-hover:text-white'
                                         ]"
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"

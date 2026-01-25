@@ -114,7 +114,7 @@ const openPdfPreview = url => {
                 v-show="isOpen"
                 class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Purchase Order (PO) & Material On Site (MOS)
@@ -284,7 +284,7 @@ const openPdfPreview = url => {
                 </section>
 
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Pelacakan Progres 25%, 50%, dan 75%
@@ -449,7 +449,7 @@ const openPdfPreview = url => {
                 </section>
 
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Commercial Operation Date (COD)
@@ -590,6 +590,18 @@ const openPdfPreview = url => {
                         </div>
                     </div>
                 </section>
+
+                <div class="space-y-1 mt-6">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Progress Terkini
+                    </p>
+                    <p class="text-sm font-bold text-gray-900 dark:text-white uppercase">
+                        {{
+                            paket.enjiniring.rendan.lakdan.kontrak.purchase_order
+                                .progress_terkini || '0'
+                        }}%
+                    </p>
+                </div>
 
                 <div
                     class="mt-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">

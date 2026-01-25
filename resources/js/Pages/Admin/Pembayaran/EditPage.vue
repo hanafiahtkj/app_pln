@@ -8,6 +8,7 @@ import KontrakSearchSelect from './KontrakSearchSelect.vue'
 import FormCurrency from '@/Components/FormCurrency.vue'
 // import FormCheckbox from '@/Components/FormCheckbox.vue' // Jika menggunakan component khusus
 import { ref } from 'vue'
+import MonthInput from '@/Components/MonthInput.vue'
 
 defineOptions({ layout: Default })
 
@@ -55,6 +56,7 @@ const form = useForm({
     // Pastikan field numerik diinisialisasi dengan nilai yang ada, null akan otomatis menjadi 0 jika form data dikirim
     nilai_tagihan: props.data.nilai_tagihan,
     nilai_akb: props.data.nilai_akb,
+    bulan_tahun_akb: props.data.bulan_tahun_akb,
     nilai_ppn: props.data.nilai_ppn,
     nilai_pph: props.data.nilai_pph,
     nilai_bayar_vendor: props.data.nilai_bayar_vendor,
@@ -99,11 +101,11 @@ const submit = () => {
 
 <template>
     <Head :title="`Edit Data Riwayat Pembayaran (Termin) ${props.data.termin_pembayaran}`" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="edit-pembayaran">
+    <main class="mx-auto space-y-8" aria-labelledby="edit-pembayaran">
         <h1 class="sr-only" id="edit-pembayaran">Edit Data Riwayat Pembayaran (Termin)</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data Riwayat Pembayaran: ${props.data.termin_pembayaran} (${props.data.kontrak_id})`"
+                :title="`Edit Data Riwayat Pembayaran: ${props.data.termin_pembayaran})`"
                 description="Perbarui detail lengkap termin pembayaran terkait Kontrak ini."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -116,7 +118,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Kontrak & Termin
@@ -156,7 +158,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Detail Nilai Pembayaran (dalam Rupiah)
@@ -180,14 +182,17 @@ const submit = () => {
                                 :error="form.errors.nilai_akb"
                                 placeholder="Nilai AKB" />
 
+                            <MonthInput
+                                v-model="form.bulan_tahun_akb"
+                                label="Bulan/Tahun AKB"
+                                :error="form.errors.bulan_tahun_akb" />
+
                             <FormCurrency
                                 label="Nilai PPN"
                                 v-model="form.nilai_ppn"
                                 :error="form.errors.nilai_ppn"
                                 placeholder="Nilai PPN" />
-                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormCurrency
                                 label="Nilai PPH"
                                 v-model="form.nilai_pph"
@@ -210,7 +215,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Tanggal Rencana & Realisasi Pembayaran
@@ -251,7 +256,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Status Dokumen / Checklist
@@ -285,7 +290,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 5. Keterangan Tambahan

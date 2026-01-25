@@ -114,7 +114,9 @@ const form = useForm({
 
     // Document Paths (Only sent if new file is uploaded)
     dokumen_perjanjian: props.data.dokumen_perjanjian,
-    dokumen_jaminan_pelaksanaan: props.data.dokumen_jaminan_pelaksanaan
+    dokumen_jaminan_pelaksanaan: props.data.dokumen_jaminan_pelaksanaan,
+
+    tanggal_efektif: formatDate(props.data.tanggal_efektif)
 })
 
 // --- Fungsi Reusable Upload File ---
@@ -211,11 +213,11 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
 
 <template>
     <Head :title="`Edit Data Kontrak ID: ${props.data.id}`" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="edit-kontrak">
+    <main class="mx-auto space-y-8" aria-labelledby="edit-kontrak">
         <h1 class="sr-only" id="edit-kontrak">Edit Data Kontrak</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data Kontrak ID: ${props.data.id}`"
+                :title="`Edit Data Kontrak`"
                 description="Perbarui detail lengkap Kontrak."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -228,7 +230,7 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Utama Kontrak
@@ -285,7 +287,7 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Detail Perjanjian (Kontrak)
@@ -339,12 +341,19 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                                 v-model="form.dokumen_perjanjian"
                                 :error="form.errors.dokumen_perjanjian"
                                 placeholder="Pilih Dokumen" />
+
+                            <FormInput
+                                label="Tgl Efektif ontrak"
+                                type="date"
+                                v-model="form.tanggal_efektif"
+                                :error="form.errors.tanggal_efektif"
+                                placeholder="Cth: PT Sinar Jaya" />
                         </div>
                     </div>
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Detail Jaminan Pelaksanaan
@@ -399,7 +408,7 @@ const lakdanOptions = props.lakdans.map(lakdan => ({
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Metrik dan Keterangan Tambahan

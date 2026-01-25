@@ -44,6 +44,7 @@
     "filepond-plugin-image-resize": "^2.0.10",
     "filepond-plugin-image-transform": "^3.8.7",
     "filepond-plugin-pdf-preview": "^1.0.4",
+    "flatpickr": "^4.6.13",
     "lowlight": "^3.3.0",
     "nprogress": "^0.2.0",
     "path": "^0.12.7",

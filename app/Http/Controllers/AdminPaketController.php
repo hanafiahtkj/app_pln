@@ -23,6 +23,8 @@ class AdminPaketController extends Controller
     {
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
+        $tahunFilter = $request->query('tahun') ?? date('Y');
+
         // 1. Inisialisasi query dasar dengan eager loading relasi prk
         $query = Paket::latest()->with([
             'unit',
@@ -38,7 +40,7 @@ class AdminPaketController extends Controller
             $query->where('unit_id', $user->unit_id);
         }
 
-        if ($request->filled('tahun')) {
+        if ($tahunFilter !== 'semua') {
             $query->where('tahun', $request->tahun);
         }
 
@@ -47,6 +49,9 @@ class AdminPaketController extends Controller
 
         return Inertia::render('Admin/Paket/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'tahun' => $tahunFilter,
+            ]
         ]);
     }
 
@@ -70,7 +75,7 @@ class AdminPaketController extends Controller
         // $this->authorize('create-lapangan');
 
         return Inertia::render('Admin/Paket/CreatePage', [
-            'prks' => Prk::get(),
+            'prks' => Prk::latest()->get(),
             'units' => [
                 'data' => Unit::select(['id', 'kode', 'name'])->get(),
             ],
@@ -124,7 +129,7 @@ class AdminPaketController extends Controller
 
         return Inertia::render('Admin/Paket/EditPage', [
             'data' => $paket, // <-- Kirim data paket yang akan diedit
-            'prks' => Prk::get(),
+            'prks' => Prk::latest()->get(),
             'units' => [
                 'data' => Unit::select(['id', 'kode', 'name'])->get(),
             ],

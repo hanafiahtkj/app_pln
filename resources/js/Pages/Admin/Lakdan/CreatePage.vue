@@ -205,7 +205,7 @@ onMounted(() => {
 
 <template>
     <Head title="Buat Data Pelaksanaan Pengadaan" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="create-lakdan">
+    <main class="mx-auto space-y-8" aria-labelledby="create-lakdan">
         <h1 class="sr-only" id="create-lakdan">Buat Data Pelaksanaan Pengadaan</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
@@ -222,7 +222,7 @@ onMounted(() => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Utama Pengadaan
@@ -263,7 +263,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Harga Perkiraan Sendiri (HPS)
@@ -313,7 +313,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Tahapan Lelang

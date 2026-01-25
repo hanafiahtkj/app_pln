@@ -226,11 +226,11 @@ const rendanOptions = props.rendans.map(rendan => ({
 
 <template>
     <Head :title="`Edit Data Lakdan ID: ${props.data.id}`" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="edit-lakdan">
+    <main class="mx-auto space-y-8" aria-labelledby="edit-lakdan">
         <h1 class="sr-only" id="edit-lakdan">Edit Data Pelaksanaan Pengadaan</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data Pelaksanaan Pengadaan (Lakdan) ID: ${props.data.id}`"
+                :title="`Edit Data Pelaksanaan Pengadaan (Lakdan)`"
                 description="Perbarui detail lengkap Pelaksanaan Pengadaan."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -243,7 +243,7 @@ const rendanOptions = props.rendans.map(rendan => ({
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Utama Pengadaan
@@ -284,7 +284,7 @@ const rendanOptions = props.rendans.map(rendan => ({
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Harga Perkiraan Sendiri (HPS)
@@ -334,7 +334,7 @@ const rendanOptions = props.rendans.map(rendan => ({
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Tahapan Lelang

@@ -50,7 +50,7 @@ const chartOptions = computed(() => {
             redrawOnParentResize: true,
             foreColor: axisColor
         },
-        colors: ['#10b981', '#ef4444'],
+        colors: props.chartData.datasets[0].backgroundColor || ['#10b981', '#FFD600'],
         title: {
             text: props.title,
             align: 'center',

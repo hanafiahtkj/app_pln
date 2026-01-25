@@ -28,10 +28,13 @@ const form = useForm({
     dokumen_nd_user: null,
     // RAB Field
     rab: '',
+    nilai_hpe: '',
     // RKS Fields
     nomor_rks: '',
+    target_tanggal_rks: '',
     tanggal_rks: '',
-    dokumen_rks: null
+    dokumen_rks: null,
+    dokumen_hpe: null
 })
 
 const submit = () => {
@@ -54,7 +57,7 @@ onMounted(() => {
 
 <template>
     <Head title="Buat Data Rendan" />
-    <main class="max-w-6xl mx-auto space-y-8">
+    <main class="mx-auto space-y-8">
         <section class="container-border overflow-hidden">
             <PageHeader
                 title="Buat Data Rendan"
@@ -67,7 +70,7 @@ onMounted(() => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Utama Rendan
@@ -86,11 +89,11 @@ onMounted(() => {
                                 placeholder="Cari Enjiniring/Paket..."
                                 :disabled="isLocked" />
 
-                            <FormCurrency
+                            <!-- <FormCurrency
                                 label="RAB (Rupiah)"
                                 v-model="form.rab"
                                 :error="form.errors.rab"
-                                placeholder="RAB Rupiah" />
+                                placeholder="RAB Rupiah" /> -->
 
                             <div class="hidden md:block"></div>
                         </div>
@@ -98,7 +101,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Nota Dinas (ND) User
@@ -131,7 +134,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Rencana Kerja Syarat (RKS)
@@ -141,7 +144,21 @@ onMounted(() => {
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                            <FormCurrency
+                                label="Nilai HPE (Rupiah)"
+                                v-model="form.nilai_hpe"
+                                :error="form.errors.nilai_hpe"
+                                placeholder="HPE Rupiah" />
+
+                            <FileManagerInput
+                                label="Dokumen HPE"
+                                v-model="form.dokumen_hpe"
+                                :error="form.errors.dokumen_hpe"
+                                placeholder="Pilih Dokumen HPE..." />
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <FormInput
                                 label="Nomor RKS"
                                 v-model="form.nomor_rks"
@@ -149,7 +166,13 @@ onMounted(() => {
                                 placeholder="Cth: 045.RKS/DAN.01.01/..." />
 
                             <FormInput
-                                label="Tanggal RKS"
+                                label="Tgl Target RKS"
+                                type="date"
+                                v-model="form.target_tanggal_rks"
+                                :error="form.errors.target_tanggal_rks" />
+
+                            <FormInput
+                                label="Tgl Realisasi RKS"
                                 type="date"
                                 v-model="form.tanggal_rks"
                                 :error="form.errors.tanggal_rks" />

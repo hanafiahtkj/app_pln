@@ -69,6 +69,20 @@ const checklistFields = [
     { key: 'lunas_vendor', label: 'Lunas Bayar Vendor' },
     { key: 'lunas_pajak', label: 'Lunas Bayar Pajak' }
 ]
+
+const formatBulanTahun = value => {
+    if (!value) return '-'
+
+    const date = new Date(value)
+
+    // Mengecek apakah date valid
+    if (isNaN(date.getTime())) return value
+
+    return new Intl.DateTimeFormat('id-ID', {
+        month: 'long',
+        year: 'numeric'
+    }).format(date)
+}
 </script>
 
 <template>
@@ -171,6 +185,14 @@ const checklistFields = [
                         </div>
                         <div class="space-y-1">
                             <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Bulan/Tahun AKB
+                            </p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                {{ formatBulanTahun(bayar.bulan_tahun_akb) }}
+                            </p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 Nilai Bayar Vendor
                             </p>
                             <p class="text-lg font-bold text-emerald-600">
@@ -205,7 +227,7 @@ const checklistFields = [
                     </div>
 
                     <section class="dark:bg-gray-700">
-                        <div class="max-w-4xl space-y-6">
+                        <div class="max-w-6xl space-y-6">
                             <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                     Tanggal Rencana & Realisasi Pembayaran
@@ -283,7 +305,7 @@ const checklistFields = [
                     </section>
 
                     <section class="dark:bg-gray-700">
-                        <div class="max-w-4xl space-y-6">
+                        <div class="max-w-6xl space-y-6">
                             <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                     Status Dokumen / Checklist

@@ -8,6 +8,7 @@ import FormCheckbox from '@/Components/FormCheckbox.vue' // ASUMSI Anda memiliki
 import KontrakSearchSelect from './KontrakSearchSelect.vue'
 import FormCurrency from '@/Components/FormCurrency.vue'
 import { ref, onMounted } from 'vue'
+import MonthInput from '@/Components/MonthInput.vue'
 
 defineOptions({ layout: Default })
 
@@ -43,6 +44,7 @@ const form = useForm({
     // Nilai (gunakan tipe number pada input)
     nilai_tagihan: 0,
     nilai_akb: 0,
+    bulan_tahun_akb: '',
     nilai_ppn: 0,
     nilai_pph: 0,
     nilai_bayar_vendor: 0,
@@ -112,7 +114,7 @@ onMounted(() => {
 
 <template>
     <Head title="Buat Data Riwayat Pembayaran (Termin)" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="create-pembayaran">
+    <main class="mx-auto space-y-8" aria-labelledby="create-pembayaran">
         <h1 class="sr-only" id="create-pembayaran">Buat Data Riwayat Pembayaran (Termin)</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
@@ -129,7 +131,7 @@ onMounted(() => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Kontrak & Termin
@@ -169,7 +171,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Detail Nilai Pembayaran (dalam Rupiah)
@@ -193,14 +195,17 @@ onMounted(() => {
                                 :error="form.errors.nilai_akb"
                                 placeholder="Nilai AKB" />
 
+                            <MonthInput
+                                v-model="form.bulan_tahun_akb"
+                                label="Bulan/Tahun AKB"
+                                :error="form.errors.bulan_tahun_akb" />
+
                             <FormCurrency
                                 label="Nilai PPN"
                                 v-model="form.nilai_ppn"
                                 :error="form.errors.nilai_ppn"
                                 placeholder="Nilai PPN" />
-                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormCurrency
                                 label="Nilai PPH"
                                 v-model="form.nilai_pph"
@@ -223,7 +228,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Tanggal Rencana & Realisasi Pembayaran
@@ -265,7 +270,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Status Dokumen / Checklist
@@ -299,7 +304,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 5. Keterangan Tambahan

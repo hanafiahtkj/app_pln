@@ -102,11 +102,11 @@ const submit = () => {
 
 <template>
     <Head :title="`Edit Data PRK: ${props.data.prk}`" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="edit-prk">
+    <main class="mx-auto space-y-8" aria-labelledby="edit-prk">
         <h1 class="sr-only" id="edit-prk">Edit Data PRK</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data PRK: ${props.data.prk}`"
+                :title="`Edit Data PRK`"
                 description="Perbarui detail lengkap Program Rencana Kerja (PRK)."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -119,7 +119,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Pokok PRK
@@ -188,7 +188,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Anggaran dan Paket
@@ -221,7 +221,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Kaji Ulang Dokumen (KKP, Risiko, GRC)
@@ -281,7 +281,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Persetujuan (TVV & SKAI)

@@ -54,10 +54,10 @@ const openPdfPreview = path => {
 <template>
     <Head :title="`Detail Proyek - ${paket.nomor_skk || paket.id}`" />
 
-    <main class="max-w-6xl mx-auto space-y-8">
+    <main class="mx-auto space-y-8">
         <div class="container-border overflow-hidden">
             <PageHeader
-                :title="`Detail Paket: ${props.data.id}`"
+                :title="`Detail Paket`"
                 description="Detail lengkap Paket Pekerjaan."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },

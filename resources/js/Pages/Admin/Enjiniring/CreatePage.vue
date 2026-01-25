@@ -69,7 +69,7 @@ onMounted(() => {
 
 <template>
     <Head title="Buat Data Enjiniring" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="create-paket-enjiniring">
+    <main class="mx-auto space-y-8" aria-labelledby="create-paket-enjiniring">
         <h1 class="sr-only" id="create-paket-enjiniring">Buat Data Paket Enjiniring</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
@@ -86,7 +86,7 @@ onMounted(() => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Paket Terkait
@@ -112,7 +112,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Status Survey
@@ -152,7 +152,7 @@ onMounted(() => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Dokumen Enjiniring (RAB & TOR)

@@ -128,25 +128,25 @@ const columns = [
         header: 'Unit',
         cell: info => h('span', info.getValue() || '-')
     }),
-    columnHelper.accessor('nomor_skk', {
-        header: 'Nomor SKK',
-        cell: info => h('span', info.getValue() || '-')
-    }),
-    columnHelper.accessor('nilai_skk', {
-        header: 'Nilai SKK (Rp)',
-        cell: info => {
-            const value = info.getValue()
-            if (value === null) return h('span', '-')
-            return h(
-                'span',
-                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
-            )
-        }
-    }),
-    columnHelper.accessor('tanggal_skk', {
-        header: 'Tgl SKK',
-        cell: info => h('span', info.getValue() || '-')
-    }),
+    // columnHelper.accessor('nomor_skk', {
+    //     header: 'Nomor SKK',
+    //     cell: info => h('span', info.getValue() || '-')
+    // }),
+    // columnHelper.accessor('nilai_skk', {
+    //     header: 'Nilai SKK (Rp)',
+    //     cell: info => {
+    //         const value = info.getValue()
+    //         if (value === null) return h('span', '-')
+    //         return h(
+    //             'span',
+    //             new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
+    //         )
+    //     }
+    // }),
+    // columnHelper.accessor('tanggal_skk', {
+    //     header: 'Tgl SKK',
+    //     cell: info => h('span', info.getValue() || '-')
+    // }),
     columnHelper.accessor('status_paket', {
         header: 'Status',
         cell: info => h('span', info.getValue() || '-')
@@ -298,7 +298,7 @@ const columns = [
     })
 ]
 // --- STATE FILTER ---
-const filterTahun = ref(props.filters?.tahun || '')
+const filterTahun = ref(props.filters?.tahun || 'semua')
 
 // Generate list tahun (10 tahun terakhir)
 const currentYear = new Date().getFullYear()
@@ -308,11 +308,11 @@ const yearsOptions = Array.from({ length: 10 }, (_, i) => {
 })
 
 // Inisialisasi state filter dari props atau default
-const filterStatus = ref(props.filters?.status || 'belum_diproses')
+const filterStatus = ref(props.filters?.status || 'semua')
 
 const resetFilters = () => {
-    filterTahun.value = ''
-    filterStatus.value = 'belum_diproses'
+    filterTahun.value = currentYear
+    filterStatus.value = 'semua'
 }
 
 // Update Watcher untuk menyertakan filter_status
@@ -379,7 +379,7 @@ const getProgressStatus = paket => {
 <template>
     <Head title="Data Purchase Order (PO) & Progres" />
 
-    <main class="max-w-7xl mx-auto" role="main">
+    <main class="mx-auto" role="main">
         <div class="container-border overflow-hidden">
             <PageHeader
                 title="Data Purchase Order (PO) & Progres"
@@ -399,7 +399,10 @@ const getProgressStatus = paket => {
                         <FormSelect
                             label="Filter Tahun"
                             v-model="filterTahun"
-                            :options="[{ value: '', label: 'Semua Tahun' }, ...yearsOptions]" />
+                            :options="[
+                                { value: 'semua', label: 'Semua Tahun' },
+                                ...yearsOptions
+                            ]" />
                     </div>
                     <div class="space-y-1">
                         <FormSelect

@@ -194,8 +194,7 @@ const deleteUser = () => {
                                                     name="name" />
                                                 <FormInput
                                                     v-model="form.email"
-                                                    label="Email address"
-                                                    type="email"
+                                                    label="Username"
                                                     :error="form.errors.email"
                                                     name="email" />
                                             </div>

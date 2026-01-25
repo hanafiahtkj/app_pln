@@ -59,7 +59,9 @@ const form = useForm({
     ba_pembayaran_50: props.data.ba_pembayaran_50,
     ba_pembayaran_75: props.data.ba_pembayaran_75,
     ba_stp: props.data.ba_stp,
-    ba_stap: props.data.ba_stap
+    ba_stap: props.data.ba_stap,
+
+    progress_terkini: props.data.progress_terkini
 })
 
 const submit = () => {
@@ -71,10 +73,10 @@ const submit = () => {
 
 <template>
     <Head :title="`Edit PO & Progres: ${props.data.id}`" />
-    <main class="max-w-6xl mx-auto space-y-8">
+    <main class="mx-auto space-y-8">
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit PO & Progres: ${props.data.id}`"
+                :title="`Edit PO & Progres`"
                 description="Perbarui detail Purchase Order dan pelacakan progres kontrak."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -84,7 +86,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Kontrak Terkait
@@ -107,7 +109,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Purchase Order (PO) & Material On Site (MOS)
@@ -152,7 +154,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Pelacakan Progres 25%, 50%, dan 75%
@@ -228,7 +230,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 4. Commercial Operation Date (COD)
@@ -264,7 +266,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 5. Keterangan Tambahan
@@ -273,6 +275,12 @@ const submit = () => {
                                 Catatan atau keterangan tambahan mengenai progres PO.
                             </p>
                         </div>
+
+                        <FormInput
+                            label="Progress Terkini %"
+                            type="number"
+                            v-model="form.progress_terkini"
+                            :error="form.errors.progress_terkini" />
 
                         <FormInput
                             label="Keterangan"

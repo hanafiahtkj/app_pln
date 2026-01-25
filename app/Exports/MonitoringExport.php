@@ -24,7 +24,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function collection()
     {
         $data = collect();
-        $no = 1; // Inisialisasi nomor urut
+        $no = 1;
 
         foreach ($this->prks as $prk) {
             foreach ($prk->pakets as $paket) {
@@ -46,7 +46,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
                 // --- BARIS 1: TARGET / RENCANA ---
                 $data->push([
-                    'NO'            => $no, // Nomor urut di baris pertama paket
+                    'NO'            => $no,
                     'TAHUN'         => "#" . $prk->tahun,
                     'PRK'           => $prk->prk,
                     'REFERENSI'     => $prk->uraian ?? '-',
@@ -60,7 +60,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     'SKKI'          => '-',
                     'SURVEY'        => $fmt($enj?->target_survey),
                     'TOR_HPE'       => $fmt($enj?->target_dokumen_enjiniring),
-                    'RKS'           => '-',
+                    'RKS'           => $fmt($ren?->target_tanggal_rks),
                     'ND_USER'       => '-',
                     'HPS'           => $fmt($lak?->rencana_tanggal_hps),
                     'LELANG'        => $fmt($lak?->rencana_pengumuman_pengadaan),
@@ -70,16 +70,13 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     'EFEKTIF'       => '-',
                     'PO'            => $fmt($po?->rencana_po),
                     'MOS'           => $fmt($po?->rencana_mos),
-                    'P25'           => $fmt($po?->rencana_progress_25),
-                    'P50'           => $fmt($po?->rencana_progress_50),
-                    'P75'           => $fmt($po?->rencana_progress_75),
-                    'P100'          => $fmt($po?->rencana_cod),
+                    'PROGRESS'      => '-', // Label target progress
                     'TERBAYAR'      => "Target: " . number_format($nilaiPerjanjian, 0, ',', '.')
                 ]);
 
                 // --- BARIS 2: REALISASI ---
                 $data->push([
-                    'NO'            => '', // Kosongkan di baris kedua paket agar rapi
+                    'NO'            => '',
                     'TAHUN'         => '',
                     'PRK'           => '',
                     'REFERENSI'     => '',
@@ -100,13 +97,10 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     'PENUNJUKAN'    => $fmt($lak?->realisasi_penunjukan_penyedia),
                     'PERJANJIAN'    => $fmt($kon?->realisasi_tanggal_perjanjian),
                     'BANK_GARANSI'  => $fmt($kon?->realisasi_jaminan_pelaksanaan),
-                    'EFEKTIF'       => $fmt($kon?->tanggal_berakhir),
+                    'EFEKTIF'       => $fmt($kon?->tanggal_efektif),
                     'PO'            => $fmt($po?->realisasi_po),
                     'MOS'           => $fmt($po?->realisasi_mos),
-                    'P25'           => $fmt($po?->realisasi_progress_25),
-                    'P50'           => $fmt($po?->realisasi_progress_50),
-                    'P75'           => $fmt($po?->realisasi_progress_75),
-                    'P100'          => $fmt($po?->realisasi_cod),
+                    'PROGRESS'      => ($po?->progress_terkini ?? 0) . '%', // Realisasi progress
                     'TERBAYAR'      => number_format($totalTerbayar, 0, ',', '.') . " (" . $persenSerapan . ")"
                 ]);
 
@@ -123,7 +117,7 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             'KKP', 'RISK', 'GRC', 'TVV', 'SKAI', 'SKKI', 'SURVEY',
             'TOR & HPE', 'RKS', 'ND USER', 'HPS', 'LELANG',
             'PENUNJUKAN', 'PERJANJIAN', 'BANK GARANSI', 'EFEKTIF KONTRAK',
-            'PO', 'MOS', 'P25', 'P50', 'P75', 'P100', 'TERBAYAR TAHUN INI'
+            'PO', 'MOS', 'PROGRESS TERKINI', 'TERBAYAR TAHUN INI'
         ];
     }
 
@@ -131,8 +125,8 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     {
         $lastRow = $sheet->getHighestRow();
 
-        // Style Header (Sekarang kolom berakhir di AC)
-        $sheet->getStyle('A1:AC1')->applyFromArray([
+        // Style Header (Kolom berakhir di Z karena kolom dikurangi)
+        $sheet->getStyle('A1:Z1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E40AF']],
             'alignment' => [
@@ -145,8 +139,8 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             $rT = $i;
             $rR = $i + 1;
 
-            // Indeks Kolom Pewarnaan Geser ke Kanan (M=Survey sampai AB=P100)
-            $cols = ['M', 'N', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z', 'AA', 'AB'];
+            // Indeks Kolom Pewarnaan untuk Tanggal (M sampai X)
+            $cols = ['M', 'N', 'O', 'Q', 'R', 'S', 'T', 'U', 'W', 'X'];
             foreach ($cols as $col) {
                 $valT = $sheet->getCell($col . $rT)->getValue();
                 $valR = $sheet->getCell($col . $rR)->getValue();
@@ -162,22 +156,24 @@ class MonitoringExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             }
 
             // Style Target (Baris Pertama Paket)
-            // Kolom F sampai AB berwarna biru
-            $sheet->getStyle("G$rT:AB$rT")->getFont()->getColor()->setARGB('3B82F6');
+            $sheet->getStyle("G$rT:Y$rT")->getFont()->getColor()->setARGB('3B82F6');
 
-            // Kolom AC (Terbayar) di Baris Realisasi dibuat Bold
-            $sheet->getStyle("AC$rR")->getFont()->setBold(true);
+            // Style Progress Terkini (Kolom Y)
+            $sheet->getStyle("Y$rR")->getFont()->setBold(true);
+
+            // Kolom Z (Terbayar) di Baris Realisasi dibuat Bold
+            $sheet->getStyle("Z$rR")->getFont()->setBold(true);
 
             // Border Pemisah antar paket
-            $sheet->getStyle("A$rR:AC$rR")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+            $sheet->getStyle("A$rR:Z$rR")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
 
             // Zebra Striping
-            if (($no_paket = $i / 2) % 2 == 0) {
-                $sheet->getStyle("A$rT:AC$rR")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('F9FAFB');
+            if (($i / 2) % 2 == 0) {
+                $sheet->getStyle("A$rT:Z$rR")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('F9FAFB');
             }
         }
 
-        $sheet->getStyle('A1:AC' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:Z' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
         $sheet->getStyle('A1:A' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         return [];

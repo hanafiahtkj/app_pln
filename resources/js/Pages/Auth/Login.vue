@@ -74,9 +74,8 @@ const sendMagicLink = () => {
             <FormInput
                 id="email"
                 v-model="form.email"
-                label="Email address"
+                label="Username"
                 name="email"
-                type="email"
                 required
                 autocomplete="email"
                 :error="form.errors.email" />

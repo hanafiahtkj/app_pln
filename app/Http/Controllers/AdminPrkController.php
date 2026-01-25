@@ -24,6 +24,8 @@ class AdminPrkController extends Controller
     {
         $perPage = $this->pagination->resolvePerPageWithDefaults($request);
 
+        $tahunFilter = $request->query('tahun') ?? date('Y');
+
         // 1. Mulai query dasar
         $query = Prk::with([
             'bidang',
@@ -38,7 +40,7 @@ class AdminPrkController extends Controller
         //     $query->where('unit_id', $user->unit_id);
         // }
 
-        if ($request->filled('tahun')) {
+       if ($tahunFilter !== 'semua') {
             $query->where('tahun', $request->tahun);
         }
 
@@ -47,6 +49,9 @@ class AdminPrkController extends Controller
 
         return Inertia::render('Admin/Prk/IndexPage', [
             'data' => $data,
+            'filters' => [
+                'tahun' => $tahunFilter,
+            ]
         ]);
     }
 

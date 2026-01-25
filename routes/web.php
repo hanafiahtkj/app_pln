@@ -33,6 +33,7 @@ use App\Http\Controllers\AdminPurchaseOrderController;
 use App\Http\Controllers\AdminPembayaranController;
 use App\Http\Controllers\FileUploaderController;
 use App\Http\Controllers\AdminMonitoringController;
+use App\Http\Controllers\AdminMonitoringPaketController;
 
 // Authenticated Routes
 Route::middleware(['web', 'auth', 'auth.session'])->group(function () {
@@ -172,7 +173,9 @@ Route::middleware(['web', 'auth', 'auth.session'])->group(function () {
                 Route::resource('kontrak', AdminKontrakController::class)->names('kontrak');
                 Route::resource('po', AdminPurchaseOrderController::class)->names('po');
                 Route::resource('pembayaran', AdminPembayaranController::class)->names('pembayaran');
+
                 Route::resource('monitoring', AdminMonitoringController::class)->names('monitoring');
+                Route::resource('monitoring-paket', AdminMonitoringPaketController::class)->names('monitoring-paket');
             });
         });
 

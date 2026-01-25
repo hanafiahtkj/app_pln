@@ -42,11 +42,14 @@ const form = useForm({
 
     // RAB Field
     rab: props.data.rab,
+    nilai_hpe: props.data.nilai_hpe,
 
     // RKS Fields
     nomor_rks: props.data.nomor_rks,
+    target_tanggal_rks: formatDate(props.data.target_tanggal_rks),
     tanggal_rks: formatDate(props.data.tanggal_rks),
-    dokumen_rks: props.data.dokumen_rks // Simpan URL path langsung
+    dokumen_rks: props.data.dokumen_rks, // Simpan URL path langsung
+    dokumen_hpe: props.dokumen_hpe
 })
 
 const submit = () => {
@@ -58,11 +61,11 @@ const submit = () => {
 
 <template>
     <Head :title="`Edit Data Rendan: ${props.data.nomor_nd_user || props.data.id}`" />
-    <main class="max-w-6xl mx-auto space-y-8" aria-labelledby="edit-rendan">
+    <main class="mx-auto space-y-8" aria-labelledby="edit-rendan">
         <h1 class="sr-only" id="edit-rendan">Edit Data Rendan</h1>
         <section class="container-border overflow-hidden">
             <PageHeader
-                :title="`Edit Data Rendan: ${props.data.nomor_nd_user || props.data.id}`"
+                :title="`Edit Data Rendan`"
                 description="Perbarui detail lengkap Rencana Pengadaan (Rendan)."
                 :breadcrumbs="[
                     { label: 'Dashboard', href: route('dashboard') },
@@ -75,7 +78,7 @@ const submit = () => {
 
             <form @submit.prevent="submit" class="divide-y divide-gray-200 dark:divide-gray-600">
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 1. Informasi Utama Rendan
@@ -94,11 +97,11 @@ const submit = () => {
                                 placeholder="Cari Enjiniring/Paket..."
                                 :disabled="true" />
 
-                            <FormCurrency
+                            <!-- <FormCurrency
                                 label="RAB (Rupiah)"
                                 v-model="form.rab"
                                 :error="form.errors.rab"
-                                placeholder="RAB Rupiah" />
+                                placeholder="RAB Rupiah" /> -->
 
                             <div class="hidden md:block"></div>
                         </div>
@@ -106,7 +109,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 2. Nota Dinas (ND) User
@@ -139,7 +142,7 @@ const submit = () => {
                 </section>
 
                 <section class="p-6 dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 3. Rencana Kerja Syarat (RKS)
@@ -149,7 +152,21 @@ const submit = () => {
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                            <FormCurrency
+                                label="Nilai HPE (Rupiah)"
+                                v-model="form.nilai_hpe"
+                                :error="form.errors.nilai_hpe"
+                                placeholder="HPE Rupiah" />
+
+                            <FileManagerInput
+                                label="Dokumen HPE"
+                                v-model="form.dokumen_hpe"
+                                :error="form.errors.dokumen_hpe"
+                                placeholder="Pilih Dokumen HPE..." />
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <FormInput
                                 label="Nomor RKS"
                                 v-model="form.nomor_rks"
@@ -157,7 +174,13 @@ const submit = () => {
                                 placeholder="Cth: 045.RKS/DAN.01.01/..." />
 
                             <FormInput
-                                label="Tanggal RKS"
+                                label="Tgl Target RKS"
+                                type="date"
+                                v-model="form.target_tanggal_rks"
+                                :error="form.errors.target_tanggal_rks" />
+
+                            <FormInput
+                                label="Tgl Realisasi RKS"
                                 type="date"
                                 v-model="form.tanggal_rks"
                                 :error="form.errors.tanggal_rks" />

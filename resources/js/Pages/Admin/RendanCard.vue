@@ -106,7 +106,7 @@ const openPdfPreview = url => {
             <div
                 v-show="isOpen"
                 class="px-7 pb-7 border-t border-gray-200 dark:border-gray-800 pt-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
+                <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-8">
                     <div class="sm:col-span-2 lg:col-span-1 space-y-1">
                         <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
                             Nilai RAB
@@ -115,10 +115,10 @@ const openPdfPreview = url => {
                             {{ formatIDR(paket.enjiniring.rendan.rab) }}
                         </p>
                     </div>
-                </div>
+                </div> -->
 
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Nota Dinas (ND) User
@@ -195,7 +195,7 @@ const openPdfPreview = url => {
                 </section>
 
                 <section class="dark:bg-gray-700">
-                    <div class="max-w-4xl space-y-6">
+                    <div class="max-w-6xl space-y-6">
                         <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 Rencana Kerja Syarat (RKS)
@@ -204,7 +204,60 @@ const openPdfPreview = url => {
                                 Detail dokumen Rencana Kerja Syarat.
                             </p>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6">
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 mb-6">
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Nilai HPE
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-gray-800 dark:text-gray-300 font-mono">
+                                    {{ formatIDR(paket.enjiniring.rendan.nilai_hpe) }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Dokumen HPE
+                                </p>
+
+                                <div v-if="paket.enjiniring.rendan.dokumen_hpe">
+                                    <a
+                                        @click="openPdfPreview(paket.enjiniring.rendan.dokumen_hpe)"
+                                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline uppercase tracking-widest">
+                                        <svg
+                                            class="w-4 h-4 text-rose-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Lihat Dokumen
+                                    </a>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-xs text-gray-500 italic flex items-center gap-2">
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Dokumen belum diunggah
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6">
                             <div class="space-y-1">
                                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Nomor RKS
@@ -217,7 +270,16 @@ const openPdfPreview = url => {
 
                             <div class="space-y-1">
                                 <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Tanggal RKS
+                                    Tgl Target RKS
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                                    {{ formatTgl(paket.enjiniring.rendan.target_tanggal_rks) }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Tgl Realisasi RKS
                                 </p>
                                 <p class="text-sm font-semibold text-gray-800 dark:text-gray-300">
                                     {{ formatTgl(paket.enjiniring.rendan.tanggal_rks) }}
