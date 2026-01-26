@@ -57,7 +57,7 @@ class AdminPurchaseOrderController extends Controller
             'realisasi_cod'       => ['nullable', 'date'],
 
             'keterangan'          => ['nullable', 'string'],
-            'progress_terkini'          => ['nullable', 'numeric'],
+            'progress_terkini'          => ['required', 'numeric'],
         ];
 
         // Karena FileManagerInput mengirim string URL, validasinya cukup string nullable
@@ -96,13 +96,17 @@ class AdminPurchaseOrderController extends Controller
 
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
-            $query->has('enjiniring.rendan.lakdan.kontrak');
+            $query->whereHas('enjiniring.rendan.lakdan.kontrak', function ($q) {
+                $q->completed();
+            });
             $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak.purchase_order');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan.kontrak.purchase_order');
         }
         else {
-            $query->has('enjiniring.rendan.lakdan.kontrak');
+            $query->whereHas('enjiniring.rendan.lakdan.kontrak', function ($q) {
+                $q->completed();
+            });
         }
 
         $data = $query->paginate($perPage)->withQueryString();

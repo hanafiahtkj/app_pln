@@ -49,13 +49,13 @@ class AdminRendanController extends Controller
 
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
-            $query->has('enjiniring');
+            $query->whereHas('enjiniring', fn($q) => $q->completed());
             $query->whereDoesntHave('enjiniring.rendan');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan');
         }
         else {
-            $query->has('enjiniring');
+            $query->whereHas('enjiniring', fn($q) => $q->completed());
         }
 
         $data = $query->paginate($perPage)->withQueryString();

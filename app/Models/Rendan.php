@@ -17,6 +17,8 @@ class Rendan extends Model
 
    protected $guarded = ['id', 'created_at', 'updated_at'];
 
+   protected $appends = ['is_completed'];
+
    public function enjiniring(): BelongsTo
     {
         return $this->belongsTo(Enjiniring::class);
@@ -25,5 +27,23 @@ class Rendan extends Model
     public function lakdan()
     {
         return $this->hasOne(Lakdan::class, 'rendan_id');
+    }
+
+    public function getIsCompletedAttribute()
+    {
+        return ($this->nilai_hpe > 0) &&
+            !empty($this->dokumen_hpe) &&
+            !empty($this->tanggal_rks) &&
+            !empty($this->dokumen_rks);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('nilai_hpe', '>', 0)
+            ->whereNotNull('dokumen_hpe')
+            ->where('dokumen_hpe', '!=', '')
+            ->whereNotNull('tanggal_rks')
+            ->whereNotNull('dokumen_rks')
+            ->where('dokumen_rks', '!=', '');
     }
 }

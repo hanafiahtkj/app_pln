@@ -100,13 +100,17 @@ class AdminPembayaranController extends Controller
 
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
-            $query->has('enjiniring.rendan.lakdan.kontrak');
+            $query->whereHas('enjiniring.rendan.lakdan.kontrak', function ($q) {
+                $q->completed();
+            });
             $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak.pembayaran');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan.kontrak.pembayaran');
         }
         else {
-            $query->has('enjiniring.rendan.lakdan.kontrak');
+            $query->whereHas('enjiniring.rendan.lakdan.kontrak', function ($q) {
+                $q->completed();
+            });
         }
 
         $data = $query->paginate($perPage)->withQueryString();

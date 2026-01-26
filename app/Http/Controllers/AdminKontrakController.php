@@ -51,13 +51,17 @@ class AdminKontrakController extends Controller
 
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
-            $query->has('enjiniring.rendan.lakdan');
+            $query->whereHas('enjiniring.rendan.lakdan', function ($q) {
+                $q->completed();
+            });
             $query->whereDoesntHave('enjiniring.rendan.lakdan.kontrak');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan.kontrak');
         }
         else {
-            $query->has('enjiniring.rendan.lakdan');
+            $query->whereHas('enjiniring.rendan.lakdan', function ($q) {
+                $q->completed();
+            });
         }
 
         $data = $query->paginate($perPage)->withQueryString();

@@ -310,17 +310,31 @@ const getStatItems = paket => {
 }
 
 const getStatusTahapan = paket => {
-    const hasPO = !!paket.enjiniring?.rendan?.lakdan?.kontrak?.purchase_order
-    const hasBayar = !!paket.enjiniring?.rendan?.lakdan?.kontrak?.pembayaran?.length // Pembayaran biasanya array
+    // Jalur Kontrak & Pasca-Kontrak (PO & Pembayaran)
+    const kontrak = paket.enjiniring?.rendan?.lakdan?.kontrak
 
-    if (hasPO && hasBayar) return 'PO & Pembayaran'
-    if (hasBayar) return 'Pembayaran'
-    if (hasPO) return 'Purchase Order'
+    if (kontrak && kontrak.is_completed) {
+        // Cek Purchase Order
+        const hasPO = !!kontrak.purchase_order && kontrak.purchase_order.is_completed
 
-    if (paket.enjiniring?.rendan?.lakdan?.kontrak) return 'Kontrak'
-    if (paket.enjiniring?.rendan?.lakdan) return 'Lakdan'
-    if (paket.enjiniring?.rendan) return 'Rendan'
-    if (paket.enjiniring) return 'Enjiniring'
+        // Cek Pembayaran (Minimal ada satu yang is_completed)
+        const hasBayar =
+            Array.isArray(kontrak.pembayaran) &&
+            kontrak.pembayaran.length > 0 &&
+            kontrak.pembayaran.some(p => p.is_completed)
+
+        if (hasPO && hasBayar) return 'PO & Pembayaran'
+        if (hasBayar) return 'Pembayaran'
+        if (hasPO) return 'Purchase Order'
+
+        return 'Kontrak'
+    }
+
+    // Jalur Sequential (Perencanaan sampai Lakdan)
+    // Status hanya bergeser jika tahap SEBELUMNYA sudah is_completed
+    if (paket.enjiniring?.rendan?.lakdan?.is_completed) return 'Lakdan'
+    if (paket.enjiniring?.rendan?.is_completed) return 'Rendan'
+    if (paket.enjiniring?.is_completed) return 'Enjiniring'
 
     return 'Perencanaan'
 }
@@ -344,33 +358,43 @@ const getStatusStyles = paket => {
 }
 
 const getSteps = paket => {
-    const kon = paket.enjiniring?.rendan?.lakdan?.kontrak
+    const enji = paket.enjiniring
+    const ren = enji?.rendan
+    const lak = ren?.lakdan
+    const kon = lak?.kontrak
+    const hasCompletedPayment =
+        Array.isArray(kon?.pembayaran) && kon.pembayaran.some(p => p.is_completed)
+
     return [
         {
             name: 'Enjiniring',
-            active: !!paket.enjiniring,
-            date: formatTgl(paket.enjiniring?.updated_at)
+            active: !!enji && enji.is_completed,
+            date: formatTgl(enji?.updated_at)
         },
         {
             name: 'Rendan',
-            active: !!paket.enjiniring?.rendan,
-            date: formatTgl(paket.enjiniring?.rendan?.updated_at)
+            active: !!ren && ren.is_completed,
+            date: formatTgl(ren?.updated_at)
         },
         {
             name: 'Lakdan',
-            active: !!paket.enjiniring?.rendan?.lakdan,
-            date: formatTgl(paket.enjiniring?.rendan?.lakdan?.updated_at)
+            active: !!lak && lak.is_completed,
+            date: formatTgl(lak?.updated_at)
         },
-        { name: 'Kontrak', active: !!kon, date: formatTgl(kon?.created_at) },
+        {
+            name: 'Kontrak',
+            active: !!kon && kon.is_completed,
+            date: formatTgl(kon?.realisasi_tanggal_perjanjian || kon?.created_at)
+        },
         {
             name: 'PO/MOS',
-            active: !!kon?.purchase_order,
+            active: !!kon?.purchase_order && kon.purchase_order.is_completed,
             date: formatTgl(kon?.purchase_order?.realisasi_po)
         },
         {
             name: 'Pembayaran',
-            active: kon?.pembayaran?.length > 0,
-            date: formatTgl(kon?.pembayaran?.[0]?.updated_at)
+            active: hasCompletedPayment,
+            date: formatTgl(kon?.pembayaran?.find(p => p.is_completed)?.updated_at)
         }
     ]
 }
@@ -485,13 +509,14 @@ const formatIDR = val => {
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
                                         <th
-                                            class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800 py-4 pl-8 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
+                                            class="sticky left-0 top-0 z-40 bg-gray-50 dark:bg-gray-800 py-4 pl-8 pr-3 text-left border-b border-gray-100 dark:border-gray-800">
                                             Tahun
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800 min-w-[300px] px-3 py-4 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
+                                            class="sticky left-[100px] top-0 z-40 bg-gray-50 dark:bg-gray-800 px-3 py-4 text-left border-b border-gray-100 dark:border-gray-800">
                                             Referensi PRK
                                         </th>
+
                                         <th
                                             class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800 min-w-[200px] px-3 py-4 text-right pr-8 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-gray-100 dark:border-gray-800">
                                             Status Tahapan
@@ -572,7 +597,8 @@ const formatIDR = val => {
                                                     ? 'bg-sky-50/30 dark:bg-sky-900/5'
                                                     : ''
                                             ">
-                                            <td class="py-5 pl-8 pr-3">
+                                            <td
+                                                class="sticky left-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-sky-50 dark:group-hover:bg-gray-800 py-5 pl-8 pr-3 transition-colors">
                                                 <div class="flex items-center gap-4">
                                                     <svg
                                                         class="w-4 h-4 text-sky-500 transition-transform"
@@ -601,7 +627,8 @@ const formatIDR = val => {
                                                 </div>
                                             </td>
 
-                                            <td class="px-3 py-5">
+                                            <td
+                                                class="sticky left-[100px] z-20 bg-white dark:bg-gray-900 group-hover:bg-sky-50 dark:group-hover:bg-gray-800 px-3 py-5 transition-colors border-r border-gray-100 dark:border-gray-800 shadow-[4px_0_4px_-2px_rgba(0,0,0,0.05)]">
                                                 <div class="flex flex-col">
                                                     <span
                                                         class="font-semibold text-[var(--color-text)] text-gray-800 dark:text-gray-200 group-hover:text-sky-600 transition-colors">
@@ -1456,8 +1483,4 @@ tbody td:nth-child(even):nth-child(n + 4) {
 /* Memastikan kolom 1, 2, dan 3 tetap bersih (tanpa background)
    meskipun ada class bawaan dari Tailwind.
 */
-thead th:nth-child(-n + 3),
-tbody td:nth-child(-n + 3) {
-    background-color: transparent !important;
-}
 </style>

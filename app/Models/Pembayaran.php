@@ -17,8 +17,19 @@ class Pembayaran extends Model
 
    protected $guarded = ['id', 'created_at', 'updated_at'];
 
+   protected $appends = ['is_completed'];
+
    public function kontrak(): BelongsTo
    {
         return $this->belongsTo(Kontrak::class);
    }
+
+   public function getIsCompletedAttribute()
+    {
+        return ($this->nilai_tagihan > 0) &&
+            ($this->nilai_bayar_vendor > 0) &&
+            ($this->nilai_bayar_pajak > 0) &&
+            !empty($this->realisasi_bayar) &&
+            !empty($this->realisasi_bayar_pajak);
+    }
 }

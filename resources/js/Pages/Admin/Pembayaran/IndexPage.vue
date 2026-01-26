@@ -318,29 +318,38 @@ watch(
 
 const getProgressStatus = paket => {
     // 1. Cek Tahapan Awal (Sequential/Berurutan)
-    if (!paket.enjiniring)
+    if (!paket.enjiniring || !paket.enjiniring.is_completed)
         return { label: 'Paket', color: 'bg-gray-100 text-gray-600 border-gray-200' }
 
-    if (!paket.enjiniring.rendan)
+    if (!paket.enjiniring.rendan || !paket.enjiniring.rendan.is_completed)
         return { label: 'Enjiniring', color: 'bg-blue-100 text-blue-700 border-blue-200' }
 
-    if (!paket.enjiniring.rendan.lakdan)
+    if (!paket.enjiniring.rendan.lakdan || !paket.enjiniring.rendan.lakdan.is_completed)
         return { label: 'Rendan', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' }
 
-    if (!paket.enjiniring.rendan.lakdan.kontrak)
+    if (
+        !paket.enjiniring.rendan.lakdan.kontrak ||
+        !paket.enjiniring.rendan.lakdan.kontrak.is_completed
+    )
         return { label: 'Lakdan', color: 'bg-purple-100 text-purple-700 border-purple-200' }
 
-    // 2. Tahapan Kontrak & Paralel (PO & Pembayaran)
+    // 2. Tahapan Kontrak, PO, & Pembayaran (Multiple)
     const kontrak = paket.enjiniring.rendan.lakdan.kontrak
-    const hasPO = !!kontrak.purchase_order
-    const hasBayar = !!kontrak.pembayaran
 
-    // Kondisi jika keduanya sudah ada
+    // Cek PO
+    const hasPO = !!kontrak.purchase_order && kontrak.purchase_order.is_completed
+
+    // Cek Pembayaran (Karena array, kita cek apakah ada minimal satu yang is_completed)
+    const hasBayar =
+        Array.isArray(kontrak.pembayaran) &&
+        kontrak.pembayaran.length > 0 &&
+        kontrak.pembayaran.some(p => p.is_completed)
+
+    // Logika Status Akhir
     if (hasPO && hasBayar) {
         return { label: 'PO & Bayar', color: 'bg-emerald-600 text-white border-emerald-700' }
     }
 
-    // Kondisi paralel: salah satu sudah ada
     if (hasBayar) {
         return { label: 'Pembayaran', color: 'bg-emerald-500 text-white border-emerald-600' }
     }
@@ -349,7 +358,6 @@ const getProgressStatus = paket => {
         return { label: 'PO', color: 'bg-orange-100 text-orange-700 border-orange-200' }
     }
 
-    // Default jika baru sampai tahap kontrak saja
     return { label: 'Kontrak', color: 'bg-pink-100 text-pink-700 border-pink-200' }
 }
 </script>

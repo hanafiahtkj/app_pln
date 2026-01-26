@@ -51,13 +51,17 @@ class AdminLakdanController extends Controller
 
         // LOGIKA FILTER BARU
         if ($statusFilter === 'belum_diproses') {
-            $query->has('enjiniring.rendan');
+            $query->whereHas('enjiniring.rendan', function ($q) {
+                $q->completed();
+            });
             $query->whereDoesntHave('enjiniring.rendan.lakdan');
         } elseif ($statusFilter === 'proses') {
             $query->has('enjiniring.rendan.lakdan');
         }
         else {
-            $query->has('enjiniring.rendan');
+            $query->whereHas('enjiniring.rendan', function ($q) {
+                $q->completed();
+            });
         }
 
         $data = $query->paginate($perPage)->withQueryString();

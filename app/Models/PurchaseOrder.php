@@ -17,8 +17,18 @@ class PurchaseOrder extends Model
 
    protected $guarded = ['id', 'created_at', 'updated_at'];
 
+   protected $appends = ['is_completed'];
+
    public function kontrak(): BelongsTo
    {
         return $this->belongsTo(Kontrak::class);
    }
+
+   public function getIsCompletedAttribute()
+    {
+        return !empty($this->realisasi_cod) &&
+            !empty($this->ba_stp) &&
+            !empty($this->ba_stap) &&
+            ($this->progress_terkini !== null);
+    }
 }
