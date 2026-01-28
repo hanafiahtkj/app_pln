@@ -42,7 +42,7 @@ class Lakdan extends Model
             !empty($this->realisasi_klarifikasi_negosiasi);
     }
 
-    public function scopeCompleted(Builder $query): Builder
+    public function scopeCompleted()
     {
         return $query->whereNotNull('realisasi_tanggal_hps')
             ->where('nilai_hps', '>', 0)
