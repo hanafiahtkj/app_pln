@@ -62,6 +62,7 @@ class HandleInertiaRequests extends Middleware
                         'avatar'      => $avatar,
                         'gravatar'    => $gravatar,
                         'unit'    => $user->unit,
+                        'unit_id' => $user->unit_id,
                     ] : null,
                 ],
 
