@@ -8,7 +8,7 @@
 
     <!-- Primary Meta Tags -->
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    {{-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> --}}
     <meta name="title" content="{{ config('app.name', 'PLN') }}">
     <meta name="description" content="{{ config('guacpanel.meta.description') }}">
     <meta name="keywords" content="{{ config('guacpanel.meta.keywords') }}">
