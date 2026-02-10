@@ -254,30 +254,85 @@ const getColumnHeader = column => {
     return ''
 }
 
+// const exportToCSV = () => {
+//     const rowsToExport = hasSelection.value
+//         ? table.getSelectedRowModel().rows
+//         : table.getRowModel().rows
+
+//     const dataToExport = rowsToExport.map(row => {
+//         if (props.formatExportData) {
+//             return props.formatExportData(row.original)
+//         }
+
+//         const rowData = {}
+//         props.columns.forEach(column => {
+//             if (column.accessorKey) {
+//                 const header = getColumnHeader(column)
+//                 const value = column.accessorFn
+//                     ? column.accessorFn(row.original)
+//                     : row.original[column.accessorKey]
+//                 rowData[header] = formatValueForCSV(value)
+//             } else if (column.id && !column.id.startsWith('_')) {
+//                 const header = getColumnHeader(column)
+//                 const cell = row.getVisibleCells().find(c => c.column.id === column.id)
+//                 if (cell?.getValue) {
+//                     rowData[header] = formatValueForCSV(cell.getValue())
+//                 }
+//             }
+//         })
+//         return rowData
+//     })
+
+//     if (!dataToExport.length) return
+
+//     const csvContent = [
+//         Object.keys(dataToExport[0]).join(','),
+//         ...dataToExport.map(row => Object.values(row).join(','))
+//     ].join('\n')
+
+//     const blob = new window.Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+//     const link = document.createElement('a')
+//     const url = URL.createObjectURL(blob)
+
+//     link.setAttribute('href', url)
+//     link.setAttribute(
+//         'download',
+//         `${props.exportFileName}_${new Date().toISOString().split('T')[0]}.csv`
+//     )
+//     link.style.visibility = 'hidden'
+
+//     document.body.appendChild(link)
+//     link.click()
+//     document.body.removeChild(link)
+// }
+
 const exportToCSV = () => {
+    // Mengambil rows yang sedang aktif di tampilan (setelah filter/pencarian)
     const rowsToExport = hasSelection.value
         ? table.getSelectedRowModel().rows
         : table.getRowModel().rows
 
     const dataToExport = rowsToExport.map(row => {
-        if (props.formatExportData) {
-            return props.formatExportData(row.original)
-        }
-
         const rowData = {}
+
         props.columns.forEach(column => {
-            if (column.accessorKey) {
+            // FILTER UTAMA: Hanya proses jika memiliki accessorKey atau accessorFn
+            if (column.accessorKey || column.accessorFn) {
                 const header = getColumnHeader(column)
-                const value = column.accessorFn
-                    ? column.accessorFn(row.original)
-                    : row.original[column.accessorKey]
-                rowData[header] = formatValueForCSV(value)
-            } else if (column.id && !column.id.startsWith('_')) {
-                const header = getColumnHeader(column)
-                const cell = row.getVisibleCells().find(c => c.column.id === column.id)
-                if (cell?.getValue) {
-                    rowData[header] = formatValueForCSV(cell.getValue())
+                let value = ''
+
+                // 1. Jika ada accessorFn (seperti logic custom atau gabungan string)
+                if (column.accessorFn) {
+                    value = column.accessorFn(row.original)
                 }
+                // 2. Jika ada accessorKey (termasuk nested seperti 'prk.prk')
+                else if (column.accessorKey) {
+                    value = column.accessorKey
+                        .split('.')
+                        .reduce((obj, key) => obj?.[key], row.original)
+                }
+
+                rowData[header] = formatValueForCSV(value)
             }
         })
         return rowData
@@ -285,25 +340,27 @@ const exportToCSV = () => {
 
     if (!dataToExport.length) return
 
+    // Proses pembuatan file CSV
+    const headers = Object.keys(dataToExport[0])
     const csvContent = [
-        Object.keys(dataToExport[0]).join(','),
-        ...dataToExport.map(row => Object.values(row).join(','))
+        headers.join(','),
+        ...dataToExport.map(row =>
+            headers
+                .map(h => {
+                    // Bersihkan nilai dari undefined/null dan bungkus dengan kutip
+                    const cellValue = row[h] === null || row[h] === undefined ? '' : String(row[h])
+                    return `"${cellValue.replace(/"/g, '""')}"`
+                })
+                .join(',')
+        )
     ].join('\n')
 
-    const blob = new window.Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    // Download dengan BOM agar Excel tidak berantakan
+    const blob = new window.Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-
-    link.setAttribute('href', url)
-    link.setAttribute(
-        'download',
-        `${props.exportFileName}_${new Date().toISOString().split('T')[0]}.csv`
-    )
-    link.style.visibility = 'hidden'
-
-    document.body.appendChild(link)
+    link.href = URL.createObjectURL(blob)
+    link.download = `${props.exportFileName}_${new Date().toISOString().split('T')[0]}.csv`
     link.click()
-    document.body.removeChild(link)
 }
 
 const table = useVueTable({
