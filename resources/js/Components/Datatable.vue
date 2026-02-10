@@ -113,17 +113,41 @@ const handleSelectAll = () => {
     table.toggleAllRowsSelected()
 }
 
+// const filteredData = computed(() => {
+//     if (!searchQuery.value || !props.searchFields.length) return props.data
+
+//     const query = searchQuery.value.toLowerCase()
+//     return props.data.filter(item =>
+//         props.searchFields.some(field =>
+//             String(item[field] || '')
+//                 .toLowerCase()
+//                 .includes(query)
+//         )
+//     )
+// })
+
 const filteredData = computed(() => {
-    if (!searchQuery.value || !props.searchFields.length) return props.data
+    if (!searchQuery.value) return props.data
 
     const query = searchQuery.value.toLowerCase()
-    return props.data.filter(item =>
-        props.searchFields.some(field =>
-            String(item[field] || '')
+
+    return props.data.filter(item => {
+        return props.columns.some(col => {
+            let value = ''
+
+            if (col.accessorFn) {
+                value = col.accessorFn(item)
+            } else if (col.accessorKey) {
+                value = col.accessorKey.split('.').reduce((obj, key) => obj?.[key], item)
+            } else if (col.id) {
+                value = item[col.id]
+            }
+
+            return String(value || '')
                 .toLowerCase()
                 .includes(query)
-        )
-    )
+        })
+    })
 })
 
 const isServerPagination = computed(() => Boolean(props.pagination?.total))
@@ -719,8 +743,8 @@ watch(
                             row.getIsSelected()
                                 ? styles.rowSelected
                                 : index % 2 === 0
-                                ? styles.rowEven
-                                : styles.rowOdd
+                                  ? styles.rowEven
+                                  : styles.rowOdd
                         ]">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
