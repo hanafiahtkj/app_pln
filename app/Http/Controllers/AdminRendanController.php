@@ -107,7 +107,7 @@ class AdminRendanController extends Controller
             'enjiniring_id' => ['required', 'exists:enjinirings,id'],
 
             // ND User Fields
-            'nomor_nd_user' => ['nullable', 'string', Rule::unique('rendans', 'nomor_nd_user')],
+            'nomor_nd_user' => ['nullable', 'string'],
             'tanggal_nd_user' => ['nullable', 'date'],
             'dokumen_nd_user' => ['nullable', 'string'],
 
@@ -154,8 +154,7 @@ class AdminRendanController extends Controller
             // ND User Fields
             'nomor_nd_user' => [
                 'nullable',
-                'string',
-                Rule::unique('rendans', 'nomor_nd_user')->ignore($rendan->id)
+                'string'
             ],
             'tanggal_nd_user' => ['nullable', 'date'],
             'dokumen_nd_user' => ['nullable', 'string'],
