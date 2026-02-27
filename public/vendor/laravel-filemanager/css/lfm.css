@@ -70,6 +70,35 @@ a {
 #tree {
   background-color: white;
   width: 300px;
+  overflow-x: hidden; /* Tambahkan ini untuk memastikan tidak ada rembesan teks */
+}
+
+#tree .nav-item {
+    width: 100%;
+}
+
+#tree .nav-link {
+    display: block !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    padding-right: 20px;
+    box-sizing: border-box;
+
+    /* SOLUSI VERTIKAL CENTER */
+    height: 5rem;          /* Tentukan tinggi baris (sesuaikan dengan kebutuhan) */
+    line-height: 5rem;     /* Samakan line-height dengan height agar teks di tengah */
+    padding-top: 0;        /* Reset padding agar tidak mendorong teks */
+    padding-bottom: 0;
+}
+
+#tree .nav-link i {
+    display: inline-block;
+    vertical-align: middle; /* Menjaga ikon tetap di tengah baris */
+    line-height: normal;    /* Mencegah ikon ikut melar secara aneh */
+    margin-right: 8px;
+    margin-top: -2px;       /* Fine-tuning manual jika ikon dirasa kurang turun */
 }
 
 @media screen and (max-width: 991px) {

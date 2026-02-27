@@ -22,7 +22,8 @@
     <link rel="stylesheet" href="{{ asset('vendor/laravel-filemanager/css/dropzone.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/laravel-filemanager/css/mime-icons.min.css') }}">
     <style>
-        {!! \File::get(base_path('vendor/unisharp/laravel-filemanager/public/css/lfm.css')) !!}
+        /* {!! \File::get(base_path('vendor/unisharp/laravel-filemanager/public/css/lfm.css')) !!} */
+        {!! \File::get(public_path('vendor/laravel-filemanager/css/lfm.css')) !!}
     </style>
     {{-- Use the line below instead of the above if you need to cache the css. --}}
     {{-- <link rel="stylesheet" href="{{ asset('/vendor/laravel-filemanager/css/lfm.css') }}"> --}}
