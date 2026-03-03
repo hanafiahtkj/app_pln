@@ -8,7 +8,7 @@ class LfmConfigHandler extends \UniSharp\LaravelFilemanager\Handlers\ConfigHandl
     {
         $user = auth()->user();
 
-        if ($user->hasRole('superuser')) {
+        if ($user->hasRole('superuser') || $user->unit_id == 1) {
             return '';
         }
 
